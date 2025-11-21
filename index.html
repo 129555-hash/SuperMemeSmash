@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Meme Bros: True Arcade</title>
+    <title>Super Meme Bros: Definitive Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Roboto:wght@700&display=swap');
 
@@ -216,9 +216,7 @@ const sfx = {
         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination);
         if (type === 'jump') { osc.type='square'; osc.frequency.setValueAtTime(150,t); osc.frequency.linearRampToValueAtTime(300,t+0.1); gain.gain.setValueAtTime(0.1,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
         else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); }
-        else if (type === 'shield') { osc.type='sine'; osc.frequency.setValueAtTime(200,t); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.1); }
         else if (type === 'break') { osc.type='sawtooth'; osc.frequency.setValueAtTime(800,t); gain.gain.setValueAtTime(0.5,t); gain.gain.linearRampToValueAtTime(0,t+0.5); }
-        else if (type === 'roll') { osc.type='triangle'; osc.frequency.setValueAtTime(300,t); osc.frequency.linearRampToValueAtTime(100,t+0.2); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.2); }
         else if (type === 'ult') { osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.linearRampToValueAtTime(800,t+0.5); gain.gain.setValueAtTime(0.3,t); osc.start(t); osc.stop(t+1.0); return; }
         else if (type === 'coin') { osc.type='sine'; osc.frequency.setValueAtTime(1000,t); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.1); }
         osc.start(t); osc.stop(t+0.1);
@@ -243,7 +241,7 @@ const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getCont
 let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, cpuLevel=5;
 let isArcade = false, arcadeStage = 0;
 let players=[], platforms=[], ultEffects=[], items=[], targets=[];
-let itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0;
+let itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0, bossTimer=0;
 const keys={}; const touchInput={left:false,right:false,up:false,down:false,atk:false,jump:false,ult:false};
 let showHitboxes = false;
 
@@ -260,7 +258,7 @@ function toggleHitboxSetting() { showHitboxes=!showHitboxes; const b=document.ge
 
 function nextStage() {
     arcadeStage++;
-    if (arcadeStage>5) { gameState='GAMEOVER'; document.getElementById('game-over').classList.remove('hidden'); document.getElementById('winner-display').innerText="ARCADE\nCLEARED!"; document.getElementById('winner-display').style.color="#f1c40f"; return; }
+    if (arcadeStage > 5) { gameState='GAMEOVER'; document.getElementById('game-over').classList.remove('hidden'); document.getElementById('winner-display').innerText="ARCADE\nCLEARED!"; document.getElementById('winner-display').style.color="#f1c40f"; return; }
     let t="",s="",m=MAPS[0]; p2IsCpu=true; cpuLevel=3+arcadeStage;
     if(arcadeStage===1){t="STAGE 1";s="VS SANIC";p2Char=CHARACTERS.find(c=>c.id==='sanic');m=MAPS[1];}
     else if(arcadeStage===2){t="STAGE 2";s="VS PEPE";p2Char=CHARACTERS.find(c=>c.id==='frog');m=MAPS[2];}
@@ -356,10 +354,7 @@ class Fighter {
         if(j&&!this.pj&&this.jumps>0&&!this.shielding) { this.vy=-14*this.stats.jump; this.jumps--; sfx.play('jump'); }
         this.pj=j;
         if(this.cd>0) this.cd--; else if(a&&!this.shielding) this.atk(u,d,l,r);
-        this.phys(); if(this.inv>0)this.inv--; 
-        // ITEM PICKUP
-        items.forEach(i=>{if(i.active&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.type==='hammer'){this.hasHammer=true;i.active=false;sfx.play('coin');}else if(i.type==='coin'){this.pct=Math.max(0,this.pct-20);i.active=false;sfx.play('coin');updateHUD();}else if(i.type==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.active=false;}}});
-        // HITBOX DECAY
+        this.phys(); if(this.inv>0)this.inv--; this.chkItm();
         if(this.box && this.box.act) { this.box.f--; if(this.box.f<=0)this.box.act=false; }
     }
     fireUlt() {
@@ -399,6 +394,7 @@ class Fighter {
         if(this.y>800) this.die();
     }
     die() { sfx.play('ko'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) { if(isArcade && this.id===2) nextStage(); else endGame(this.id===1?2:1); } updateHUD(); }
+    chkItm() { items.forEach(i=>{if(i.active&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.type==='hammer'){this.hasHammer=true;i.active=false;sfx.play('coin');}else if(i.type==='coin'){this.pct=Math.max(0,this.pct-20);i.active=false;sfx.play('coin');updateHUD();}else if(i.type==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.active=false;}}}); }
     draw() {
         if(this.stocks<=0)return;
         ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2); 
@@ -421,7 +417,9 @@ function endGame(w) { gameState='GAMEOVER'; document.getElementById('game-over')
 
 function loop() {
     if(gameState!=='GAME')return;
-    if(hitStop>0) { hitStop--; players.forEach(p=>p.draw()); requestAnimationFrame(loop); return; }
+    // FIXED RENDER LOOP
+    if(hitStop > 0) { hitStop--; draw(); requestAnimationFrame(loop); return; }
+
     itemTimer++; if(itemTimer>400) { if(Math.random()<0.7) items.push(new Item()); itemTimer=0; }
     players.forEach(p=>p.update()); items.forEach(i=>i.update());
     
