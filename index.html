@@ -427,6 +427,21 @@ function initGame() {
     document.getElementById('p1-name').innerText = p1Char.name; document.getElementById('p2-name').innerText = p2Char.name; updateHUD();
 }
 
+class Item {
+    constructor() {
+        this.type = Math.random() > 0.8 ? 'nyan' : (Math.random() > 0.5 ? 'hammer' : 'coin');
+        this.active = true; this.w=30; this.h=30;
+        if(this.type==='nyan') { this.y=Math.random()*400-200; this.vx=(Math.random()<0.5?1:-1)*12; this.x=this.vx>0?-600:600; this.vy=0; this.icon='🌈'; }
+        else { this.x=(Math.random()*600)-300; this.y=-400; this.vx=0; this.vy=0; this.icon=this.type==='hammer'?'🔨':'🪙'; }
+    }
+    update() {
+        if(!this.active) return;
+        if(this.type==='nyan') { this.x+=this.vx; if(this.x<-1500||this.x>1500) this.active=false; }
+        else { this.vy+=0.5; this.y+=this.vy; for(let p of platforms) if(this.vy>0&&this.y+this.h>p.y&&this.y+this.h<p.y+30&&this.x+this.w>p.x&&this.x<p.x+p.w) { this.y=p.y-this.h; this.vy=0; } if(this.y>800) this.active=false; }
+    }
+    draw() { if(!this.active) return; ctx.font="30px Arial"; ctx.fillText(this.icon, this.x, this.y+30); }
+}
+
 class Fighter {
     constructor(id, s, x, y, loc, cpu) {
         this.id=id; this.stats=s; this.x=x; this.y=y; this.w=50; this.h=50; this.vx=0; this.vy=0;
