@@ -3,79 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Meme Bros: Definitive Edition</title>
+    <title>Super Meme Bros: Arcade Edition</title>
+    <script type="module">
+        // --- FIREBASE SETUP (Stable Version 10.12.2) ---
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // Local function definition to prevent ReferenceErrors
+        function updateOnlineStatus(ready) {
+            const btn = document.getElementById('btn-online');
+            const ind = document.getElementById('online-indicator');
+            if (!btn || !ind) return;
+            
+            if (ready) {
+                btn.classList.remove('disabled'); 
+                btn.innerText = "ONLINE PVP";
+                ind.innerText = "SERVERS ONLINE"; 
+                ind.style.color = "#2ecc71";
+            } else {
+                btn.classList.add('disabled'); 
+                btn.innerText = "OFFLINE MODE"; 
+                ind.innerText = "CONNECTION FAILED"; 
+                ind.style.color = "#e74c3c";
+            }
+        }
+        window.updateOnlineStatus = updateOnlineStatus;
+
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyAc-xsQ9YO22dTUEt5mO9SoNXyRLLKvXR4",
+            authDomain: "supermemesmash.firebaseapp.com",
+            projectId: "supermemesmash",
+            storageBucket: "supermemesmash.firebasestorage.app",
+            messagingSenderId: "910162711190",
+            appId: "1:910162711190:web:4e663132beb96fd06568b7",
+            measurementId: "G-MV5ZGT17YC"
+        };
+        
+        window.firebaseLoaded = false;
+        let app, auth, db, currentUser, currentRoomId, unsubscribeRoom;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    window.firebaseLoaded = true;
+                    updateOnlineStatus(true);
+                }
+            });
+            signInAnonymously(auth).catch(e => updateOnlineStatus(false));
+        } catch (e) { updateOnlineStatus(false); }
+
+        // --- ONLINE FUNCTIONS ---
+        window.createRoom = async () => {
+            if (!currentUser) return alert("Online not ready.");
+            const roomId = Math.floor(1000 + Math.random() * 9000).toString();
+            const roomRef = doc(db, 'games', roomId);
+            try {
+                await setDoc(roomRef, { host: currentUser.uid, status: 'waiting', p1Char: 'doge', p2Char: 'frog', map: 'flat', lastUpdate: Date.now() });
+                currentRoomId = roomId; window.playerRole = 'host';
+                window.enterLobbyUI(roomId); listenToRoom(roomId);
+            } catch (e) { alert("Database Error"); }
+        };
+        window.joinRoom = async (roomId) => {
+            if (!currentUser) return alert("Online not ready.");
+            if (!roomId || roomId.length !== 4) return alert("Invalid Code");
+            const roomRef = doc(db, 'games', roomId);
+            await updateDoc(roomRef, { client: currentUser.uid, status: 'selecting' }).catch(e => alert("Room not found!"));
+            currentRoomId = roomId; window.playerRole = 'client';
+            window.enterLobbyUI(roomId); listenToRoom(roomId);
+        };
+        function listenToRoom(roomId) {
+            const roomRef = doc(db, 'games', roomId);
+            unsubscribeRoom = onSnapshot(roomRef, (snap) => { const data = snap.data(); if (data) window.handleRoomUpdate(data); });
+        }
+        window.syncGameState = async (myState) => {
+            if (!currentRoomId || !currentUser) return;
+            const playerRef = doc(db, 'games', currentRoomId, 'pState', window.playerRole);
+            await setDoc(playerRef, myState).catch(()=>{});
+        };
+        window.listenToOpponent = () => {
+            if (!currentRoomId) return;
+            const oppRole = window.playerRole === 'host' ? 'client' : 'host';
+            const oppRef = doc(db, 'games', currentRoomId, 'pState', oppRole);
+            onSnapshot(oppRef, (snap) => { const data = snap.data(); if (data) window.updateOpponent(data); });
+        };
+        window.updateRoomSelection = async (field, value) => {
+            if (!currentRoomId) return;
+            const roomRef = doc(db, 'games', currentRoomId);
+            await updateDoc(roomRef, { [field]: value });
+        }
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Roboto:wght@700&display=swap');
-
-        :root {
-            --p1: #3498db;
-            --p2: #e74c3c;
-            --cpu: #9b59b6;
-            --ult: #f1c40f;
-            --on: #2ecc71;
-            --off: #e74c3c;
-        }
-
+        :root { --p1: #3498db; --p2: #e74c3c; --cpu: #9b59b6; --ult: #f1c40f; --on: #2ecc71; --boss: #c0392b; }
         body { margin: 0; background: #111; overflow: hidden; font-family: 'Roboto', sans-serif; color: white; user-select: none; touch-action: none; }
         #game-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
         canvas { display: block; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-
-        /* SCREENS */
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 10; transition: opacity 0.3s; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
-
-        /* TYPOGRAPHY */
         h1 { font-family: 'Black Ops One'; font-size: 60px; background: -webkit-linear-gradient(#eee, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 20px 0; text-align: center; }
-        h2 { font-family: 'Press Start 2P'; color: #fff; margin-bottom: 30px; font-size: 20px; }
-
-        /* UI ELEMENTS */
-        .menu-btn { font-family: 'Press Start 2P'; padding: 20px 40px; font-size: 20px; background: transparent; color: white; border: 4px solid white; cursor: pointer; margin: 10px; transition: 0.2s; }
+        .menu-btn { font-family: 'Press Start 2P'; padding: 15px 30px; font-size: 16px; background: transparent; color: white; border: 4px solid white; cursor: pointer; margin: 10px; transition: 0.2s; }
         .menu-btn:hover { background: white; color: black; transform: scale(1.1); }
-
-        /* SETTINGS SPECIFIC */
-        .setting-row { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; font-family: 'Press Start 2P'; font-size: 16px; }
-        .toggle-btn { width: 100px; padding: 10px; cursor: pointer; border: 2px solid white; font-family: 'Press Start 2P'; }
-        .toggle-on { background: var(--on); color: white; border-color: var(--on); }
-        .toggle-off { background: var(--off); color: white; border-color: var(--off); }
-
-        /* CHAR SELECT */
-        .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 800px; }
-        .char-card { background: #333; border: 4px solid #555; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .menu-btn.disabled { border-color: #555; color: #555; pointer-events: none; }
+        .menu-btn.online-btn { border-color: var(--on); color: var(--on); }
+        .menu-btn.boss-btn { border-color: var(--boss); color: var(--boss); }
+        .menu-btn.boss-btn:hover { background: var(--boss); color: white; }
+        #online-indicator { font-family: 'Press Start 2P'; font-size: 10px; color: #7f8c8d; margin-top: 5px; animation: pulse 2s infinite; }
+        input.code-input { font-family: 'Press Start 2P'; font-size: 20px; padding: 10px; text-align: center; width: 150px; margin: 10px; background: #333; color: white; border: 2px solid #666; }
+        .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 800px; }
+        .char-card { background: #333; border: 4px solid #555; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.2s; }
         .char-card:hover { transform: scale(1.05); border-color: white; }
-        .char-icon { font-size: 50px; display: block; margin-bottom: 5px; }
+        .char-icon { font-size: 40px; display: block; }
         .selected-p1 { border-color: var(--p1) !important; box-shadow: 0 0 15px var(--p1); }
         .selected-p2 { border-color: var(--p2) !important; box-shadow: 0 0 15px var(--p2); }
-
-        /* MAP SELECT */
         .map-grid { display: flex; gap: 20px; }
         .map-card { width: 200px; height: 150px; background: #444; border: 3px solid #666; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-direction: column; }
         .map-card:hover { border-color: #fff; }
         .map-preview { font-size: 40px; margin-bottom: 10px; }
-
-        /* HUD */
+        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
+        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
+        .move-input { color: var(--p2); font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
         #hud { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-around; pointer-events: none; font-family: 'Black Ops One'; }
-        .player-hud { background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 10px; text-align: center; min-width: 180px; border-top: 5px solid #fff; }
+        .player-hud { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; text-align: center; min-width: 150px; border-top: 5px solid #fff; }
         .p1-hud { border-color: var(--p1); } .p2-hud { border-color: var(--p2); } .p2-cpu { border-color: var(--cpu) !important; }
         .percent { font-size: 48px; color: white; text-shadow: 2px 2px 0 #000; }
-        .ult-container { width: 100%; height: 10px; background: #333; margin-top: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #555; }
-        .ult-bar { height: 100%; width: 0%; background: #555; transition: width 0.1s; }
+        .ult-bar { height: 5px; background: #555; width: 0%; margin-top: 5px; transition: width 0.1s; }
         .ult-ready .ult-bar { background: var(--ult); box-shadow: 0 0 10px var(--ult); }
-        
-        /* CPU CONTROLS */
         #cpu-controls { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         #cpu-toggle { font-size: 14px; padding: 10px 20px; border-color: var(--p2); color: var(--p2); }
         #cpu-toggle.cpu-active { background: var(--cpu); color: white; border-color: white; }
-        #cpu-level-container { display: none; align-items: center; gap: 10px; font-family: 'Press Start 2P'; font-size: 12px; color: var(--cpu); }
-        input[type=range] { width: 150px; accent-color: var(--cpu); cursor: pointer; }
-
-        /* MOVES LIST */
-        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
-        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
-        .move-icon { font-size: 40px; min-width: 50px; }
-        .move-details { text-align: left; font-size: 12px; line-height: 1.8; color: #ccc; width: 100%; }
-        .move-input { color: #e74c3c; font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
-
-        /* MOBILE */
         #mobile-controls { display: none; position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         .touch-btn { pointer-events: auto; position: absolute; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; backdrop-filter: blur(2px); }
         .touch-btn:active { background: rgba(255,255,255,0.3); }
@@ -86,14 +149,30 @@
         #btn-jump { bottom: 60px; right: 110px; border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
         #btn-ult { bottom: 120px; right: 40px; width: 50px; height: 50px; border-color: var(--ult); background: rgba(241, 196, 15, 0.3); font-size: 12px; }
         
-        .pulse { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        /* BOSS HUD */
+        #boss-hud { position: absolute; top: 20px; width: 80%; left: 10%; display: none; }
+        .boss-health-bar { height: 30px; background: #333; border: 3px solid #fff; border-radius: 15px; overflow: hidden; }
+        .boss-fill { height: 100%; width: 100%; background: var(--boss); transition: width 0.2s; }
+        .boss-name { color: white; font-family: 'Black Ops One'; font-size: 24px; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px 0 #000; }
+
+        /* ARCADE OVERLAY */
+        #arcade-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
+        .stage-title { font-family: 'Black Ops One'; font-size: 60px; color: var(--ult); margin-bottom: 20px; }
+        .stage-subtitle { font-family: 'Press Start 2P'; color: white; margin-bottom: 40px; }
+
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <canvas id="gameCanvas"></canvas>
+</div>
+
+<!-- BOSS UI -->
+<div id="boss-hud">
+    <div class="boss-name">GIGA DOGE</div>
+    <div class="boss-health-bar"><div class="boss-fill" id="boss-fill"></div></div>
 </div>
 
 <div id="hud" class="hidden">
@@ -113,28 +192,38 @@
 
 <div id="title-screen" class="screen">
     <h1>SUPER<br>MEME BROS<br>ULTIMATE</h1>
-    <button class="menu-btn pulse" onclick="goToCharSelect()">FIGHT</button>
+    <button class="menu-btn" onclick="startLocal()">LOCAL / CPU</button>
+    <button class="menu-btn boss-btn" onclick="startArcadeRun()">ARCADE RUN</button> <!-- NEW -->
+    <button id="btn-online" class="menu-btn online-btn disabled" onclick="goToOnlineMenu()">CONNECTING...</button>
+    <div id="online-indicator">CONNECTING TO SERVERS...</div>
     <button class="menu-btn" onclick="showMoves()">MOVES LIST</button>
-    <button class="menu-btn" onclick="openSettings()">SETTINGS</button>
 </div>
 
-<!-- SETTINGS SCREEN -->
-<div id="settings-screen" class="screen hidden">
-    <h2>SETTINGS</h2>
-    <div class="setting-row">
-        <span>SHOW HITBOXES</span>
-        <button id="btn-hitbox" class="toggle-btn toggle-off" onclick="toggleHitboxSetting()">OFF</button>
+<div id="online-menu" class="screen hidden">
+    <h2>ONLINE LOBBY</h2>
+    <button class="menu-btn online-btn" onclick="window.createRoom()">CREATE ROOM</button>
+    <div style="margin: 20px 0;">
+        <input type="text" id="room-code-input" class="code-input" placeholder="CODE" maxlength="4">
+        <button class="menu-btn" onclick="window.joinRoom(document.getElementById('room-code-input').value)">JOIN</button>
     </div>
-    <button class="menu-btn" onclick="closeSettings()">BACK</button>
+    <button class="menu-btn" onclick="location.reload()">BACK</button>
 </div>
 
 <div id="moves-screen" class="screen hidden">
-    <h2>CHARACTER MOVES</h2>
+    <h2>MOVES LIST</h2>
     <div id="moves-content"></div>
     <button class="menu-btn" onclick="hideMoves()">BACK</button>
 </div>
 
+<!-- ARCADE INTRO SCREEN -->
+<div id="arcade-overlay" class="hidden">
+    <div class="stage-title" id="stage-title">STAGE 1</div>
+    <div class="stage-subtitle" id="stage-sub">VS SANIC</div>
+    <button class="menu-btn boss-btn" onclick="beginStage()">READY</button>
+</div>
+
 <div id="char-select" class="screen hidden">
+    <div id="lobby-info" class="hidden">ROOM: <span id="room-code-display">----</span> <span id="connection-status">WAITING...</span></div>
     <h2>SELECT FIGHTER</h2>
     <h3 id="select-instruction">P1 CHOOSE</h3>
     <div class="char-grid" id="char-grid"></div>
@@ -185,18 +274,12 @@ const sfx = {
         if (!this.ctx) return;
         const t = this.ctx.currentTime;
         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination);
-        
         if (type === 'jump') { osc.type='square'; osc.frequency.setValueAtTime(150,t); osc.frequency.linearRampToValueAtTime(300,t+0.1); gain.gain.setValueAtTime(0.1,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
-        else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
-        else if (type === 'shield') { osc.type='sine'; osc.frequency.setValueAtTime(200,t); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.1); }
-        else if (type === 'break') { osc.type='sawtooth'; osc.frequency.setValueAtTime(800,t); osc.frequency.exponentialRampToValueAtTime(100,t+0.5); gain.gain.setValueAtTime(0.5,t); gain.gain.linearRampToValueAtTime(0,t+0.5); }
-        else if (type === 'roll') { osc.type='triangle'; osc.frequency.setValueAtTime(300,t); osc.frequency.linearRampToValueAtTime(100,t+0.2); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.2); }
-        else if (type === 'ult') { osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.linearRampToValueAtTime(800,t+0.5); gain.gain.setValueAtTime(0.3,t); gain.gain.linearRampToValueAtTime(0,t+1.5); }
+        else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); }
+        else if (type === 'break') { osc.type='sawtooth'; osc.frequency.setValueAtTime(800,t); gain.gain.setValueAtTime(0.5,t); gain.gain.linearRampToValueAtTime(0,t+0.5); }
+        else if (type === 'ult') { osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.linearRampToValueAtTime(800,t+0.5); gain.gain.setValueAtTime(0.3,t); osc.start(t); osc.stop(t+1.0); return; }
         else if (type === 'coin') { osc.type='sine'; osc.frequency.setValueAtTime(1000,t); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.1); }
-        else if (type === 'ko') { osc.type='sawtooth'; osc.frequency.setValueAtTime(50,t); osc.frequency.exponentialRampToValueAtTime(10,t+1.0); gain.gain.setValueAtTime(0.5,t); gain.gain.exponentialRampToValueAtTime(0.01,t+1.0); }
-        
-        osc.start(t);
-        osc.stop(t + (type === 'ult' || type === 'ko' ? 1.5 : 0.2));
+        osc.start(t); osc.stop(t+0.1);
     }
 };
 
@@ -215,84 +298,167 @@ const MAPS = [{id:'flat',name:'Flat',icon:'🛑',color:'#546E7A'}, {id:'plat',na
 
 // --- GLOBALS ---
 const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, cpuLevel=5;
-let selectedMap = null, players = [], platforms = [], items = [], ultEffects = [];
-let itemTimer = 0, camera = {x:0,y:0,zoom:1}, shake=0, hitStop=0;
-const keys = {}; const touchInput = { left:false, right:false, up:false, down:false, atk:false, jump:false, ult:false };
-let showHitboxes = false; // SETTING
+let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, isOnline=false, cpuLevel=5;
+let isArcade = false, arcadeStage = 0; // ARCADE STATE
+let players=[], platforms=[], ultEffects=[], items=[], targets=[];
+let itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0, bossTimer=0;
+const keys={}; const touchInput={left:false,right:false,up:false,down:false,atk:false,jump:false,ult:false};
 
 window.addEventListener('keydown', e=>keys[e.key]=true); window.addEventListener('keyup', e=>keys[e.key]=false);
 
-// --- UI LOGIC ---
+// --- MENU FUNCTIONS ---
+function startLocal() {
+    sfx.init(); isOnline=false; isArcade=false;
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('char-select').classList.remove('hidden');
+    document.getElementById('cpu-controls').classList.remove('hidden');
+    renderCharGrid();
+}
+function goToOnlineMenu() {
+    if(document.getElementById('btn-online').classList.contains('disabled')) return;
+    sfx.init(); isOnline=true; isArcade=false;
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('online-menu').classList.remove('hidden');
+}
+
+// ARCADE LOGIC
+function startArcadeRun() {
+    sfx.init(); isArcade = true; isOnline = false;
+    arcadeStage = 0;
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('char-select').classList.remove('hidden');
+    document.getElementById('cpu-controls').classList.add('hidden'); // Force CPU
+    document.getElementById('select-instruction').innerText = "CHOOSE YOUR HERO";
+    renderCharGrid();
+}
+
+function nextStage() {
+    arcadeStage++;
+    if (arcadeStage > 5) {
+        // WIN
+        gameState = 'GAMEOVER';
+        document.getElementById('game-over').classList.remove('hidden');
+        document.getElementById('winner-display').innerText = "ARCADE\nCLEARED!";
+        document.getElementById('winner-display').style.color = "#f1c40f";
+        return;
+    }
+    
+    // Setup Stage
+    let t = "", s = "", m = MAPS[0];
+    p2IsCpu = true; cpuLevel = 3 + arcadeStage; // Scaling difficulty
+    
+    if(arcadeStage===1) { t="STAGE 1"; s="VS SANIC"; p2Char=CHARACTERS.find(c=>c.id==='sanic'); m=MAPS[1]; }
+    else if(arcadeStage===2) { t="STAGE 2"; s="VS PEPE"; p2Char=CHARACTERS.find(c=>c.id==='frog'); m=MAPS[2]; }
+    else if(arcadeStage===3) { t="STAGE 3"; s="VS CHAD"; p2Char=CHARACTERS.find(c=>c.id==='chad'); m=MAPS[0]; }
+    else if(arcadeStage===4) { t="BONUS STAGE"; s="BREAK THE TARGETS"; m=MAPS[1]; }
+    else if(arcadeStage===5) { t="FINAL STAGE"; s="VS GIGA DOGE"; p2Char=CHARACTERS.find(c=>c.id==='doge'); m=MAPS[0]; }
+
+    // Show Overlay
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('arcade-overlay').classList.remove('hidden');
+    document.getElementById('stage-title').innerText = t;
+    document.getElementById('stage-sub').innerText = s;
+    selectedMap = m;
+}
+
+function beginStage() {
+    document.getElementById('arcade-overlay').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    
+    resize(); initGame(); 
+    
+    if (arcadeStage === 4) {
+        // TARGET MODE
+        players = [players[0]]; // Remove P2
+        // Spawn Targets
+        targets = [
+            {x: -400, y: -100, w: 40, h: 40, active: true},
+            {x: 400, y: -100, w: 40, h: 40, active: true},
+            {x: 0, y: -300, w: 40, h: 40, active: true},
+            {x: -200, y: 0, w: 40, h: 40, active: true},
+            {x: 200, y: 0, w: 40, h: 40, active: true}
+        ];
+        document.getElementById('p2-hud-box').style.display = 'none';
+    } else if (arcadeStage === 5) {
+        // BOSS MODE
+        players[1].isBoss = true;
+        players[1].w = 150; players[1].h = 150; // BIG
+        players[1].stats.weight = 10.0; // Heavy
+        players[1].pct = 0; // Use Boss HP instead
+        players[1].bossHP = 300;
+        document.getElementById('boss-hud').style.display = 'block';
+        document.getElementById('p2-hud-box').style.display = 'none';
+    } else {
+        document.getElementById('boss-hud').style.display = 'none';
+        document.getElementById('p2-hud-box').style.display = 'block';
+    }
+
+    gameState = 'GAME'; loop();
+}
+
+// [Existing UI Functions Omitted for brevity - assume identical to previous]
+window.enterLobbyUI = (rid) => {
+    document.getElementById('online-menu').classList.add('hidden');
+    document.getElementById('char-select').classList.remove('hidden');
+    document.getElementById('lobby-info').classList.remove('hidden');
+    document.getElementById('room-code-display').innerText = rid;
+    document.getElementById('cpu-controls').classList.add('hidden');
+    renderCharGrid();
+}
+window.handleRoomUpdate = (d) => {
+    if (d.p1Char && p1Char?.id !== d.p1Char) { p1Char = CHARACTERS.find(c=>c.id===d.p1Char); highlightChar(d.p1Char,1); }
+    if (d.p2Char && p2Char?.id !== d.p2Char) { p2Char = CHARACTERS.find(c=>c.id===d.p2Char); highlightChar(d.p2Char,2); }
+    if (d.client) document.getElementById('connection-status').innerText = "PLAYER 2 CONNECTED!";
+    if (d.status === 'playing' && gameState !== 'GAME') { startGameLoop(); window.listenToOpponent(); }
+}
 function showMoves() {
     sfx.init();
-    document.getElementById('title-screen').classList.add('hidden');
-    document.getElementById('moves-screen').classList.remove('hidden');
-    const c = document.getElementById('moves-content'); c.innerHTML = '';
+    document.getElementById('title-screen').classList.add('hidden'); document.getElementById('moves-screen').classList.remove('hidden');
+    const c = document.getElementById('moves-content'); c.innerHTML='';
     CHARACTERS.forEach(ch => {
         c.innerHTML += `<div class="move-card"><div class="move-icon">${ch.icon}</div><div class="move-details"><strong>${ch.name}</strong><br><span class="move-input">S</span> ${ch.moves.side}<br><span class="move-input">U</span> ${ch.moves.up}<br><span class="move-input">D</span> ${ch.moves.down}<br><span class="move-input" style="color:var(--ult)">ULT</span> ${ch.moves.ult}</div></div>`;
     });
 }
 function hideMoves() { document.getElementById('moves-screen').classList.add('hidden'); document.getElementById('title-screen').classList.remove('hidden'); }
-
-// SETTINGS
-function openSettings() { sfx.init(); document.getElementById('title-screen').classList.add('hidden'); document.getElementById('settings-screen').classList.remove('hidden'); }
-function closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); document.getElementById('title-screen').classList.remove('hidden'); }
-function toggleHitboxSetting() {
-    showHitboxes = !showHitboxes;
-    const btn = document.getElementById('btn-hitbox');
-    if(showHitboxes) { btn.innerText="ON"; btn.className="toggle-btn toggle-on"; }
-    else { btn.innerText="OFF"; btn.className="toggle-btn toggle-off"; }
-    sfx.play('coin');
-}
-
-function goToCharSelect() {
-    sfx.init();
-    document.getElementById('title-screen').classList.add('hidden');
-    document.getElementById('char-select').classList.remove('hidden');
-    renderCharGrid();
-}
-function toggleCpu() { p2IsCpu=!p2IsCpu; document.getElementById('cpu-toggle').innerText = p2IsCpu ? "P2: CPU" : "P2: HUMAN"; document.getElementById('cpu-toggle').classList.toggle('cpu-active', p2IsCpu); document.getElementById('cpu-level-container').style.display=p2IsCpu?'flex':'none'; }
+function toggleCpu() { p2IsCpu=!p2IsCpu; document.getElementById('cpu-toggle').innerText=p2IsCpu?"P2: CPU":"P2: HUMAN"; document.getElementById('cpu-toggle').classList.toggle('cpu-active', p2IsCpu); document.getElementById('cpu-level-container').style.display=p2IsCpu?'flex':'none'; }
 function updateCpuLevel(v) { cpuLevel=parseInt(v); document.getElementById('cpu-level-val').innerText=cpuLevel; }
-function renderCharGrid() {
-    const g = document.getElementById('char-grid'); g.innerHTML = '';
-    CHARACTERS.forEach(c => {
-        const d = document.createElement('div'); d.className = 'char-card'; d.id=`card-${c.id}`;
-        d.innerHTML = `<span class="char-icon">${c.icon}</span><span class="char-name">${c.name}</span>`;
-        d.onclick = () => selectCharacter(c, d); g.appendChild(d);
-    });
-}
+function renderCharGrid() { const g=document.getElementById('char-grid'); g.innerHTML=''; CHARACTERS.forEach(c=>{ const d=document.createElement('div'); d.className='char-card'; d.id=`card-${c.id}`; d.innerHTML=`<span class="char-icon">${c.icon}</span>`; d.onclick=()=>selectCharacter(c); g.appendChild(d); }); }
 function highlightChar(id, p) { const cards=document.getElementsByClassName('char-card'); for(let c of cards) c.classList.remove(`selected-p${p}`); document.getElementById(`card-${id}`)?.classList.add(`selected-p${p}`); }
 function selectCharacter(c) {
     sfx.play('coin');
-    if(!p1Char) { p1Char=c; highlightChar(c.id, 1); document.getElementById('select-instruction').innerText="P2 CHOOSE"; document.getElementById('select-instruction').style.color="var(--p2)"; }
-    else if(!p2Char) { p2Char=c; highlightChar(c.id, 2); setTimeout(goToMapSelect, 500); }
+    if (isOnline) {
+        const role = window.playerRole;
+        if (role === 'host') { p1Char=c; window.updateRoomSelection('p1Char', c.id); } else { p2Char=c; window.updateRoomSelection('p2Char', c.id); }
+        if (role === 'host' && p1Char && p2Char) setTimeout(()=>window.updateRoomSelection('status','playing'), 1000);
+    } else {
+        if (isArcade) {
+            p1Char = c;
+            document.getElementById('char-select').classList.add('hidden');
+            nextStage(); // START ARCADE
+        } else {
+            if(!p1Char) { p1Char=c; highlightChar(c.id,1); document.getElementById('select-instruction').innerText="P2 CHOOSE"; document.getElementById('select-instruction').style.color="var(--p2)"; }
+            else if(!p2Char) { p2Char=c; highlightChar(c.id,2); setTimeout(goToMapSelect, 500); }
+        }
+    }
 }
-function goToMapSelect() {
-    document.getElementById('char-select').classList.add('hidden'); document.getElementById('map-select').classList.remove('hidden');
-    const g = document.getElementById('map-grid'); g.innerHTML = '';
-    MAPS.forEach(m => {
-        const d = document.createElement('div'); d.className='map-card'; d.innerHTML=`<div class="map-preview">${m.icon}</div><div>${m.name}</div>`;
-        d.onclick=()=>{selectedMap=m;document.getElementById('map-select').classList.add('hidden');document.getElementById('controls-hint').classList.remove('hidden'); if(p2IsCpu)document.getElementById('p2-controls-text').innerHTML=`<strong style="color:var(--cpu)">CPU LVL ${cpuLevel}</strong>`;};
-        g.appendChild(d);
-    });
-}
-function startGameLoop() {
-    document.getElementById('controls-hint').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden');
-    if(p2IsCpu) document.getElementById('p2-hud-box').classList.add('p2-cpu');
-    resize(); initGame(); gameState='GAME'; loop();
-}
+function goToMapSelect() { document.getElementById('char-select').classList.add('hidden'); document.getElementById('map-select').classList.remove('hidden'); const g=document.getElementById('map-grid'); g.innerHTML=''; MAPS.forEach(m=>{ const d=document.createElement('div'); d.className='map-card'; d.innerHTML=`<div class="map-preview">${m.icon}</div><div>${m.name}</div>`; d.onclick=()=>{selectedMap=m;document.getElementById('map-select').classList.add('hidden');document.getElementById('controls-hint').classList.remove('hidden'); if(p2IsCpu) document.getElementById('p2-controls-text').innerHTML=`<strong style="color:var(--cpu)">CPU LVL ${cpuLevel}</strong>`; }; g.appendChild(d); }); }
+function startGameLoop() { document.getElementById('controls-hint').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); if(p2IsCpu) document.getElementById('p2-hud-box').classList.add('p2-cpu'); resize(); initGame(); gameState='GAME'; loop(); }
 
 // --- GAME LOGIC ---
 function initGame() {
     if(!p1Char) p1Char=CHARACTERS[0]; if(!p2Char) p2Char=CHARACTERS[1]; if(!selectedMap) selectedMap=MAPS[0];
-    platforms=[]; items=[]; ultEffects=[]; itemTimer=0; const gy=200;
-    
+    platforms=[]; items=[]; ultEffects=[]; targets=[]; itemTimer=0; const gy=200;
     if(selectedMap.id==='flat') platforms.push({x:-600,y:gy,w:1200,h:500,t:'solid',c:selectedMap.color});
     else if(selectedMap.id==='plat') { platforms.push({x:-500,y:gy,w:1000,h:500,t:'solid',c:selectedMap.color}); platforms.push({x:-300,y:gy-150,w:150,h:20,t:'pass',c:'#ddd'}); platforms.push({x:150,y:gy-150,w:150,h:20,t:'pass',c:'#ddd'}); platforms.push({x:-75,y:gy-280,w:150,h:20,t:'pass',c:'#ddd'}); }
     else platforms.push({x:-200,y:gy,w:400,h:500,t:'solid',c:selectedMap.color});
+    
+    let p1C = !isOnline || window.playerRole==='host';
+    let p2C = !isOnline && !p2IsCpu && !isArcade;
+    let p2CPU = (!isOnline && p2IsCpu) || isArcade;
+    let p1R = isOnline && window.playerRole==='client';
+    let p2R = isOnline && window.playerRole==='host';
 
-    players = [ new Fighter(1, p1Char, -200, 0, false), new Fighter(2, p2Char, 200, 0, p2IsCpu) ];
+    players = [ new Fighter(1, p1Char, -200, 0, p1C, false, p1R), new Fighter(2, p2Char, 200, 0, (isOnline && window.playerRole==='client')||p2C, p2CPU, p2R) ];
     document.getElementById('p1-name').innerText = p1Char.name; document.getElementById('p2-name').innerText = p2Char.name; updateHUD();
 }
 
@@ -312,105 +478,69 @@ class Item {
 }
 
 class Fighter {
-    constructor(id, s, x, y, isCpu) {
+    constructor(id, s, x, y, loc, cpu, rem) {
         this.id=id; this.stats=s; this.x=x; this.y=y; this.w=50; this.h=50; this.vx=0; this.vy=0;
-        this.pct=0; this.stocks=3; this.ult=0; this.dir=id===1; this.isCpu=isCpu;
+        this.pct=0; this.stocks=3; this.ult=0; this.dir=id===1; 
+        this.loc=loc; this.cpu=cpu; this.rem=rem;
         this.jumps=2; this.stun=0; this.inv=0; this.cd=0; this.box=null; this.hasHammer=false;
-        // SHIELD STATS
         this.shieldHP = 100; this.shielding = false; this.rolling = false; this.rollDir = 0; this.rollTime = 0;
+        this.isBoss = false; this.bossHP = 0;
     }
     update() {
         if(this.stocks<=0) return;
         this.ult = Math.min(100, this.ult+0.05);
-        if(this.shieldHP < 100 && !this.shielding) this.shieldHP += 0.5; // Regen
+        if(this.shieldHP < 100 && !this.shielding) this.shieldHP += 0.5;
 
-        // ROLL LOGIC
-        if(this.rolling) {
-            this.rollTime--;
-            this.vx = this.rollDir * 15; // Fixed roll speed
-            this.inv = 2; // Keep invincible
-            if(this.rollTime <= 0) { this.rolling=false; this.vx=0; }
+        // BOSS AI
+        if (this.isBoss) {
+            if (Math.random() < 0.01 && this.cd <= 0) { 
+                // LASER ATTACK
+                ultEffects.push({t:'moon', x: players[0].x, y: -500, l: 50}); // Reusing moon effect as projectile
+                this.cd = 60;
+            }
+            // Basic movement towards player
+            if (players[0].x > this.x + 100) this.vx += 0.5;
+            else if (players[0].x < this.x - 100) this.vx -= 0.5;
             this.phys();
-            return; // Skip other inputs
+            if(this.cd > 0) this.cd--;
+            return; // Skip standard inputs
         }
 
-        // STUN LOGIC
-        if(this.stun>0) { 
-            this.stun--; this.shielding=false; 
-            // Shield break dizziness
-            this.vx *= 0.8;
-            this.phys(); return; 
-        }
+        if(this.rolling) { this.rollTime--; this.vx = this.rollDir * 15; this.inv = 2; if(this.rollTime <= 0) { this.rolling=false; this.vx=0; } this.phys(); return; }
+        if(this.stun>0) { this.stun--; this.shielding=false; this.vx *= 0.8; this.phys(); return; }
 
         let l=0,r=0,u=0,d=0,a=0,j=0,U=0,S=0;
-        
-        // INPUT MAPPING
-        if(this.isCpu) {
+        if(this.rem) { this.x+=(this.tx-this.x)*0.3; this.y+=(this.ty-this.y)*0.3; return; }
+
+        if(this.cpu) {
             let t = players.find(p=>p.id!==this.id);
-            let dx=t.x-this.x, dy=t.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
-            // Basic Nav
-            if(this.y>250||Math.abs(this.x)>700) { if(this.x<0)r=1;else l=1; if(this.jumps>0&&this.vy>0)j=1; if(this.jumps==0){u=1;a=1;} }
-            else {
-                if(Math.abs(dx)>60) { if(dx>0)r=1; else l=1; }
-                if(dy<-100&&this.jumps>0&&Math.random()<(cpuLevel*0.02))j=1;
-                if(dist<150&&Math.random()<(cpuLevel*0.01)) { a=1; if(dy>50)d=1; else if(dy<-50)u=1; else if(Math.abs(dx)>20){if(dx>0)r=1;else l=1;} }
-                // CPU SHIELDING (High Level)
-                if(cpuLevel>6 && dist<100 && t.box && t.box.act && Math.random()<0.3) S=1;
-                // CPU ROLLING
-                if(S && (l||r) && Math.random()<0.1) { /* CPU will execute roll in shield block */ }
-                if(this.ult>=100&&dist<200&&cpuLevel>5)U=1;
+            if (t) {
+                let dx=t.x-this.x, dy=t.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
+                if(this.y>250||Math.abs(this.x)>700) { if(this.x<0)r=1;else l=1; if(this.jumps>0&&this.vy>0)j=1; if(this.jumps==0){u=1;a=1;} }
+                else {
+                    if(Math.abs(dx)>60) { if(dx>0)r=1; else l=1; }
+                    if(dy<-100&&this.jumps>0&&Math.random()<(cpuLevel*0.02))j=1;
+                    if(dist<150&&Math.random()<(cpuLevel*0.01)) { a=1; if(dy>50)d=1; else if(dy<-50)u=1; else if(Math.abs(dx)>20){if(dx>0)r=1;else l=1;} }
+                    if(cpuLevel>6 && dist<100 && t.box && t.box.act && Math.random()<0.3) S=1;
+                    if(this.ult>=100&&dist<200&&cpuLevel>5)U=1;
+                }
             }
-        } else if(this.id===1) {
-            l=keys['a']||touchInput.left; r=keys['d']||touchInput.right; u=keys['w']||touchInput.up; d=keys['s']||touchInput.down; a=keys['f']||touchInput.atk; j=keys['w']||touchInput.jump; U=keys['r']||touchInput.ult;
-            // P1 Shield: S key (Note: Attack overrides shield for Down-Attack)
-            if(d && !a) S=1;
-        } else {
-            l=keys['ArrowLeft']; r=keys['ArrowRight']; u=keys['ArrowUp']; d=keys['ArrowDown']; a=keys['l']; j=keys['ArrowUp']; U=keys['Shift'];
-            // P2 Shield: Down Arrow
-            if(d && !a) S=1;
+        } else if(this.loc) {
+            if(this.id===1||isOnline) { l=keys['a']||touchInput.left; r=keys['d']||touchInput.right; u=keys['w']||touchInput.up; d=keys['s']||touchInput.down; a=keys['f']||touchInput.atk; j=keys['w']||touchInput.jump; U=keys['r']||touchInput.ult; if(d&&!a)S=1; }
+            else { l=keys['ArrowLeft']; r=keys['ArrowRight']; u=keys['ArrowUp']; d=keys['ArrowDown']; a=keys['l']; j=keys['ArrowUp']; U=keys['Shift']; if(d&&!a)S=1; }
         }
 
-        // SHIELD ACTIVATION
         this.shielding = false;
         if (S && this.grounded && this.shieldHP > 0 && this.stun <= 0) {
-            this.shielding = true;
-            this.vx *= 0.5; // Friction while shielding
-            this.shieldHP -= 0.5; // Decay
-            
-            // CHECK ROLL
-            if (l || r) {
-                this.rolling = true;
-                this.rollDir = l ? -1 : 1;
-                this.rollTime = 15; // Roll duration
-                this.shielding = false;
-                this.inv = 15; // I-frames
-                sfx.play('roll');
-                return; // Start roll immediately
-            }
-            
-            if (this.shieldHP <= 0) {
-                sfx.play('break');
-                this.shielding = false;
-                this.stun = 180; // 3 sec stun
-                this.vy = -10; // Pop up
-            }
-        } else if (S && !this.grounded && this.jumps > 0 && this.stun <=0 && !this.rolling) {
-            // AIR DODGE
-            this.rolling = true; // Reuse roll state for air dodge
-            this.rollDir = 0;
-            this.rollTime = 20;
-            this.vx = 0; this.vy = 0; // Stall in air
-            this.inv = 20;
-            sfx.play('roll');
-            return;
+            this.shielding = true; this.vx *= 0.5; this.shieldHP -= 0.5;
+            if (l || r) { this.rolling = true; this.rollDir = l ? -1 : 1; this.rollTime = 15; this.shielding = false; this.inv = 15; sfx.play('roll'); return; }
+            if (this.shieldHP <= 0) { sfx.play('break'); this.shielding = false; this.stun = 180; this.vy = -10; }
         }
 
         if(U && this.ult>=100) this.fireUlt();
 
         const sp = 1.5 * this.stats.speed;
-        if (!this.shielding) {
-            if(l) { this.vx -= sp; this.dir=false; } if(r) { this.vx += sp; this.dir=true; }
-        }
+        if (!this.shielding) { if(l) { this.vx -= sp; this.dir=false; } if(r) { this.vx += sp; this.dir=true; } }
         this.vx *= 0.85;
 
         if(j && !this.pj && this.jumps>0 && !this.shielding) { this.vy=-14*this.stats.jump; this.jumps--; sfx.play('jump'); }
@@ -420,8 +550,18 @@ class Fighter {
 
         this.phys(); if(this.inv>0)this.inv--; this.chkItm();
         if(this.box && this.box.act) { this.box.f--; if(this.box.f<=0)this.box.act=false; }
-    }
 
+        if(isOnline && this.loc && Math.random()<0.3) window.syncGameState({x:Math.round(this.x), y:Math.round(this.y), pct:Math.round(this.pct), facingRight:this.dir, stocks:this.stocks, anim:a?'atk':'idle'});
+    }
+    syncFromRemote(d) { this.tx=d.x; this.ty=d.y; this.pct=d.pct; this.dir=d.facingRight; this.stocks=d.stocks; if(d.anim==='atk')this.cd=10; updateHUD(); }
+    atk(u,d,l,r) {
+        this.cd=30; sfx.play('hit');
+        let ox=this.dir?50:-60, dmg=10, kbx=10, kby=-10;
+        if(this.hasHammer) { this.hasHammer=false; this.cd=45; this.box={relX:this.dir?0:-40,relY:-20,w:90,h:70,act:true,own:this.id,kbx:25,kby:-15,dmg:25,f:5}; return; }
+        const s=this.stats;
+        if(u){this.vy=-12*s.jump;kby=-15;dmg=12;} else if(d){dmg=15;kby=15;} else if(l||r){this.vx=(this.dir?1:-1)*15;dmg=12;kbx=15;}
+        this.box = { relX:ox, relY:0, w:60, h:50, act:true, own:this.id, kbx:kbx*s.power, kby:kby*s.power, dmg:dmg*s.power, f:5 };
+    }
     fireUlt() {
         this.ult=0; sfx.play('ult'); shake=30; updateHUD();
         let t=players.find(p=>p.id!==this.id); if(!t)return;
@@ -431,32 +571,20 @@ class Fighter {
         else if(this.stats.id==='chad') { t.stun=180; t.vx=0; t.vy=0; }
         else t.hit(20*(this.x<t.x?1:-1),-20,40);
     }
-
-    atk(u,d,l,r) {
-        this.cd=30; sfx.play('hit');
-        let ox=this.dir?50:-60, dmg=10, kbx=10, kby=-10;
-        if(this.hasHammer) { this.hasHammer=false; this.cd=45; this.box={relX:this.dir?0:-40,relY:-20,w:90,h:70,act:true,own:this.id,kbx:25,kby:-15,dmg:25,f:5}; return; }
-        const s=this.stats;
-        if(u){this.vy=-12*s.jump;kby=-15;dmg=12;} else if(d){dmg=15;kby=15;} else if(l||r){this.vx=(this.dir?1:-1)*15;dmg=12;kbx=15;}
-        this.box = { relX:ox, relY:0, w:60, h:50, act:true, own:this.id, kbx:kbx*s.power, kby:kby*s.power, dmg:dmg*s.power, f:5 };
-    }
-
     hit(kbx,kby,d) {
-        if(this.inv>0 || (this.rolling && this.inv>0)) return; // Invincible
+        if(this.inv>0 || (this.rolling && this.inv>0)) return; 
+        if (this.shielding) { this.shieldHP -= d * 2; sfx.play('shield'); this.vx = kbx * 0.5; if(this.shieldHP <= 0) { sfx.play('break'); this.shielding = false; this.stun = 180; this.vy = -15; } return; }
         
-        // SHIELD BLOCK LOGIC
-        if (this.shielding) {
-            // Directional block? For now, 360 block.
-            this.shieldHP -= d * 2; // Shield takes double damage
-            sfx.play('shield');
-            this.vx = kbx * 0.5; // Pushback but no launch
-            if(this.shieldHP <= 0) {
-                sfx.play('break');
-                this.shielding = false;
-                this.stun = 180;
-                this.vy = -15; // Shield break pop
-            }
-            return; // Blocked!
+        if (this.isBoss) {
+            this.bossHP -= d;
+            this.vx = kbx * 0.1; // Super armor
+            this.vy = kby * 0.1;
+            sfx.play('heavy_hit');
+            // Update Boss Bar
+            let p = (this.bossHP / 300) * 100;
+            document.getElementById('boss-fill').style.width = p + "%";
+            if (this.bossHP <= 0) this.die();
+            return;
         }
 
         this.pct+=d; this.ult=Math.min(100,this.ult+d);
@@ -465,7 +593,6 @@ class Fighter {
         else this.vx=(Math.random()-0.5)*Math.abs(kbx*sc*wm);
         this.vy=kby*sc*wm; this.inv=10; sfx.play(d>15?'heavy_hit':'hit'); hitStop=5; updateHUD();
     }
-
     phys() {
         this.vy+=0.6; if(this.vy>25)this.vy=25; this.x+=this.vx; this.y+=this.vy; this.grounded=false;
         for(let p of platforms) {
@@ -475,75 +602,56 @@ class Fighter {
         }
         if(this.y>800) this.die();
     }
-
-    die() { sfx.play('ko'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) endGame(this.id===1?2:1); updateHUD(); }
-
+    die() { sfx.play('ko'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) { if(isArcade && this.id===2) { nextStage(); } else endGame(this.id===1?2:1); } updateHUD(); }
     chkItm() { items.forEach(i=>{if(i.active&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.type==='hammer'){this.hasHammer=true;i.active=false;sfx.play('coin');}else if(i.type==='coin'){this.pct=Math.max(0,this.pct-20);i.active=false;sfx.play('coin');updateHUD();}else if(i.type==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.active=false;}}}); }
-
     draw() {
         if(this.stocks<=0)return;
-        ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2); if(this.dir)ctx.scale(-1,1);
+        ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2); 
         
-        // Draw Character
+        if(this.isBoss) ctx.scale(2.5, 2.5); // BOSS SCALE
+        
+        if(this.dir)ctx.scale(-1,1);
         ctx.font="50px Arial"; ctx.textAlign="center"; ctx.textBaseline="middle"; 
-        
-        if (this.stun > 0) {
-            // STUNNED ANIMATION
-            ctx.fillText("💫", 0, -10);
-            ctx.font="40px Arial";
-            ctx.fillText(this.stats.icon, 0, 10);
-        } else if (this.rolling) {
-            // ROLL ANIMATION (Spin/Fade)
-            ctx.globalAlpha = 0.5;
-            ctx.rotate(Date.now()/50);
-            ctx.fillText(this.stats.icon, 0, 0);
-        } else {
-            // NORMAL
-            ctx.fillText(this.stats.icon, 0, 5);
-        }
-
+        if (this.stun > 0) { ctx.fillText("💫", 0, -10); ctx.font="40px Arial"; ctx.fillText(this.stats.icon, 0, 10); } 
+        else if (this.rolling) { ctx.globalAlpha = 0.5; ctx.rotate(Date.now()/50); ctx.fillText(this.stats.icon, 0, 0); } 
+        else { ctx.fillText(this.stats.icon, 0, 5); }
         if(this.hasHammer){ctx.font="20px Arial";ctx.fillText('🔨',25,-25);}
-        
-        // SHIELD DRAW
-        if(this.shielding) {
-            ctx.beginPath();
-            ctx.arc(0, 0, 40 * (this.shieldHP/100), 0, Math.PI*2);
-            ctx.fillStyle = `rgba(${255 - this.shieldHP*2.55}, ${this.shieldHP*2.55}, 0, 0.5)`; // Green to Red
-            ctx.fill();
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-        }
-
+        if(this.shielding) { ctx.beginPath(); ctx.arc(0, 0, 40 * (this.shieldHP/100), 0, Math.PI*2); ctx.fillStyle = `rgba(${255 - this.shieldHP*2.55}, ${this.shieldHP*2.55}, 0, 0.5)`; ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke(); }
         ctx.restore();
-        
-        // DEBUG HITBOX DRAW (Controlled by Setting)
-        if(this.box && this.box.act && showHitboxes) {
-            ctx.fillStyle='rgba(255,255,255,0.5)'; 
-            // Must calculate absolute position since we are no longer translated
-            ctx.fillRect(this.x + this.box.relX, this.y + this.box.relY, this.box.w, this.box.h);
-        }
-
+        // DEBUG HITBOX
+        // if(this.box && this.box.act) { ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(this.x + this.box.relX, this.y + this.box.relY, this.box.w, this.box.h); }
         ctx.fillStyle=this.id===1?'#3498db':(this.isCpu?'#9b59b6':'#e74c3c'); ctx.font="bold 12px sans-serif"; ctx.fillText(this.isCpu?`CPU`:`P${this.id}`,this.x+15,this.y-10);
     }
 }
 
+window.updateOpponent = (d) => { const p=window.playerRole==='host'?players[1]:players[0]; if(p)p.syncFromRemote(d); };
 function updateHUD() { players.forEach(p=>{ const x=p.id===1?'p1':'p2'; document.getElementById(`${x}-pct`).innerText=Math.floor(p.pct)+'%'; document.getElementById(`${x}-stocks`).innerText='●'.repeat(p.stocks); const b=document.getElementById(`${x}-ult-bar`); b.style.width=p.ult+'%'; if(p.ult>=100)b.parentNode.classList.add('ult-ready');else b.parentNode.classList.remove('ult-ready'); }); }
 function endGame(w) { gameState='GAMEOVER'; document.getElementById('game-over').classList.remove('hidden'); document.getElementById('winner-display').innerText=`GAME!\n${(w===1?p1Char:p2Char).name} WINS`; }
 
 function loop() {
     if(gameState!=='GAME')return;
-    
-    // HIT STOP FIX: Draw frozen frame correctly (call DRAW)
-    if(hitStop > 0) { 
-        hitStop--; 
-        draw(); 
-        requestAnimationFrame(loop); 
-        return; 
-    }
-
+    if(hitStop>0) { hitStop--; players.forEach(p=>p.draw()); requestAnimationFrame(loop); return; }
     itemTimer++; if(itemTimer>400) { if(Math.random()<0.7) items.push(new Item()); itemTimer=0; }
     players.forEach(p=>p.update()); items.forEach(i=>i.update());
     
     for(let i=ultEffects.length-1;i>=0;i--) { let e=ultEffects[i]; e.l--; if(e.t==='moon'){e.y+=15;players.forEach(p=>{if(Math.abs(p.x-e.x)<100&&Math.abs(p.y-e.y)<100)p.hit(0,20,2)});} else if(e.t==='tear'){e.y+=10;players.forEach(p=>{if(Math.abs(p.x-e.x)<30&&Math.abs(p.y-e.y)<30)p.hit(10,0,1)});} if(e.l<=0)ultEffects.splice(i,1); }
+
+    // TARGET LOGIC
+    if (arcadeStage === 4) {
+        for (let i=targets.length-1; i>=0; i--) {
+            let t = targets[i];
+            let p = players[0];
+            if (p.box && p.box.act) {
+                let absX = p.x + p.box.relX, absY = p.y + p.box.relY;
+                if (absX < t.x+t.w && absX+p.box.w > t.x && absY < t.y+t.h && absY+p.box.h > t.y) {
+                    sfx.play('break');
+                    targets.splice(i, 1);
+                    p.box.act = false; // Consume hit
+                }
+            }
+        }
+        if (targets.length === 0) nextStage();
+    }
 
     players.forEach(atk=>{
         if(atk.box && atk.box.act) {
@@ -570,6 +678,7 @@ function draw() {
     ctx.scale(camera.zoom,camera.zoom); ctx.translate(-camera.x,-camera.y);
     platforms.forEach(p=>{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.w,p.h);});
     items.forEach(i=>i.draw());
+    targets.forEach(t=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(t.x+20,t.y+20,20,0,Math.PI*2);ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(t.x+20,t.y+20,10,0,Math.PI*2);ctx.fill();});
     ultEffects.forEach(e=>{if(e.t==='moon'){ctx.font="200px Arial";ctx.fillText('🌚',e.x-100,e.y);}else if(e.t==='tear'){ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fill();}});
     players.forEach(p=>p.draw());
     ctx.restore();
