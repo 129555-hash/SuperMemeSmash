@@ -225,7 +225,7 @@ function renderCharGrid() {
     CHARACTERS.forEach(c => {
         const d = document.createElement('div'); d.className = 'char-card'; d.id=`card-${c.id}`;
         d.innerHTML = `<span class="char-icon">${c.icon}</span><span class="char-name">${c.name}</span>`;
-        d.onclick = () => selectCharacter(c); g.appendChild(d);
+        d.onclick = () => selectCharacter(c, d); g.appendChild(d);
     });
 }
 function highlightChar(id, p) { const cards=document.getElementsByClassName('char-card'); for(let c of cards) c.classList.remove(`selected-p${p}`); document.getElementById(`card-${id}`)?.classList.add(`selected-p${p}`); }
@@ -363,7 +363,7 @@ class Fighter {
 
     die() { sfx.play('ko'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) endGame(this.id===1?2:1); updateHUD(); }
 
-    chkItm() { items.forEach(i=>{if(i.act&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.t==='hammer'){this.hasHammer=true;i.act=false;sfx.play('coin');}else if(i.t==='coin'){this.pct=Math.max(0,this.pct-20);i.act=false;sfx.play('coin');updateHUD();}else if(i.t==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.act=false;}}}); }
+    chkItm() { items.forEach(i=>{if(i.active&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.type==='hammer'){this.hasHammer=true;i.active=false;sfx.play('coin');}else if(i.type==='coin'){this.pct=Math.max(0,this.pct-20);i.active=false;sfx.play('coin');updateHUD();}else if(i.type==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.active=false;}}}); }
 
     draw() {
         if(this.stocks<=0)return;
