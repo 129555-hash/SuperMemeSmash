@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Meme Bros: Bug Free Edition</title>
+    <title>Super Meme Bros: Stable Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Roboto:wght@700&display=swap');
 
@@ -25,11 +25,9 @@
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 10; transition: opacity 0.3s; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        /* TYPOGRAPHY */
         h1 { font-family: 'Black Ops One'; font-size: 60px; background: -webkit-linear-gradient(#eee, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 20px 0; text-align: center; }
         h2 { font-family: 'Press Start 2P'; color: #fff; margin-bottom: 30px; font-size: 20px; }
 
-        /* UI ELEMENTS */
         .menu-btn { font-family: 'Press Start 2P'; padding: 20px 40px; font-size: 20px; background: transparent; color: white; border: 4px solid white; cursor: pointer; margin: 10px; transition: 0.2s; }
         .menu-btn:hover { background: white; color: black; transform: scale(1.1); }
         .menu-btn.boss-btn { border-color: var(--boss); color: var(--boss); }
@@ -41,7 +39,7 @@
         .toggle-on { background: var(--on); color: white; border-color: var(--on); }
         .toggle-off { background: var(--off); color: white; border-color: var(--off); }
 
-        /* CHAR SELECT */
+        /* GRIDS */
         .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 800px; }
         .char-card { background: #333; border: 4px solid #555; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s; }
         .char-card:hover { transform: scale(1.05); border-color: white; }
@@ -49,7 +47,6 @@
         .selected-p1 { border-color: var(--p1) !important; box-shadow: 0 0 15px var(--p1); }
         .selected-p2 { border-color: var(--p2) !important; box-shadow: 0 0 15px var(--p2); }
 
-        /* MAP SELECT */
         .map-grid { display: flex; gap: 20px; }
         .map-card { width: 200px; height: 150px; background: #444; border: 3px solid #666; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-direction: column; }
         .map-card:hover { border-color: #fff; }
@@ -64,27 +61,27 @@
         .ult-bar { height: 100%; width: 0%; background: #555; transition: width 0.1s; }
         .ult-ready .ult-bar { background: var(--ult); box-shadow: 0 0 10px var(--ult); }
         
-        /* CPU CONTROLS */
-        #cpu-controls { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        #cpu-toggle { font-size: 14px; padding: 10px 20px; border-color: var(--p2); color: var(--p2); }
-        #cpu-toggle.cpu-active { background: var(--cpu); color: white; border-color: white; }
-        #cpu-level-container { display: none; align-items: center; gap: 10px; font-family: 'Press Start 2P'; font-size: 12px; color: var(--cpu); }
-        input[type=range] { width: 150px; accent-color: var(--cpu); cursor: pointer; }
-
-        /* MOVES LIST */
-        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
-        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
-        .move-icon { font-size: 40px; min-width: 50px; }
-        .move-details { text-align: left; font-size: 12px; line-height: 1.8; color: #ccc; width: 100%; }
-        .move-input { color: #e74c3c; font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
-
         /* BOSS HUD */
         #boss-hud { position: absolute; top: 20px; width: 80%; left: 10%; display: none; }
         .boss-health-bar { height: 30px; background: #333; border: 3px solid #fff; border-radius: 15px; overflow: hidden; }
         .boss-fill { height: 100%; width: 100%; background: var(--boss); transition: width 0.2s; }
         .boss-name { color: white; font-family: 'Black Ops One'; font-size: 24px; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px 0 #000; }
 
-        /* ARCADE OVERLAY */
+        /* CPU */
+        #cpu-controls { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        #cpu-toggle { font-size: 14px; padding: 10px 20px; border-color: var(--p2); color: var(--p2); }
+        #cpu-toggle.cpu-active { background: var(--cpu); color: white; border-color: white; }
+        #cpu-level-container { display: none; align-items: center; gap: 10px; font-family: 'Press Start 2P'; font-size: 12px; color: var(--cpu); }
+        input[type=range] { width: 150px; accent-color: var(--cpu); cursor: pointer; }
+
+        /* MOVES */
+        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
+        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
+        .move-icon { font-size: 40px; min-width: 50px; }
+        .move-details { text-align: left; font-size: 12px; line-height: 1.8; color: #ccc; width: 100%; }
+        .move-input { color: #e74c3c; font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
+
+        /* ARCADE */
         #arcade-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; }
         .stage-title { font-family: 'Black Ops One'; font-size: 60px; color: var(--ult); margin-bottom: 20px; }
         .stage-subtitle { font-family: 'Press Start 2P'; color: white; margin-bottom: 40px; }
@@ -110,7 +107,6 @@
     <canvas id="gameCanvas"></canvas>
 </div>
 
-<!-- BOSS UI -->
 <div id="boss-hud">
     <div class="boss-name">GIGA DOGE</div>
     <div class="boss-health-bar"><div class="boss-fill" id="boss-fill"></div></div>
@@ -139,7 +135,6 @@
     <button class="menu-btn" onclick="openSettings()">SETTINGS</button>
 </div>
 
-<!-- SETTINGS SCREEN -->
 <div id="settings-screen" class="screen hidden">
     <h2>SETTINGS</h2>
     <div class="setting-row">
@@ -149,14 +144,12 @@
     <button class="menu-btn" onclick="closeSettings()">BACK</button>
 </div>
 
-<!-- MOVES SCREEN -->
 <div id="moves-screen" class="screen hidden">
     <h2>CHARACTER MOVES</h2>
     <div id="moves-content"></div>
     <button class="menu-btn" onclick="hideMoves()">BACK</button>
 </div>
 
-<!-- ARCADE INTRO SCREEN -->
 <div id="arcade-overlay" class="hidden">
     <div class="stage-title" id="stage-title">STAGE 1</div>
     <div class="stage-subtitle" id="stage-sub">VS SANIC</div>
@@ -206,14 +199,13 @@
 </div>
 
 <script>
-// --- SOUND ---
 const sfx = {
     ctx: null,
     init: function() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
     play: function(type) {
         if (!this.ctx) return;
-        const t = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination);
+        const t = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
         if (type === 'jump') { osc.type='square'; osc.frequency.setValueAtTime(150,t); osc.frequency.linearRampToValueAtTime(300,t+0.1); gain.gain.setValueAtTime(0.1,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
         else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); }
         else if (type === 'break') { osc.type='sawtooth'; osc.frequency.setValueAtTime(800,t); gain.gain.setValueAtTime(0.5,t); gain.gain.linearRampToValueAtTime(0,t+0.5); }
@@ -223,7 +215,6 @@ const sfx = {
     }
 };
 
-// --- DATA ---
 const CHARACTERS = [
     { id: 'doge', name: 'Doge', icon: '🐕', speed: 1.1, weight: 1.0, power: 1.0, jump: 1.0, desc: "Balanced", moves: {side:"Zoomies", up:"Moon Jump", down:"Heavy", ult:"MOON CRASH"} },
     { id: 'frog', name: 'Pepe', icon: '🐸', speed: 0.8, weight: 1.4, power: 1.3, jump: 0.9, desc: "Heavy", moves: {side:"Ree Punch", up:"High Hop", down:"Stomp", ult:"TEAR FLOOD"} },
@@ -236,18 +227,14 @@ const CHARACTERS = [
 ];
 const MAPS = [{id:'flat',name:'Flat',icon:'🛑',color:'#546E7A'}, {id:'plat',name:'Plats',icon:'🏗️',color:'#2E7D32'}, {id:'edge',name:'Edge',icon:'⛰️',color:'#4e342e'}];
 
-// --- GLOBALS ---
 const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, cpuLevel=5;
-let isArcade = false, arcadeStage = 0;
-let players=[], platforms=[], ultEffects=[], items=[], targets=[];
-let itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0, bossTimer=0;
+let gameState='TITLE', p1Char=null, p2Char=null, p2IsCpu=false, cpuLevel=5, isArcade=false, arcadeStage=0;
+let players=[], platforms=[], ultEffects=[], items=[], targets=[], itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0;
 const keys={}; const touchInput={left:false,right:false,up:false,down:false,atk:false,jump:false,ult:false};
 let showHitboxes = false;
 
 window.addEventListener('keydown', e=>keys[e.key]=true); window.addEventListener('keyup', e=>keys[e.key]=false);
 
-// --- UI LOGIC ---
 function startLocal() { sfx.init(); isArcade=false; document.getElementById('title-screen').classList.add('hidden'); document.getElementById('char-select').classList.remove('hidden'); document.getElementById('cpu-controls').classList.remove('hidden'); renderCharGrid(); }
 function startArcadeRun() { sfx.init(); isArcade=true; arcadeStage=0; document.getElementById('title-screen').classList.add('hidden'); document.getElementById('char-select').classList.remove('hidden'); document.getElementById('cpu-controls').classList.add('hidden'); document.getElementById('select-instruction').innerText="CHOOSE HERO"; renderCharGrid(); }
 function showMoves() { sfx.init(); document.getElementById('title-screen').classList.add('hidden'); document.getElementById('moves-screen').classList.remove('hidden'); const c=document.getElementById('moves-content'); c.innerHTML=''; CHARACTERS.forEach(ch=>{c.innerHTML+=`<div class="move-card"><div class="move-icon">${ch.icon}</div><div class="move-details"><strong>${ch.name}</strong><br>S: ${ch.moves.side}<br>U: ${ch.moves.up}<br>D: ${ch.moves.down}<br>ULT: ${ch.moves.ult}</div></div>`}); }
@@ -417,39 +404,8 @@ function endGame(w) { gameState='GAMEOVER'; document.getElementById('game-over')
 
 function loop() {
     if(gameState!=='GAME')return;
-    
-    // FIXED CAMERA RENDER LOOP FOR HIT PAUSE
-    if(hitStop > 0) { 
-        hitStop--; 
-        // Calculate camera position manually here because physics/updateCamera aren't running
-        let p1 = players[0], p2 = players[1];
-        if (p1 && (p2 || arcadeStage===4)) {
-            let target2 = p2 ? p2 : {x: 0, y: 0}; // Fallback for single player modes
-            let mx = (p1.x + target2.x) / 2;
-            let my = (p1.y + target2.y) / 2;
-            // Simple camera follow for pause frame
-            if (arcadeStage === 4) { mx = p1.x; my = p1.y; }
-            
-            ctx.fillStyle='#2c3e50'; ctx.fillRect(0,0,canvas.width,canvas.height);
-            const g=ctx.createLinearGradient(0,0,0,canvas.height); g.addColorStop(0,'#87CEEB'); g.addColorStop(1,'#E0F7FA'); ctx.fillStyle=g; ctx.fillRect(0,0,canvas.width,canvas.height);
-            
-            ctx.save(); 
-            ctx.translate(canvas.width/2,canvas.height/2);
-            // Use last known camera pos (it shouldn't change during freeze anyway)
-            ctx.scale(camera.zoom,camera.zoom); 
-            ctx.translate(-camera.x,-camera.y);
-            
-            // Draw everything
-            platforms.forEach(p=>{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.w,p.h);});
-            items.forEach(i=>i.draw());
-            targets.forEach(t=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(t.x+20,t.y+20,20,0,Math.PI*2);ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(t.x+20,t.y+20,10,0,Math.PI*2);ctx.fill();});
-            ultEffects.forEach(e=>{if(e.t==='moon'){ctx.font="200px Arial";ctx.fillText('🌚',e.x-100,e.y);}else if(e.t==='tear'){ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fill();}});
-            players.forEach(p=>p.draw());
-            ctx.restore();
-        }
-        requestAnimationFrame(loop); 
-        return; 
-    }
+    // SIMPLE HIT PAUSE
+    if(hitStop > 0) { hitStop--; draw(); requestAnimationFrame(loop); return; }
 
     itemTimer++; if(itemTimer>400) { if(Math.random()<0.7) items.push(new Item()); itemTimer=0; }
     players.forEach(p=>p.update()); items.forEach(i=>i.update());
@@ -463,24 +419,9 @@ function loop() {
 
     players.forEach(atk=>{ if(atk.box&&atk.box.act) { let ax=atk.x+atk.box.relX, ay=atk.y+atk.box.relY; players.forEach(def=>{ if(atk.id!==def.id && ax<def.x+def.w && ax+atk.box.w>def.x && ay<def.y+def.h && ay+atk.box.h>def.y) { let d=atk.dir?1:-1; def.hit(Math.abs(atk.box.kbx)*d, atk.box.kby, atk.box.dmg); atk.box.act=false; } }); } });
 
-    // Camera Logic
-    let p1 = players[0], p2 = players[1];
-    let mx = p1.x, my = p1.y, tz = 1;
-    
-    if (p2) {
-        mx = (p1.x + p2.x)/2; 
-        my = (p1.y + p2.y)/2;
-        let d = Math.sqrt(Math.pow(p2.x - p1.x, 2));
-        tz = Math.max(0.5, Math.min(1.2, 1000/(d+200)));
-    } else {
-        // Single player camera
-        tz = 0.8;
-    }
-    
-    camera.x += (mx - camera.x)*0.1; 
-    camera.y += (my - camera.y)*0.1; 
-    camera.zoom += (tz - camera.zoom)*0.05;
-    
+    let mx=(players[0].x+players[1].x)/2, my=(players[0].y+players[1].y)/2, d=Math.sqrt(Math.pow(players[1].x-players[0].x,2)), tz=Math.max(0.5,Math.min(1.2,1000/(d+200)));
+    if (arcadeStage===4) { mx=players[0].x; my=players[0].y; tz=0.8; } // Camera fix for single player
+    camera.x+=(mx-camera.x)*0.1; camera.y+=(my-camera.y)*0.1; camera.zoom+=(tz-camera.zoom)*0.05;
     draw(); requestAnimationFrame(loop);
 }
 
