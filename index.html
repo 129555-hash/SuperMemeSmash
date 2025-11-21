@@ -3,158 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Meme Bros Ultimate</title>
-    <script type="module">
-        // --- FIREBASE SETUP ---
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-
-        window.firebaseLoaded = false;
-        
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
-        
-        let app, auth, db, currentUser, currentRoomId, unsubscribeRoom;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (e) { console.error("Auth Error", e); forceOfflineMode(); }
-            };
-            initAuth();
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    window.firebaseLoaded = true;
-                    updateOnlineStatus(true);
-                }
-            });
-        } catch (e) { console.error("Firebase Init Error", e); forceOfflineMode(); }
-
-        function updateOnlineStatus(ready) {
-            const btn = document.getElementById('btn-online');
-            const ind = document.getElementById('online-indicator');
-            if (ready && btn && ind) {
-                btn.classList.remove('disabled'); 
-                btn.innerText = "ONLINE PVP";
-                ind.innerText = "SERVERS ONLINE"; 
-                ind.style.color = "#2ecc71";
-            }
-        }
-
-        function forceOfflineMode() {
-            const btn = document.getElementById('btn-online');
-            const ind = document.getElementById('online-indicator');
-            if(btn) { btn.innerText = "OFFLINE MODE"; btn.classList.add('disabled'); }
-            if(ind) { ind.innerText = "CONNECTION FAILED"; ind.style.color = "#e74c3c"; }
-        }
-
-        // --- ONLINE EXPORTS ---
-        window.createRoom = async () => {
-            if (!currentUser) return alert("Online services not ready.");
-            const roomId = Math.floor(1000 + Math.random() * 9000).toString();
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', roomId);
-            
-            await setDoc(roomRef, { 
-                host: currentUser.uid, 
-                status: 'waiting', 
-                p1Char: 'doge', 
-                p2Char: 'frog', 
-                map: 'flat', 
-                cpuLevel: 5, 
-                lastUpdate: Date.now() 
-            });
-
-            currentRoomId = roomId; window.playerRole = 'host';
-            window.enterLobbyUI(roomId); listenToRoom(roomId);
-        };
-
-        window.joinRoom = async (roomId) => {
-            if (!currentUser) return alert("Online services not ready.");
-            if (!roomId || roomId.length !== 4) return alert("Invalid Code");
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', roomId);
-            
-            await updateDoc(roomRef, { client: currentUser.uid, status: 'selecting' }).catch(e => alert("Room not found!"));
-            currentRoomId = roomId; window.playerRole = 'client';
-            window.enterLobbyUI(roomId); listenToRoom(roomId);
-        };
-
-        function listenToRoom(roomId) {
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', roomId);
-            unsubscribeRoom = onSnapshot(roomRef, (snap) => {
-                const data = snap.data(); if (data) window.handleRoomUpdate(data);
-            });
-        }
-
-        window.syncGameState = async (myState) => {
-            if (!currentRoomId || !currentUser) return;
-            const playerRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', currentRoomId, 'players', window.playerRole);
-            await setDoc(playerRef, myState).catch(()=>{});
-        };
-
-        window.listenToOpponent = () => {
-            if (!currentRoomId) return;
-            const oppRole = window.playerRole === 'host' ? 'client' : 'host';
-            const oppRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', currentRoomId, 'players', oppRole);
-            onSnapshot(oppRef, (snap) => { const data = snap.data(); if (data) window.updateOpponent(data); });
-        };
-
-        window.updateRoomSelection = async (field, value) => {
-            if (!currentRoomId) return;
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'games', currentRoomId);
-            await updateDoc(roomRef, { [field]: value });
-        }
-    </script>
-
+    <title>Super Meme Bros: Definitive Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Roboto:wght@700&display=swap');
-        :root { --p1: #3498db; --p2: #e74c3c; --cpu: #9b59b6; --ult: #f1c40f; --on: #2ecc71; }
+
+        :root {
+            --p1: #3498db;
+            --p2: #e74c3c;
+            --cpu: #9b59b6;
+            --ult: #f1c40f;
+        }
+
         body { margin: 0; background: #111; overflow: hidden; font-family: 'Roboto', sans-serif; color: white; user-select: none; touch-action: none; }
         #game-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
         canvas { display: block; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+
+        /* SCREENS */
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 10; transition: opacity 0.3s; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* TYPOGRAPHY */
         h1 { font-family: 'Black Ops One'; font-size: 60px; background: -webkit-linear-gradient(#eee, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 20px 0; text-align: center; }
-        .menu-btn { font-family: 'Press Start 2P'; padding: 15px 30px; font-size: 16px; background: transparent; color: white; border: 4px solid white; cursor: pointer; margin: 10px; transition: 0.2s; }
+        h2 { font-family: 'Press Start 2P'; color: #fff; margin-bottom: 30px; font-size: 20px; }
+
+        /* UI ELEMENTS */
+        .menu-btn { font-family: 'Press Start 2P'; padding: 20px 40px; font-size: 20px; background: transparent; color: white; border: 4px solid white; cursor: pointer; margin: 10px; transition: 0.2s; }
         .menu-btn:hover { background: white; color: black; transform: scale(1.1); }
-        .menu-btn.disabled { border-color: #555; color: #555; pointer-events: none; }
-        .menu-btn.online-btn { border-color: var(--on); color: var(--on); }
-        .menu-btn.online-btn:hover { background: var(--on); color: white; }
-        #online-indicator { font-family: 'Press Start 2P'; font-size: 10px; color: #7f8c8d; margin-top: 5px; animation: pulse 2s infinite; }
-        input.code-input { font-family: 'Press Start 2P'; font-size: 20px; padding: 10px; text-align: center; width: 150px; margin: 10px; background: #333; color: white; border: 2px solid #666; }
-        .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 800px; }
-        .char-card { background: #333; border: 4px solid #555; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+
+        /* CHAR SELECT */
+        .char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 800px; }
+        .char-card { background: #333; border: 4px solid #555; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s; }
         .char-card:hover { transform: scale(1.05); border-color: white; }
-        .char-icon { font-size: 40px; display: block; }
+        .char-icon { font-size: 50px; display: block; margin-bottom: 5px; }
         .selected-p1 { border-color: var(--p1) !important; box-shadow: 0 0 15px var(--p1); }
         .selected-p2 { border-color: var(--p2) !important; box-shadow: 0 0 15px var(--p2); }
+
+        /* MAP SELECT */
         .map-grid { display: flex; gap: 20px; }
         .map-card { width: 200px; height: 150px; background: #444; border: 3px solid #666; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-direction: column; }
         .map-card:hover { border-color: #fff; }
         .map-preview { font-size: 40px; margin-bottom: 10px; }
-        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
-        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
-        .move-input { color: var(--p2); font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
+
+        /* HUD */
         #hud { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-around; pointer-events: none; font-family: 'Black Ops One'; }
-        .player-hud { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; text-align: center; min-width: 150px; border-top: 5px solid #fff; }
+        .player-hud { background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 10px; text-align: center; min-width: 180px; border-top: 5px solid #fff; }
         .p1-hud { border-color: var(--p1); } .p2-hud { border-color: var(--p2); } .p2-cpu { border-color: var(--cpu) !important; }
         .percent { font-size: 48px; color: white; text-shadow: 2px 2px 0 #000; }
-        .ult-bar { height: 5px; background: #555; width: 0%; margin-top: 5px; transition: width 0.1s; }
+        .ult-container { width: 100%; height: 10px; background: #333; margin-top: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #555; }
+        .ult-bar { height: 100%; width: 0%; background: #555; transition: width 0.1s; }
         .ult-ready .ult-bar { background: var(--ult); box-shadow: 0 0 10px var(--ult); }
+        
+        /* CPU CONTROLS */
         #cpu-controls { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         #cpu-toggle { font-size: 14px; padding: 10px 20px; border-color: var(--p2); color: var(--p2); }
         #cpu-toggle.cpu-active { background: var(--cpu); color: white; border-color: white; }
+        #cpu-level-container { display: none; align-items: center; gap: 10px; font-family: 'Press Start 2P'; font-size: 12px; color: var(--cpu); }
+        input[type=range] { width: 150px; accent-color: var(--cpu); cursor: pointer; }
+
+        /* MOVES LIST */
+        #moves-content { width: 90%; height: 70%; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; box-sizing: border-box; }
+        .move-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; align-items: flex-start; gap: 15px; border: 1px solid #444; }
+        .move-icon { font-size: 40px; min-width: 50px; }
+        .move-details { text-align: left; font-size: 12px; line-height: 1.8; color: #ccc; width: 100%; }
+        .move-input { color: #e74c3c; font-weight: bold; font-size: 10px; background: #444; padding: 2px 5px; border-radius: 4px; margin-right: 5px;}
+
+        /* MOBILE */
         #mobile-controls { display: none; position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         .touch-btn { pointer-events: auto; position: absolute; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; backdrop-filter: blur(2px); }
         .touch-btn:active { background: rgba(255,255,255,0.3); }
@@ -164,7 +77,9 @@
         #btn-atk { bottom: 40px; right: 30px; border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); }
         #btn-jump { bottom: 60px; right: 110px; border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
         #btn-ult { bottom: 120px; right: 40px; width: 50px; height: 50px; border-color: var(--ult); background: rgba(241, 196, 15, 0.3); font-size: 12px; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .pulse { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -190,37 +105,25 @@
 
 <div id="title-screen" class="screen">
     <h1>SUPER<br>MEME BROS<br>ULTIMATE</h1>
-    <button class="menu-btn" onclick="startLocal()">LOCAL / CPU</button>
-    <button id="btn-online" class="menu-btn online-btn disabled" onclick="goToOnlineMenu()">CONNECTING...</button>
-    <div id="online-indicator">CONNECTING TO SERVERS...</div>
+    <button class="menu-btn pulse" onclick="goToCharSelect()">FIGHT</button>
     <button class="menu-btn" onclick="showMoves()">MOVES LIST</button>
 </div>
 
-<div id="online-menu" class="screen hidden">
-    <h2>ONLINE LOBBY</h2>
-    <button class="menu-btn online-btn" onclick="window.createRoom()">CREATE ROOM</button>
-    <div style="margin: 20px 0;">
-        <input type="text" id="room-code-input" class="code-input" placeholder="CODE" maxlength="4">
-        <button class="menu-btn" onclick="window.joinRoom(document.getElementById('room-code-input').value)">JOIN</button>
-    </div>
-    <button class="menu-btn" onclick="location.reload()">BACK</button>
-</div>
-
 <div id="moves-screen" class="screen hidden">
-    <h2>MOVES LIST</h2>
+    <h2>CHARACTER MOVES</h2>
     <div id="moves-content"></div>
     <button class="menu-btn" onclick="hideMoves()">BACK</button>
 </div>
 
 <div id="char-select" class="screen hidden">
-    <div id="lobby-info" class="hidden">ROOM: <span id="room-code-display">----</span> <span id="connection-status">WAITING...</span></div>
     <h2>SELECT FIGHTER</h2>
     <h3 id="select-instruction">P1 CHOOSE</h3>
     <div class="char-grid" id="char-grid"></div>
     <div id="cpu-controls">
         <button id="cpu-toggle" class="menu-btn" onclick="toggleCpu()">P2: HUMAN</button>
-        <div id="cpu-level-container" style="display:none; color: var(--cpu); font-family: 'Press Start 2P'; font-size: 12px;">
-            LVL <span id="cpu-level-val">5</span> <input type="range" id="cpu-level-slider" min="1" max="9" value="5" oninput="updateCpuLevel(this.value)">
+        <div id="cpu-level-container">
+            LVL <span id="cpu-level-val">5</span>
+            <input type="range" id="cpu-level-slider" min="1" max="9" value="5" oninput="updateCpuLevel(this.value)">
         </div>
     </div>
 </div>
@@ -255,7 +158,7 @@
 </div>
 
 <script>
-// --- SOUND ---
+// --- SOUND SYSTEM ---
 const sfx = {
     ctx: null,
     init: function() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -263,15 +166,20 @@ const sfx = {
         if (!this.ctx) return;
         const t = this.ctx.currentTime;
         const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain(); osc.connect(gain); gain.connect(this.ctx.destination);
+        
         if (type === 'jump') { osc.type='square'; osc.frequency.setValueAtTime(150,t); osc.frequency.linearRampToValueAtTime(300,t+0.1); gain.gain.setValueAtTime(0.1,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
-        else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); }
-        else if (type === 'ult') { osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.linearRampToValueAtTime(800,t+0.5); gain.gain.setValueAtTime(0.3,t); osc.start(t); osc.stop(t+1.0); return; }
+        else if (type === 'hit') { osc.type='sawtooth'; osc.frequency.setValueAtTime(100,t); osc.frequency.exponentialRampToValueAtTime(10,t+0.1); gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); }
+        else if (type === 'heavy_hit') { osc.type='square'; osc.frequency.setValueAtTime(80,t); osc.frequency.exponentialRampToValueAtTime(20,t+0.2); gain.gain.setValueAtTime(0.3,t); gain.gain.linearRampToValueAtTime(0,t+0.2); }
+        else if (type === 'ult') { osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.linearRampToValueAtTime(800,t+0.5); gain.gain.setValueAtTime(0.3,t); gain.gain.linearRampToValueAtTime(0,t+1.5); }
         else if (type === 'coin') { osc.type='sine'; osc.frequency.setValueAtTime(1000,t); gain.gain.setValueAtTime(0.1,t); gain.gain.linearRampToValueAtTime(0,t+0.1); }
-        osc.start(t); osc.stop(t+0.1);
+        else if (type === 'ko') { osc.type='sawtooth'; osc.frequency.setValueAtTime(50,t); osc.frequency.exponentialRampToValueAtTime(10,t+1.0); gain.gain.setValueAtTime(0.5,t); gain.gain.exponentialRampToValueAtTime(0.01,t+1.0); }
+        
+        osc.start(t);
+        osc.stop(t + (type === 'ult' || type === 'ko' ? 1.5 : 0.2));
     }
 };
 
-// --- DATA ---
+// --- GAME DATA ---
 const CHARACTERS = [
     { id: 'doge', name: 'Doge', icon: '🐕', speed: 1.1, weight: 1.0, power: 1.0, jump: 1.0, desc: "Balanced", moves: {side:"Zoomies", up:"Moon Jump", down:"Heavy", ult:"MOON CRASH"} },
     { id: 'frog', name: 'Pepe', icon: '🐸', speed: 0.8, weight: 1.4, power: 1.3, jump: 0.9, desc: "Heavy", moves: {side:"Ree Punch", up:"High Hop", down:"Stomp", ult:"TEAR FLOOD"} },
@@ -286,92 +194,79 @@ const MAPS = [{id:'flat',name:'Flat',icon:'🛑',color:'#546E7A'}, {id:'plat',na
 
 // --- GLOBALS ---
 const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, isOnline=false, cpuLevel=5;
-let players=[], platforms=[], ultEffects=[], items=[];
-let itemTimer=0, camera={x:0,y:0,zoom:1}, shake=0, hitStop=0;
-const keys={}; const touchInput={left:false,right:false,up:false,down:false,atk:false,jump:false,ult:false};
+let gameState = 'TITLE', p1Char=null, p2Char=null, p2IsCpu=false, cpuLevel=5;
+let selectedMap = null, players = [], platforms = [], items = [], ultEffects = [];
+let itemTimer = 0, camera = {x:0,y:0,zoom:1}, shake=0, hitStop=0;
+const keys = {}; const touchInput = { left:false, right:false, up:false, down:false, atk:false, jump:false, ult:false };
 
-// --- INPUT ---
 window.addEventListener('keydown', e=>keys[e.key]=true); window.addEventListener('keyup', e=>keys[e.key]=false);
 
-// --- MENU FUNCTIONS ---
-function startLocal() {
-    sfx.init(); isOnline=false;
-    document.getElementById('title-screen').classList.add('hidden');
-    document.getElementById('char-select').classList.remove('hidden');
-    document.getElementById('cpu-controls').classList.remove('hidden');
-    renderCharGrid();
-}
-function goToOnlineMenu() {
-    if(!window.isOnlineAvailable) return;
-    sfx.init(); isOnline=true;
-    document.getElementById('title-screen').classList.add('hidden');
-    document.getElementById('online-menu').classList.remove('hidden');
-}
-window.enterLobbyUI = (rid) => {
-    document.getElementById('online-menu').classList.add('hidden');
-    document.getElementById('char-select').classList.remove('hidden');
-    document.getElementById('lobby-info').classList.remove('hidden');
-    document.getElementById('room-code-display').innerText = rid;
-    document.getElementById('cpu-controls').classList.add('hidden');
-    renderCharGrid();
-}
-window.handleRoomUpdate = (d) => {
-    if (d.p1Char && p1Char?.id !== d.p1Char) { p1Char = CHARACTERS.find(c=>c.id===d.p1Char); highlightChar(d.p1Char,1); }
-    if (d.p2Char && p2Char?.id !== d.p2Char) { p2Char = CHARACTERS.find(c=>c.id===d.p2Char); highlightChar(d.p2Char,2); }
-    if (d.client) document.getElementById('connection-status').innerText = "PLAYER 2 CONNECTED!";
-    if (d.status === 'playing' && gameState !== 'GAME') { startGameLoop(); window.listenToOpponent(); }
-}
+// --- UI LOGIC ---
 function showMoves() {
     sfx.init();
-    document.getElementById('title-screen').classList.add('hidden'); document.getElementById('moves-screen').classList.remove('hidden');
-    const c = document.getElementById('moves-content'); c.innerHTML='';
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('moves-screen').classList.remove('hidden');
+    const c = document.getElementById('moves-content'); c.innerHTML = '';
     CHARACTERS.forEach(ch => {
         c.innerHTML += `<div class="move-card"><div class="move-icon">${ch.icon}</div><div class="move-details"><strong>${ch.name}</strong><br><span class="move-input">S</span> ${ch.moves.side}<br><span class="move-input">U</span> ${ch.moves.up}<br><span class="move-input">D</span> ${ch.moves.down}<br><span class="move-input" style="color:var(--ult)">ULT</span> ${ch.moves.ult}</div></div>`;
     });
 }
 function hideMoves() { document.getElementById('moves-screen').classList.add('hidden'); document.getElementById('title-screen').classList.remove('hidden'); }
-function toggleCpu() { p2IsCpu=!p2IsCpu; document.getElementById('cpu-toggle').innerText=p2IsCpu?"P2: CPU":"P2: HUMAN"; document.getElementById('cpu-toggle').classList.toggle('cpu-active', p2IsCpu); document.getElementById('cpu-level-container').style.display=p2IsCpu?'flex':'none'; }
+function goToCharSelect() {
+    sfx.init();
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('char-select').classList.remove('hidden');
+    renderCharGrid();
+}
+function toggleCpu() { p2IsCpu=!p2IsCpu; document.getElementById('cpu-toggle').innerText = p2IsCpu ? "P2: CPU" : "P2: HUMAN"; document.getElementById('cpu-toggle').classList.toggle('cpu-active', p2IsCpu); document.getElementById('cpu-level-container').style.display=p2IsCpu?'flex':'none'; }
 function updateCpuLevel(v) { cpuLevel=parseInt(v); document.getElementById('cpu-level-val').innerText=cpuLevel; }
-function renderCharGrid() { const g=document.getElementById('char-grid'); g.innerHTML=''; CHARACTERS.forEach(c=>{ const d=document.createElement('div'); d.className='char-card'; d.id=`card-${c.id}`; d.innerHTML=`<span class="char-icon">${c.icon}</span>`; d.onclick=()=>selectCharacter(c); g.appendChild(d); }); }
+function renderCharGrid() {
+    const g = document.getElementById('char-grid'); g.innerHTML = '';
+    CHARACTERS.forEach(c => {
+        const d = document.createElement('div'); d.className = 'char-card'; d.id=`card-${c.id}`;
+        d.innerHTML = `<span class="char-icon">${c.icon}</span><span class="char-name">${c.name}</span>`;
+        d.onclick = () => selectCharacter(c); g.appendChild(d);
+    });
+}
 function highlightChar(id, p) { const cards=document.getElementsByClassName('char-card'); for(let c of cards) c.classList.remove(`selected-p${p}`); document.getElementById(`card-${id}`)?.classList.add(`selected-p${p}`); }
 function selectCharacter(c) {
     sfx.play('coin');
-    if (isOnline) {
-        const role = window.playerRole;
-        if (role === 'host') { p1Char=c; window.updateRoomSelection('p1Char', c.id); } else { p2Char=c; window.updateRoomSelection('p2Char', c.id); }
-        if (role === 'host' && p1Char && p2Char) setTimeout(()=>window.updateRoomSelection('status','playing'), 1000);
-    } else {
-        if(!p1Char) { p1Char=c; highlightChar(c.id,1); document.getElementById('select-instruction').innerText="P2 CHOOSE"; document.getElementById('select-instruction').style.color="var(--p2)"; }
-        else if(!p2Char) { p2Char=c; highlightChar(c.id,2); setTimeout(goToMapSelect, 500); }
-    }
+    if(!p1Char) { p1Char=c; highlightChar(c.id, 1); document.getElementById('select-instruction').innerText="P2 CHOOSE"; document.getElementById('select-instruction').style.color="var(--p2)"; }
+    else if(!p2Char) { p2Char=c; highlightChar(c.id, 2); setTimeout(goToMapSelect, 500); }
 }
-function goToMapSelect() { document.getElementById('char-select').classList.add('hidden'); document.getElementById('map-select').classList.remove('hidden'); const g=document.getElementById('map-grid'); g.innerHTML=''; MAPS.forEach(m=>{ const d=document.createElement('div'); d.className='map-card'; d.innerHTML=`<div class="map-preview">${m.icon}</div><div>${m.name}</div>`; d.onclick=()=>{selectedMap=m;document.getElementById('map-select').classList.add('hidden');document.getElementById('controls-hint').classList.remove('hidden'); if(p2IsCpu) document.getElementById('p2-controls-text').innerHTML=`<strong style="color:var(--cpu)">CPU LVL ${cpuLevel}</strong>`; }; g.appendChild(d); }); }
-function startGameLoop() { document.getElementById('controls-hint').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); if(p2IsCpu) document.getElementById('p2-hud-box').classList.add('p2-cpu'); resize(); initGame(); gameState='GAME'; loop(); }
+function goToMapSelect() {
+    document.getElementById('char-select').classList.add('hidden'); document.getElementById('map-select').classList.remove('hidden');
+    const g = document.getElementById('map-grid'); g.innerHTML = '';
+    MAPS.forEach(m => {
+        const d = document.createElement('div'); d.className='map-card'; d.innerHTML=`<div class="map-preview">${m.icon}</div><div>${m.name}</div>`;
+        d.onclick=()=>{selectedMap=m;document.getElementById('map-select').classList.add('hidden');document.getElementById('controls-hint').classList.remove('hidden'); if(p2IsCpu)document.getElementById('p2-controls-text').innerHTML=`<strong style="color:var(--cpu)">CPU LVL ${cpuLevel}</strong>`;};
+        g.appendChild(d);
+    });
+}
+function startGameLoop() {
+    document.getElementById('controls-hint').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden');
+    if(p2IsCpu) document.getElementById('p2-hud-box').classList.add('p2-cpu');
+    resize(); initGame(); gameState='GAME'; loop();
+}
 
 // --- GAME LOGIC ---
 function initGame() {
     if(!p1Char) p1Char=CHARACTERS[0]; if(!p2Char) p2Char=CHARACTERS[1]; if(!selectedMap) selectedMap=MAPS[0];
     platforms=[]; items=[]; ultEffects=[]; itemTimer=0; const gy=200;
+    
     if(selectedMap.id==='flat') platforms.push({x:-600,y:gy,w:1200,h:500,t:'solid',c:selectedMap.color});
     else if(selectedMap.id==='plat') { platforms.push({x:-500,y:gy,w:1000,h:500,t:'solid',c:selectedMap.color}); platforms.push({x:-300,y:gy-150,w:150,h:20,t:'pass',c:'#ddd'}); platforms.push({x:150,y:gy-150,w:150,h:20,t:'pass',c:'#ddd'}); platforms.push({x:-75,y:gy-280,w:150,h:20,t:'pass',c:'#ddd'}); }
     else platforms.push({x:-200,y:gy,w:400,h:500,t:'solid',c:selectedMap.color});
-    
-    let p1C = !isOnline || window.playerRole==='host';
-    let p2C = !isOnline && !p2IsCpu;
-    let p2CPU = !isOnline && p2IsCpu;
-    let p1R = isOnline && window.playerRole==='client';
-    let p2R = isOnline && window.playerRole==='host';
 
-    players = [ new Fighter(1, p1Char, -200, 0, p1C, false, p1R), new Fighter(2, p2Char, 200, 0, (isOnline && window.playerRole==='client')||p2C, p2CPU, p2R) ];
+    players = [ new Fighter(1, p1Char, -200, 0, false), new Fighter(2, p2Char, 200, 0, p2IsCpu) ];
     document.getElementById('p1-name').innerText = p1Char.name; document.getElementById('p2-name').innerText = p2Char.name; updateHUD();
 }
 
 class Item {
     constructor() {
         this.type = Math.random() > 0.8 ? 'nyan' : (Math.random() > 0.5 ? 'hammer' : 'coin');
-        this.active = true; this.w = 30; this.h = 30;
-        if (this.type === 'nyan') { this.y = Math.random()*400-200; this.vx=(Math.random()<0.5?1:-1)*12; this.x=this.vx>0?-600:600; this.vy=0; this.icon='🌈'; }
+        this.active = true; this.w=30; this.h=30;
+        if(this.type==='nyan') { this.y=Math.random()*400-200; this.vx=(Math.random()<0.5?1:-1)*12; this.x=this.vx>0?-600:600; this.vy=0; this.icon='🌈'; }
         else { this.x=(Math.random()*600)-300; this.y=-400; this.vx=0; this.vy=0; this.icon=this.type==='hammer'?'🔨':'🪙'; }
     }
     update() {
@@ -383,19 +278,17 @@ class Item {
 }
 
 class Fighter {
-    constructor(id, s, x, y, loc, cpu, rem) {
+    constructor(id, s, x, y, isCpu) {
         this.id=id; this.stats=s; this.x=x; this.y=y; this.w=50; this.h=50; this.vx=0; this.vy=0;
-        this.pct=0; this.stocks=3; this.ult=0; this.dir=id===1; 
-        this.loc=loc; this.cpu=cpu; this.rem=rem;
-        this.jumps=2; this.stun=0; this.inv=0; this.cd=0; this.box=null; this.tx=x; this.ty=y;
+        this.pct=0; this.stocks=3; this.ult=0; this.dir=id===1; this.isCpu=isCpu;
+        this.jumps=2; this.stun=0; this.inv=0; this.cd=0; this.box=null; this.hasHammer=false;
     }
     update() {
         if(this.stocks<=0) return;
         this.ult = Math.min(100, this.ult+0.05);
-        if(this.rem) { this.x+=(this.tx-this.x)*0.3; this.y+=(this.ty-this.y)*0.3; return; }
 
         let l=0,r=0,u=0,d=0,a=0,j=0,U=0;
-        if(this.cpu) {
+        if(this.isCpu) {
             let t = players.find(p=>p.id!==this.id);
             if (cpuLevel===1) { if(Math.random()<0.1)r=1; if(Math.random()<0.1)l=1; if(Math.random()<0.02)a=1; if(this.y>400&&Math.random()<0.2)j=1; }
             else {
@@ -408,9 +301,10 @@ class Fighter {
                     if(this.ult>=100&&dist<200&&cpuLevel>5)U=1;
                 }
             }
-        } else if(this.loc) {
-            if(this.id===1||isOnline) { l=keys['a']||touchInput.left; r=keys['d']||touchInput.right; u=keys['w']||touchInput.up; d=keys['s']||touchInput.down; a=keys['f']||touchInput.atk; j=keys['w']||touchInput.jump; U=keys['r']||touchInput.ult; }
-            else { l=keys['ArrowLeft']; r=keys['ArrowRight']; u=keys['ArrowUp']; d=keys['ArrowDown']; a=keys['l']; j=keys['ArrowUp']; U=keys['Shift']; }
+        } else if(this.id===1) {
+            l=keys['a']||touchInput.left; r=keys['d']||touchInput.right; u=keys['w']||touchInput.up; d=keys['s']||touchInput.down; a=keys['f']||touchInput.atk; j=keys['w']||touchInput.jump; U=keys['r']||touchInput.ult;
+        } else {
+            l=keys['ArrowLeft']; r=keys['ArrowRight']; u=keys['ArrowUp']; d=keys['ArrowDown']; a=keys['l']; j=keys['ArrowUp']; U=keys['Shift'];
         }
 
         if(this.stun>0) { this.stun--; this.phys(); return; }
@@ -426,10 +320,19 @@ class Fighter {
         if(this.cd>0) this.cd--; else if(a) this.atk(u,d,l,r);
 
         this.phys(); if(this.inv>0)this.inv--; this.chkItm();
-
-        if(isOnline && this.loc && Math.random()<0.3) window.syncGameState({x:Math.round(this.x), y:Math.round(this.y), pct:Math.round(this.pct), facingRight:this.dir, stocks:this.stocks, anim:a?'atk':'idle'});
+        if(this.box && this.box.act) { this.box.f--; if(this.box.f<=0)this.box.act=false; }
     }
-    syncFromRemote(d) { this.tx=d.x; this.ty=d.y; this.pct=d.pct; this.dir=d.facingRight; this.stocks=d.stocks; if(d.anim==='atk')this.cd=10; updateHUD(); }
+
+    fireUlt() {
+        this.ult=0; sfx.play('ult'); shake=30; updateHUD();
+        let t=players.find(p=>p.id!==this.id); if(!t)return;
+        if(this.stats.id==='doge') ultEffects.push({t:'moon',x:t.x,y:-500,l:50});
+        else if(this.stats.id==='frog') { for(let i=0;i<20;i++) ultEffects.push({t:'tear',x:Math.random()*2000-1000,y:-200-Math.random()*500,l:100}); }
+        else if(this.stats.id==='sanic') { this.x=t.x; this.y=t.y; t.hit(0,-15,30); this.inv=60; }
+        else if(this.stats.id==='chad') { t.stun=180; t.vx=0; t.vy=0; }
+        else t.hit(20*(this.x<t.x?1:-1),-20,40);
+    }
+
     atk(u,d,l,r) {
         this.cd=30; sfx.play('hit');
         let ox=this.dir?50:-60, dmg=10, kbx=10, kby=-10;
@@ -438,24 +341,16 @@ class Fighter {
         if(u){this.vy=-12*s.jump;kby=-15;dmg=12;} else if(d){dmg=15;kby=15;} else if(l||r){this.vx=(this.dir?1:-1)*15;dmg=12;kbx=15;}
         this.box = { relX:ox, relY:0, w:60, h:50, act:true, own:this.id, kbx:kbx*s.power, kby:kby*s.power, dmg:dmg*s.power, f:5 };
     }
-    fireUlt() {
-        this.ult=0; sfx.play('ult'); shake=30; updateHUD();
-        let t=players.find(p=>p.id!==this.id);
-        if(!t) return; 
-        if(this.stats.id==='doge') ultEffects.push({t:'moon',x:t.x,y:-500,l:50});
-        else if(this.stats.id==='frog') { for(let i=0;i<20;i++) ultEffects.push({t:'tear',x:Math.random()*2000-1000,y:-200-Math.random()*500,l:100}); }
-        else if(this.stats.id==='sanic') { this.x=t.x; this.y=t.y; t.hit(0,-15,30); this.inv=60; }
-        else if(this.stats.id==='chad') { t.stun=180; t.vx=0; t.vy=0; }
-        else t.hit(20*(this.x<t.x?1:-1),-20,40);
-    }
+
     hit(kbx,kby,d) {
         if(this.inv>0)return;
         this.pct+=d; this.ult=Math.min(100,this.ult+d);
         let sc=0.5+(this.pct*0.025), wm=1.0/this.stats.weight;
         if(kbx!==0) { let o=players.find(p=>p.id!==this.id); this.vx=(this.x<o.x?-1:1)*Math.abs(kbx*sc*wm); }
         else this.vx=(Math.random()-0.5)*Math.abs(kbx*sc*wm);
-        this.vy=kby*sc*wm; this.inv=10; sfx.play('hit'); hitStop=5; updateHUD();
+        this.vy=kby*sc*wm; this.inv=10; sfx.play(d>15?'heavy_hit':'hit'); hitStop=5; updateHUD();
     }
+
     phys() {
         this.vy+=0.6; if(this.vy>25)this.vy=25; this.x+=this.vx; this.y+=this.vy; this.grounded=false;
         for(let p of platforms) {
@@ -465,28 +360,28 @@ class Fighter {
         }
         if(this.y>800) this.die();
     }
-    die() { sfx.play('hit'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) endGame(this.id===1?2:1); updateHUD(); }
+
+    die() { sfx.play('ko'); this.stocks--; this.pct=0; this.ult=0; this.x=0; this.y=-200; this.vx=0; this.vy=0; if(this.stocks<=0) endGame(this.id===1?2:1); updateHUD(); }
+
     chkItm() { items.forEach(i=>{if(i.act&&this.x<i.x+i.w&&this.x+this.w>i.x&&this.y<i.y+i.h&&this.y+this.h>i.y){if(i.t==='hammer'){this.hasHammer=true;i.act=false;sfx.play('coin');}else if(i.t==='coin'){this.pct=Math.max(0,this.pct-20);i.act=false;sfx.play('coin');updateHUD();}else if(i.t==='nyan'){this.hit(20*(i.vx>0?1:-1),-10,15);i.act=false;}}}); }
+
     draw() {
         if(this.stocks<=0)return;
         ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2); if(this.dir)ctx.scale(-1,1);
         ctx.font="50px Arial"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(this.stun>0?"😵":this.stats.icon,0,5);
         if(this.hasHammer){ctx.font="20px Arial";ctx.fillText('🔨',25,-25);}
         ctx.restore();
-        // GLITCH FIX: REMOVED VISUAL DEBUG HITBOX
-        if(this.box && this.box.act) { this.box.f--; if(this.box.f<=0)this.box.act=false; }
-        ctx.fillStyle=this.id===1?'#3498db':(this.cpu?'#9b59b6':'#e74c3c'); ctx.font="bold 12px sans-serif"; ctx.fillText(this.rem?`NET`:`P${this.id}`,this.x+15,this.y-10);
+        ctx.fillStyle=this.id===1?'#3498db':(this.isCpu?'#9b59b6':'#e74c3c'); ctx.font="bold 12px sans-serif"; ctx.fillText(this.isCpu?`CPU`:`P${this.id}`,this.x+15,this.y-10);
     }
 }
 
-window.updateOpponent = (d) => { const p=window.playerRole==='host'?players[1]:players[0]; if(p)p.syncFromRemote(d); };
 function updateHUD() { players.forEach(p=>{ const x=p.id===1?'p1':'p2'; document.getElementById(`${x}-pct`).innerText=Math.floor(p.pct)+'%'; document.getElementById(`${x}-stocks`).innerText='●'.repeat(p.stocks); const b=document.getElementById(`${x}-ult-bar`); b.style.width=p.ult+'%'; if(p.ult>=100)b.parentNode.classList.add('ult-ready');else b.parentNode.classList.remove('ult-ready'); }); }
 function endGame(w) { gameState='GAMEOVER'; document.getElementById('game-over').classList.remove('hidden'); document.getElementById('winner-display').innerText=`GAME!\n${(w===1?p1Char:p2Char).name} WINS`; }
 
 function loop() {
     if(gameState!=='GAME')return;
     
-    // HIT STOP FIX: Draw frozen frame correctly
+    // HIT STOP FIX: Draw frozen frame correctly (call DRAW)
     if(hitStop > 0) { 
         hitStop--; 
         draw(); 
@@ -532,9 +427,6 @@ function draw() {
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;} window.addEventListener('resize',resize);
 if('ontouchstart'in window||navigator.maxTouchPoints>0){document.getElementById('mobile-controls').style.display='block'; const b=(id,k)=>{const e=document.getElementById(id);e.addEventListener('touchstart',e=>{e.preventDefault();touchInput[k]=true;});e.addEventListener('touchend',e=>{e.preventDefault();touchInput[k]=false;});}; b('btn-left','left');b('btn-right','right');b('btn-up','up');b('btn-down','down');b('btn-atk','atk');b('btn-jump','jump');b('btn-ult','ult');}
 resize();
-
-// TIMEOUT CHECK
-setTimeout(() => { if (!window.firebaseLoaded) forceOfflineMode(); }, 5000);
 </script>
 </body>
 </html>
