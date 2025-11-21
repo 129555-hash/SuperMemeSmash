@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Meme Bros: Definitive Edition</title>
+    <title>Super Meme Bros: Bug Free Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Press+Start+2P&family=Roboto:wght@700&display=swap');
 
@@ -417,8 +417,39 @@ function endGame(w) { gameState='GAMEOVER'; document.getElementById('game-over')
 
 function loop() {
     if(gameState!=='GAME')return;
-    // FIXED RENDER LOOP
-    if(hitStop > 0) { hitStop--; draw(); requestAnimationFrame(loop); return; }
+    
+    // FIXED CAMERA RENDER LOOP FOR HIT PAUSE
+    if(hitStop > 0) { 
+        hitStop--; 
+        // Calculate camera position manually here because physics/updateCamera aren't running
+        let p1 = players[0], p2 = players[1];
+        if (p1 && (p2 || arcadeStage===4)) {
+            let target2 = p2 ? p2 : {x: 0, y: 0}; // Fallback for single player modes
+            let mx = (p1.x + target2.x) / 2;
+            let my = (p1.y + target2.y) / 2;
+            // Simple camera follow for pause frame
+            if (arcadeStage === 4) { mx = p1.x; my = p1.y; }
+            
+            ctx.fillStyle='#2c3e50'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            const g=ctx.createLinearGradient(0,0,0,canvas.height); g.addColorStop(0,'#87CEEB'); g.addColorStop(1,'#E0F7FA'); ctx.fillStyle=g; ctx.fillRect(0,0,canvas.width,canvas.height);
+            
+            ctx.save(); 
+            ctx.translate(canvas.width/2,canvas.height/2);
+            // Use last known camera pos (it shouldn't change during freeze anyway)
+            ctx.scale(camera.zoom,camera.zoom); 
+            ctx.translate(-camera.x,-camera.y);
+            
+            // Draw everything
+            platforms.forEach(p=>{ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.w,p.h);});
+            items.forEach(i=>i.draw());
+            targets.forEach(t=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(t.x+20,t.y+20,20,0,Math.PI*2);ctx.fill();ctx.fillStyle='white';ctx.beginPath();ctx.arc(t.x+20,t.y+20,10,0,Math.PI*2);ctx.fill();});
+            ultEffects.forEach(e=>{if(e.t==='moon'){ctx.font="200px Arial";ctx.fillText('🌚',e.x-100,e.y);}else if(e.t==='tear'){ctx.fillStyle='#3498db';ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fill();}});
+            players.forEach(p=>p.draw());
+            ctx.restore();
+        }
+        requestAnimationFrame(loop); 
+        return; 
+    }
 
     itemTimer++; if(itemTimer>400) { if(Math.random()<0.7) items.push(new Item()); itemTimer=0; }
     players.forEach(p=>p.update()); items.forEach(i=>i.update());
@@ -432,8 +463,24 @@ function loop() {
 
     players.forEach(atk=>{ if(atk.box&&atk.box.act) { let ax=atk.x+atk.box.relX, ay=atk.y+atk.box.relY; players.forEach(def=>{ if(atk.id!==def.id && ax<def.x+def.w && ax+atk.box.w>def.x && ay<def.y+def.h && ay+atk.box.h>def.y) { let d=atk.dir?1:-1; def.hit(Math.abs(atk.box.kbx)*d, atk.box.kby, atk.box.dmg); atk.box.act=false; } }); } });
 
-    let mx=(players[0].x+players[1].x)/2, my=(players[0].y+players[1].y)/2, d=Math.sqrt(Math.pow(players[1].x-players[0].x,2)), tz=Math.max(0.5,Math.min(1.2,1000/(d+200)));
-    camera.x+=(mx-camera.x)*0.1; camera.y+=(my-camera.y)*0.1; camera.zoom+=(tz-camera.zoom)*0.05;
+    // Camera Logic
+    let p1 = players[0], p2 = players[1];
+    let mx = p1.x, my = p1.y, tz = 1;
+    
+    if (p2) {
+        mx = (p1.x + p2.x)/2; 
+        my = (p1.y + p2.y)/2;
+        let d = Math.sqrt(Math.pow(p2.x - p1.x, 2));
+        tz = Math.max(0.5, Math.min(1.2, 1000/(d+200)));
+    } else {
+        // Single player camera
+        tz = 0.8;
+    }
+    
+    camera.x += (mx - camera.x)*0.1; 
+    camera.y += (my - camera.y)*0.1; 
+    camera.zoom += (tz - camera.zoom)*0.05;
+    
     draw(); requestAnimationFrame(loop);
 }
 
