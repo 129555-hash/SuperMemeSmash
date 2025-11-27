@@ -301,8 +301,13 @@
 <div id="online-screen" class="screen hidden">
     <h2>ONLINE (BETA)</h2>
     <div style="display:flex;gap:20px;flex-direction:column;align-items:center">
-        <div style="margin-bottom:10px">
-            <input type="text" id="online-ws-url" placeholder="ws://localhost:8080" style="width:260px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff" value="ws://localhost:8080">
+        <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
+            <span style="font-family:'Press Start 2P';font-size:12px;color:#ffd700">Server URL</span>
+            <input type="text" id="online-ws-url" placeholder="wss://your-relay.example.com" style="width:320px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff" value="https://supermemesmashmutliplayer-production.up.railway.app/">
+        </div>
+        <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
+            <span style="font-family:'Press Start 2P';font-size:12px;color:#ffd700">Your Name</span>
+            <input type="text" id="online-nickname" placeholder="Player" maxlength="12" style="width:180px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff">
         </div>
         <div>
             <button class="menu-btn" onclick="hostRoom()">HOST ROOM</button>
@@ -313,6 +318,72 @@
             <button class="menu-btn" onclick="joinRoom()">JOIN</button>
         </div>
         <div id="online-status" style="font-family:'Press Start 2P';font-size:12px;color:#0f0;min-height:18px"></div>
+        <div id="online-controls-help" style="display:none;flex-direction:column;gap:6px;margin:10px 0;padding:10px;background:rgba(0,0,0,0.4);border:1px solid #555;min-width:320px;font-family:'Press Start 2P';font-size:9px;color:#ddd">
+            <div style="color:#ffd700">DEFAULT CONTROLS</div>
+            <div id="controls-p1">P1 (Host): Move WASD • Attack F • Ult Q • Shield G</div>
+            <div id="controls-p2">P2: Move WASD • Attack F • Ult R • Shield G</div>
+            <div id="controls-p3">P3: Move WASD • Attack F • Ult R • Shield G</div>
+            <div id="controls-p4">P4: Move WASD • Attack F • Ult R • Shield G</div>
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+                <button class="menu-btn" style="font-size:10px" onclick="remapKey('p1','ult')">Remap P1 Ult</button>
+                <button class="menu-btn" style="font-size:10px" onclick="remapKey('p2','ult')">Remap P2 Ult</button>
+                <button class="menu-btn" style="font-size:10px" onclick="remapKey('p3','ult')">Remap P3 Ult</button>
+                <button class="menu-btn" style="font-size:10px" onclick="remapKey('p4','ult')">Remap P4 Ult</button>
+            </div>
+        </div>
+        <div id="online-lobby-list" style="display:none;flex-direction:column;gap:8px;margin:15px 0;padding:15px;background:rgba(0,0,0,0.5);border:2px solid #555;min-width:320px">
+            <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700;margin-bottom:5px">CONNECTED PLAYERS</div>
+            <div id="online-player-list" style="font-family:'Press Start 2P';font-size:9px;color:#fff"></div>
+        </div>
+        <div id="online-start-box" style="display:none;flex-direction:column;gap:10px;align-items:center">
+            <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700">SELECT GAME MODE</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+                <button class="menu-btn" id="mode-1v1-btn" onclick="selectOnlineMode('1v1')" style="background:#0f0;color:#000">1v1</button>
+                <button class="menu-btn" id="mode-2v2-btn" onclick="selectOnlineMode('2v2')">2v2</button>
+            </div>
+            <div id="online-char-select" style="margin-top:10px;display:flex;gap:10px;flex-direction:column;align-items:center">
+                <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700">CHARACTER SELECT (Host)</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+                    <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">P1:
+                        <select id="online-p1-char" style="padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px"></select>
+                    </label>
+                    <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">P2:
+                        <select id="online-p2-char" style="padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px"></select>
+                    </label>
+                </div>
+                <div id="online-picked-preview" style="font-family:'Press Start 2P';font-size:9px;color:#aaa"></div>
+            </div>
+            <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700;margin-top:10px">MATCH SETTINGS</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center">
+                <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">Stage:
+                    <select id="online-stage-sel" style="padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px">
+                        <option value="flat">Flat</option>
+                        <option value="plat">Platforms</option>
+                        <option value="edge">Edge</option>
+                        <option value="machine">Machine</option>
+                    </select>
+                </label>
+                <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">Stocks:
+                    <input type="number" id="online-stocks" min="1" max="5" value="3" style="width:50px;padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px">
+                </label>
+            </div>
+            <div style="display:flex;gap:15px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+                <label style="font-family:'Press Start 2P';font-size:8px;color:#ddd;cursor:pointer">
+                    <input type="checkbox" id="online-items" checked style="margin-right:5px"> Items
+                </label>
+                <label style="font-family:'Press Start 2P';font-size:8px;color:#ddd;cursor:pointer">
+                    <input type="checkbox" id="online-hazards" checked style="margin-right:5px"> Hazards
+                </label>
+                <label style="font-family:'Press Start 2P';font-size:8px;color:#ddd;cursor:pointer">
+                    <input type="checkbox" id="online-teamattack" style="margin-right:5px"> Team Attack
+                </label>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+                <button class="menu-btn" onclick="onlineStart('meme')">START MEME BALL</button>
+                <button class="menu-btn" onclick="onlineStart('vs')">START VS MATCH</button>
+            </div>
+            <div style="font-family:'Press Start 2P';font-size:9px;color:#888;max-width:340px;text-align:center">1v1: 2 players | 2v2: 4 players (teams)</div>
+        </div>
         <button class="menu-btn" onclick="hideOnline()">BACK</button>
     </div>
     <div style="position:absolute;bottom:20px;font-family:'Press Start 2P';font-size:10px;color:#888">Requires local signaling server ws://localhost:8080</div>
@@ -477,8 +548,18 @@ let isOnline = false,
     netRoom = null,
     netPeerReady = false,
     netOpened = false,
+    netReadyCount = 0,
+    netConnectedPlayers = [], // [{id, name, ready}]
     netP2Inputs = {l:0,r:0,u:0,d:0,a:0,j:0,U:0,S:0},
-    netTick = 0;
+    netP3Inputs = {l:0,r:0,u:0,d:0,a:0,j:0,U:0,S:0},
+    netP4Inputs = {l:0,r:0,u:0,d:0,a:0,j:0,U:0,S:0},
+    netTick = 0,
+    netGameMode = '1v1', // '1v1' or '2v2'
+    customStocks = 3, // Custom stock count for online matches
+    rulesItemsEnabled = true,
+    rulesHazardsEnabled = true,
+    rulesTeamAttack = false, // Friendly fire in teams
+    netDisconnected = false; // Track mid-match disconnect
 let survivalWave = 0,
     spawnTimer = 0,
     isTraining = !1,
@@ -528,7 +609,7 @@ let cheatIndex4 = 0;
 const cheatCodeGacha = ['ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowLeft'];
 let cheatIndexGacha = 0;
 // Konami code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
-const cheatCodeKonami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const cheatCodeKonami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','B','A'];
 let cheatIndexKonami = 0;
 // Pork code: (example) Up, Down, Left, Right, P, O, R, K
 const cheatCodePork = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','p','o','r','k'];
@@ -746,6 +827,42 @@ const music = {
         gain.gain.linearRampToValueAtTime(0, t + 0.2);
         osc.start(t);
         osc.stop(t + 0.2);
+    }
+};
+const audioFiles = {
+    vivaldi: null,
+    init: function() {
+        if (this.vivaldi) return; // Already initialized
+        try {
+            // Create audio element for Vivaldi
+            this.vivaldi = new Audio();
+            this.vivaldi.src = 'vivaldi-winter.mp3'; // Place MP3 file in same directory
+            this.vivaldi.volume = 0.5;
+            this.vivaldi.loop = false;
+            console.log('[AudioFiles] Vivaldi initialized. File: vivaldi-winter.mp3');
+        } catch (e) {
+            console.error('[AudioFiles] Failed to initialize:', e);
+        }
+    },
+    play: function(track) {
+        if (track === 'VIVALDI') {
+            if (!this.vivaldi) {
+                console.warn('[AudioFiles] Vivaldi not initialized, initializing now...');
+                this.init();
+            }
+            if (this.vivaldi) {
+                this.vivaldi.currentTime = 0;
+                this.vivaldi.play()
+                    .then(() => console.log('[AudioFiles] Vivaldi playing!'))
+                    .catch(e => console.error('[AudioFiles] Vivaldi playback failed:', e.message));
+            }
+        }
+    },
+    stop: function(track) {
+        if (track === 'VIVALDI' && this.vivaldi) {
+            this.vivaldi.pause();
+            this.vivaldi.currentTime = 0;
+        }
     }
 };
 class Ball {
@@ -1297,7 +1414,7 @@ class Fighter {
                 const p1u = getControl('p1', 'up') || 'w';
                 const p1d = getControl('p1', 'down') || 's';
                 const p1a = getControl('p1', 'attack') || 'f';
-                const p1ult = getControl('p1', 'ult') || 'r';
+                const p1ult = getControl('p1', 'ult') || 'q';
                 const p1shield = getControl('p1', 'shield') || 'g';
                 
                 l = keys[p1] || touchInput.left;
@@ -1310,8 +1427,14 @@ class Fighter {
                 S = keys[p1shield] || touchInput.shield;
             } else {
                 if (isOnline && isHost) {
-                    // Use networked inputs for P2 on host
-                    l = netP2Inputs.l; r = netP2Inputs.r; u = netP2Inputs.u; d = netP2Inputs.d; a = netP2Inputs.a; j = netP2Inputs.j; U = netP2Inputs.U; S = netP2Inputs.S;
+                    // Use networked inputs for P2/P3/P4 on host
+                    if (this.id === 2) {
+                        l = netP2Inputs.l; r = netP2Inputs.r; u = netP2Inputs.u; d = netP2Inputs.d; a = netP2Inputs.a; j = netP2Inputs.j; U = netP2Inputs.U; S = netP2Inputs.S;
+                    } else if (this.id === 3) {
+                        l = netP3Inputs.l; r = netP3Inputs.r; u = netP3Inputs.u; d = netP3Inputs.d; a = netP3Inputs.a; j = netP3Inputs.j; U = netP3Inputs.U; S = netP3Inputs.S;
+                    } else if (this.id === 4) {
+                        l = netP4Inputs.l; r = netP4Inputs.r; u = netP4Inputs.u; d = netP4Inputs.d; a = netP4Inputs.a; j = netP4Inputs.j; U = netP4Inputs.U; S = netP4Inputs.S;
+                    }
                 } else {
                     const p2l = getControl('p2', 'left') || 'ArrowLeft';
                     const p2r = getControl('p2', 'right') || 'ArrowRight';
@@ -1382,12 +1505,18 @@ class Fighter {
         }
     }
     fireUlt() {
+        if (this.ult < 100) return; // Safety check
         this.ult = 0;
+        this.cd = 30; // Add cooldown to prevent rapid re-fire
         sfx.play('ult');
         shake = 30;
         updateHUD();
         let t = players.find(p => p.id !== this.id);
         if (!t) return;
+        
+        // Debug: log which character is firing ult
+        console.log(`Player ${this.id} (${this.stats.id}) firing ult`);
+        
         if (this.stats.id === 'doge') ultEffects.push({
             t: 'moon',
             x: t.x,
@@ -1484,6 +1613,70 @@ class Fighter {
                     this.mrbeastBoost = false;
                 }
             }, 10000);
+            sfx.play('ult');
+        } else if (this.stats.id === 'jack') {
+            // Everything Everywhere All At Once: Fire ALL ults!
+            console.log('Jack ult: EVERYTHING EVERYWHERE ALL AT ONCE!');
+            shake = 60;
+            // Make Jack invincible during ult to prevent self-damage
+            this.inv = 240; // 4 seconds of invincibility
+            // Play Vivaldi Four Seasons Winter
+            audioFiles.play('VIVALDI');
+            
+            // Fire every ult effect with extended delays for longer sequence
+            setTimeout(() => ultEffects.push({t: 'moon', x: t.x, y: -500, l: 50}), 200); // Doge
+            setTimeout(() => {
+                for (let i = 0; i < 20; i++) ultEffects.push({
+                    t: 'tear',
+                    x: Math.random() * 1400 - 700,
+                    y: -200 - Math.random() * 400,
+                    l: 90
+                });
+            }, 400); // Frog
+            setTimeout(() => { if (t && t.stocks > 0) { this.x = t.x; this.y = t.y; t.hit(0, -15, 30); } }, 600); // Sanic
+            setTimeout(() => ultEffects.push({t: 'fire', owner: this.id, x: this.x, y: this.y, vx: 0, vy: 0, l: 70}), 800); // Chad
+            setTimeout(() => { if (t) t.confused = 300; }, 1000); // Gps
+            setTimeout(() => ultEffects.push({t: 'sword', owner: this.id, x: this.x, y: this.y - 20, l: 100}), 1200); // Sahur
+            setTimeout(() => ultEffects.push({t: 'primo', owner: this.id, x: this.x, y: this.y - 50, vx: (this.dir ? 1 : -1) * 15, l: 110}), 1400); // Primo
+            setTimeout(() => { if (t) t.stun = 180; }, 1600); // Ocralito/others
+            setTimeout(() => ultEffects.push({t: 'pork', x: t.x, y: -600, l: 130}), 1800); // Johnpork
+            setTimeout(() => {
+                // Bluedude punch
+                this.box = {
+                    relX: this.dir ? 50 : -150,
+                    relY: -25,
+                    w: 120,
+                    h: 120,
+                    act: !0,
+                    own: this.id,
+                    kbx: 35,
+                    kby: -28,
+                    dmg: 50,
+                    f: 10
+                };
+            }, 2000);
+            // Giant combined FINALE - ONE SHOT KILL
+            setTimeout(() => {
+                shake = 100;
+                for (let i = 0; i < 50; i++) {
+                    particles.push({
+                        x: this.x + this.w / 2,
+                        y: this.y + this.h / 2,
+                        vx: (Math.random() - 0.5) * 25,
+                        vy: (Math.random() - 0.5) * 25,
+                        size: 15,
+                        life: 100,
+                        color: ['#FFD700', '#FF4500', '#8B00FF', '#00CED1', '#FF1493', '#FFFFFF'][Math.floor(Math.random() * 6)]
+                    });
+                }
+                // ONE SHOT: Deal 999 damage to guarantee kill
+                if (t && t.stocks > 0) {
+                    t.pct = 999;
+                    t.hit(35 * (this.x < t.x ? 1 : -1), -40, 999);
+                }
+                // Stop Vivaldi after ult completes
+                audioFiles.stop('VIVALDI');
+            }, 2400);
             sfx.play('ult');
         } else t.hit(20 * (this.x < t.x ? 1 : -1), -20, 40);
     }
@@ -2104,6 +2297,109 @@ class Fighter {
                 this.cd = 60;
                 return;
             }
+        } else if (s.id === 'jack') {
+            if (l || r) {
+                // Master Of None: Rush attack + stat comparison buff + projectile
+                let t = players.find(p => p.id !== this.id);
+                this.vx = (this.dir ? 1 : -1) * 15;
+                this.box = {
+                    relX: this.dir ? 40 : -80,
+                    relY: 0,
+                    w: 60,
+                    h: 50,
+                    act: !0,
+                    own: this.id,
+                    kbx: 12 * s.power,
+                    kby: -8 * s.power,
+                    dmg: 15 * s.power,
+                    f: 10
+                };
+                // Get 0.5 better stats than opponent temporarily
+                if (t && !this.jackStatBoost) {
+                    this.jackStatBoost = true;
+                    const oldSpeed = this.stats.speed;
+                    const oldPower = this.stats.power;
+                    const oldJump = this.stats.jump;
+                    this.stats.speed = Math.max(this.stats.speed, t.stats.speed + 0.5);
+                    this.stats.power = Math.max(this.stats.power, t.stats.power + 0.5);
+                    this.stats.jump = Math.max(this.stats.jump, t.stats.jump + 0.5);
+                    setTimeout(() => {
+                        if (this.stats) {
+                            this.stats.speed = oldSpeed;
+                            this.stats.power = oldPower;
+                            this.stats.jump = oldJump;
+                            this.jackStatBoost = false;
+                        }
+                    }, 180);
+                }
+                // Throw projectile
+                setTimeout(() => {
+                    ultEffects.push({
+                        t: 'tear',
+                        x: this.x + (this.dir ? 30 : -30),
+                        y: this.y,
+                        l: 30
+                    });
+                }, 100);
+                this.cd = 60;
+                return;
+            }
+            if (d) {
+                // Parry Combo: Hybrid of BlueDude and BrokeBoy parry with 50% buff chance
+                this.isParrying = !0;
+                this.parryTimer = 15;
+                this.jackParryBonus = Math.random() < 0.5; // 50% chance for buff
+                if (this.jackParryBonus) {
+                    // Visual feedback for bonus
+                    for (let i = 0; i < 5; i++) {
+                        particles.push({
+                            x: this.x + this.w / 2,
+                            y: this.y + this.h / 2,
+                            vx: (Math.random() - 0.5) * 8,
+                            vy: (Math.random() - 0.5) * 8,
+                            size: 6,
+                            life: 30,
+                            color: '#FFD700'
+                        });
+                    }
+                }
+                this.cd = 35;
+                return;
+            }
+            if (u) {
+                // Rising Mastery: Stat buff + low damage attack
+                this.vy = -18 * s.jump;
+                this.box = {
+                    relX: -30,
+                    relY: -20,
+                    w: 60,
+                    h: 70,
+                    act: !0,
+                    own: this.id,
+                    kbx: 3 * s.power,
+                    kby: -5 * s.power,
+                    dmg: 5 * s.power,
+                    f: 12
+                };
+                // Temporary stat boost
+                if (!this.jackRisingBoost) {
+                    this.jackRisingBoost = true;
+                    const oldStats = {speed: this.stats.speed, power: this.stats.power, jump: this.stats.jump};
+                    this.stats.speed += 0.3;
+                    this.stats.power += 0.3;
+                    this.stats.jump += 0.3;
+                    setTimeout(() => {
+                        if (this.stats) {
+                            this.stats.speed = oldStats.speed;
+                            this.stats.power = oldStats.power;
+                            this.stats.jump = oldStats.jump;
+                            this.jackRisingBoost = false;
+                        }
+                    }, 240);
+                }
+                this.cd = 50;
+                return;
+            }
         }
         if (!u && !d && !l && !r) {
             this.box = {
@@ -2196,6 +2492,25 @@ class Fighter {
             let attacker = players.find(p => p.box && p.box.act && p.id !== this.id);
             if (attacker) {
                 attacker.stun = 120;
+                // Jack's Parry Combo bonus: 50% chance for permanent stat buff
+                if (this.stats.id === 'jack' && this.jackParryBonus) {
+                    const statChoices = ['speed', 'power', 'jump'];
+                    const buffStat = statChoices[Math.floor(Math.random() * 3)];
+                    this.stats[buffStat] += 0.5;
+                    console.log(`Jack parry buff! +0.5 ${buffStat}`);
+                    // Visual effect
+                    for (let i = 0; i < 10; i++) {
+                        particles.push({
+                            x: this.x + this.w / 2,
+                            y: this.y + this.h / 2,
+                            vx: (Math.random() - 0.5) * 12,
+                            vy: (Math.random() - 0.5) * 12,
+                            size: 8,
+                            life: 40,
+                            color: '#FFD700'
+                        });
+                    }
+                }
             }
             this.parryTimer = 0;
             this.isParrying = !1;
@@ -2353,6 +2668,20 @@ class Fighter {
                 endGame(1);
             }
         } else if (this.stocks <= 0) {
+            // Jack Of All Trades passive: Killer gains stats when Jack dies
+            const killer = players.find(p => p.id !== this.id && p.stocks > 0);
+            if (killer && killer.stats.id === 'jack') {
+                if (!killer.jackKills) killer.jackKills = 0;
+                if (!killer.jackBuffs) killer.jackBuffs = {speed: 0, power: 0, jump: 0};
+                killer.jackKills++;
+                // Random stat gets +3
+                const statChoices = ['speed', 'power', 'jump'];
+                const buffStat = statChoices[Math.floor(Math.random() * 3)];
+                killer.jackBuffs[buffStat] += 3;
+                killer.stats[buffStat] += 3;
+                killer.stats.weight += 0.1; // Weight increases each kill
+                console.log(`Jack gained +3 ${buffStat}, weight now ${killer.stats.weight.toFixed(1)}`);
+            }
             if (gameState === 'GAME') endGame(this.id === 1 ? 2 : 1);
         }
         updateHUD();
@@ -3137,6 +3466,58 @@ const CHARACTERS = [{
         '7': '#ffffff'
     },
     spriteData: ["0000000000000000", "0011111111110000", "0013456712340000", "0014567123450000", "0015671234560000", "0016712345610000", "0017123456120000", "0071234561230000", "0012345612340000", "0023456123450000", "0034561234560000", "0045612345610000", "0056123456120000", "0061234561230000", "0000000000000000", "0000000000000000"]
+}, {
+    id: 'jack',
+    name: 'Jack Of All Trades',
+    icon: '🃏',
+    speed: 1.8,
+    weight: 0.5,
+    power: 2.0,
+    jump: 2.0,
+    desc: "Master of None",
+    moves: {
+        side: "Master Of None",
+        up: "Rising Mastery",
+        down: "Parry Combo",
+        ult: "Everything Everywhere All At Once"
+    },
+    colors: {
+        '0': "rgba(0,0,0,0)",
+        '1': '#000000',
+        '2': '#FFFFFF',
+        '3': '#7B8694',
+        '4': '#b27c4b',
+        '5': '#d9965a',
+        '6': '#FF0000',
+        '7': '#ff0000',
+        '8': '#cc0000',
+        '9': '#ff8000',
+        'A': '#00FFFF',
+        'B': '#0000FF',
+        'C': '#8000FF',
+        'D': '#FF00FF',
+        'E': '#964B00',
+        'F': '#808080',
+        'G': '#404040',
+        'H': '#606060',
+        'I': '#202020',
+        'J': '#008000',
+        'K': '#008080',
+        'L': '#800000',
+        'M': '#b30000',
+        'N': '#4d0000',
+        'O': '#804000',
+        'P': '#C0C0C0',
+        'Q': '#A0A0A0',
+        'R': '#303030',
+        'S': '#101010',
+        'T': '#FFD700',
+        'U': '#ADFF2F',
+        'V': '#4B0082'
+    },
+    spriteData: ["0000000000000000", "0001111111111100", "0001M27272626100", "0001222222222100", "0001M2M272626100", "0001222222222100", "0001M2M2M2M26100", "0001222222222100", "0001L2M2M2M26100", "0001222222222100", "0001N28282826100", "0001222222222100", "0001N28282826100", "0001222222222100", "0001N2N2N2L26100", "0001111111111100"],
+    jackKills: 0,
+    jackBuffs: {speed: 0, power: 0, jump: 0}
 }];
 const MAPS = [{
     id: 'flat',
@@ -3460,6 +3841,7 @@ function buyOrEquip() {
 function openGacha() {
     sfx.init();
     music.init();
+    audioFiles.init();
     document.getElementById('title-screen').classList.add('hidden');
     document.getElementById('gacha-screen').classList.remove('hidden');
     gameState = 'GACHA';
@@ -4085,7 +4467,7 @@ window.addEventListener('keydown', e => {
         // Konami Code
         if (key === cheatCodeKonami[cheatIndexKonami]) {
             cheatIndexKonami++;
-            console.log('[DEBUG] cheatCodeKonami progress:', cheatIndexKonami, '/', cheatCodeKonami.length);
+            console.log('[DEBUG] Konami progress:', cheatIndexKonami, '/', cheatCodeKonami.length, '- Key pressed:', key);
             if (cheatIndexKonami === cheatCodeKonami.length) {
                 const allSecrets = ['thememe','gps','mechabara','bluedude','johnpork','glitch','luckyblock','brokeboy'];
                 let unlocked = [];
@@ -4121,6 +4503,8 @@ window.addEventListener('keydown', e => {
                 saveGame();
                 updateCoinDisplay();
                 renderCharGrid && renderCharGrid();
+                // Check if Jack should be unlocked
+                checkJackUnlock();
                 showNotification("KONAMI CODE!", `SECRETS + MASTERIES!<br>${unlocked.map(u=>u.toUpperCase()).join(', ')}`);
                 sfx.play('coin');
                 cheatIndexKonami = 0;
@@ -4129,7 +4513,7 @@ window.addEventListener('keydown', e => {
                 }
             }
             matched = true;
-        } else {
+        } else if (!matched) {
             cheatIndexKonami = 0;
         }
         
@@ -4226,6 +4610,7 @@ function startLocal() {
 }
 function startOnline() {
     music.init();
+    audioFiles.init();
     sfx.init();
     isSurvival = !1; isTraining = !1; isMemeBall = !1; isOnline = true; isHost = false; netPeerReady = false;
     document.getElementById('title-screen').classList.add('hidden');
@@ -4239,30 +4624,68 @@ function hideOnline() {
     isOnline = false; isHost = false; netRoom = null; netPeerReady = false;
 }
 function hostRoom() {
-    isHost = true; isOnline = true; netRoom = Math.random().toString(36).slice(2,8).toUpperCase();
+    const nickInput = document.getElementById('online-nickname');
+    const nickname = (nickInput && nickInput.value.trim()) || 'Host';
+    isHost = true; isOnline = true; netRoom = Math.random().toString(36).slice(2,8).toUpperCase(); netReadyCount = 0; netPeerReady = false;
+    netConnectedPlayers = [{id:'host', name:nickname + ' (Host)', ready:true}];
+    netGameMode = '1v1';
     document.getElementById('online-room-code').textContent = netRoom;
+    const box = document.getElementById('online-start-box'); if (box) box.style.display='none';
+    const lobby = document.getElementById('online-lobby-list'); if (lobby) lobby.style.display='none';
     initSocket();
 }
 function joinRoom() {
     const code = (document.getElementById('online-join-code').value||'').trim().toUpperCase();
     if (!code) { document.getElementById('online-status').textContent = 'Enter a room code'; return; }
-    isHost = false; isOnline = true; netRoom = code; initSocket();
+    const nickInput = document.getElementById('online-nickname');
+    const nickname = (nickInput && nickInput.value.trim()) || 'Player';
+    isHost = false; isOnline = true; netRoom = code; netReadyCount = 0; netPeerReady = false;
+    netConnectedPlayers = [];
+    const box = document.getElementById('online-start-box'); if (box) box.style.display='none';
+    const lobby = document.getElementById('online-lobby-list'); if (lobby) lobby.style.display='none';
+    initSocket();
+}
+function normalizeWSURL(raw) {
+    let u = (raw || '').trim();
+    if (!u) return 'ws://localhost:8080';
+    // Convert http/https schemes
+    if (u.startsWith('http://')) u = 'ws://' + u.slice(7);
+    else if (u.startsWith('https://')) u = 'wss://' + u.slice(8);
+    // If user pasted a railway/render domain without protocol
+    if (!u.startsWith('ws://') && !u.startsWith('wss://')) {
+        // Prefer ws for local dev, wss for remote
+        if (u.startsWith('localhost') || u.startsWith('127.') || u.startsWith('192.168.') ) {
+            u = 'ws://' + u;
+        } else {
+            u = 'wss://' + u;
+        }
+    }
+    return u;
 }
 function initSocket() {
     netOpened = false;
     try {
         const urlInput = document.getElementById('online-ws-url');
-        const WS_URL = (urlInput && urlInput.value) ? urlInput.value : 'ws://localhost:8080';
+        const WS_URL = normalizeWSURL(urlInput && urlInput.value ? urlInput.value : 'ws://localhost:8080');
+        const st = document.getElementById('online-status');
+        if (st) st.textContent = 'Connecting to ' + WS_URL + ' ...';
         netSocket = new WebSocket(WS_URL);
         netSocket.onerror = () => {
-            // Silent console; friendly UI only
-            const st = document.getElementById('online-status');
-            if (st) st.textContent = 'Server connection failed. Check server URL and availability.';
+            const st2 = document.getElementById('online-status');
+            if (st2) st2.textContent = 'Connection failed. Ensure a WebSocket server is running at that URL (use wss:// for hosted domains).';
         };
         netSocket.onclose = () => {
             // Only show Disconnected if connection was previously opened
             const st = document.getElementById('online-status');
-            if (netOpened && st && isOnline) st.textContent = 'Disconnected';
+            if (netOpened && st && isOnline) {
+                st.textContent = 'Disconnected';
+                // If disconnect happens mid-match, pause and show notification
+                if (gameState === 'GAME' && !netDisconnected) {
+                    netDisconnected = true;
+                    gameState = 'PAUSED';
+                    showDisconnectNotification();
+                }
+            }
         };
     } catch(e) {
         const st = document.getElementById('online-status');
@@ -4271,59 +4694,113 @@ function initSocket() {
     }
     netSocket.onopen = () => {
         netOpened = true;
-        sendNet({t:'join', room: netRoom, host: !!isHost});
-        document.getElementById('online-status').textContent = 'Connecting...';
+        const nickInput = document.getElementById('online-nickname');
+        const nickname = (nickInput && nickInput.value.trim()) || 'Player';
+        sendNet({t:'join', room: netRoom, host: !!isHost, nickname: nickname});
+        document.getElementById('online-status').textContent = 'Joined relay. Negotiating room...';
     };
     netSocket.onmessage = ev => {
         let msg; try { msg = JSON.parse(ev.data); } catch(e) { return; }
         if (msg.t === 'joined') {
-            document.getElementById('online-status').textContent = 'Room created. Waiting for player...';
+            document.getElementById('online-status').textContent = 'Room created. Waiting for players...';
+            updateLobbyList();
+            initOnlineCharSelect();
+        } else if (msg.t === 'playerlist') {
+            // Server sends updated player list
+            if (msg.players) {
+                const oldCount = netConnectedPlayers.length;
+                netConnectedPlayers = msg.players;
+                const newCount = netConnectedPlayers.length;
+                // If player left during match, pause and notify
+                if (gameState === 'GAME' && newCount < oldCount && !netDisconnected) {
+                    netDisconnected = true;
+                    gameState = 'PAUSED';
+                    showDisconnectNotification();
+                }
+                netReadyCount = msg.players.length;
+                updateLobbyList();
+                if (isHost) {
+                    const minPlayers = (netGameMode === '2v2') ? 4 : 2;
+                    if (netReadyCount >= minPlayers) {
+                        netPeerReady = true;
+                        document.getElementById('online-status').textContent = `Ready! ${netReadyCount}/${minPlayers} players`;
+                        const box = document.getElementById('online-start-box'); if (box) box.style.display='flex';
+                        initOnlineCharSelect();
+                    } else {
+                        document.getElementById('online-status').textContent = `Waiting... ${netReadyCount}/${minPlayers} players`;
+                        const box = document.getElementById('online-start-box'); if (box) box.style.display='none';
+                    }
+                } else {
+                    document.getElementById('online-status').textContent = 'Connected! Waiting for host...';
+                    netPeerReady = true;
+                }
+            }
         } else if (msg.t === 'ready') {
-            netPeerReady = true;
-            document.getElementById('online-status').textContent = isHost ? 'Player joined! Choose mode and start.' : 'Connected! Waiting for host...';
-            if (!isHost) {
-                // Client waits for host to start and sends inputs only
+            // Legacy ready handling (fallback if server doesn't send playerlist)
+            netReadyCount++;
+            if (isHost) {
+                const minPlayers = (netGameMode === '2v2') ? 4 : 2;
+                if (netReadyCount >= minPlayers) {
+                    netPeerReady = true;
+                    document.getElementById('online-status').textContent = `Player joined! ${netReadyCount}/${minPlayers}`;
+                    const box = document.getElementById('online-start-box'); if (box) box.style.display='flex';
+                } else {
+                    document.getElementById('online-status').textContent = `Waiting... ${netReadyCount}/${minPlayers}`;
+                }
             } else {
-                // Auto-start a simple Meme Ball match for beta testing
-                try {
-                    p1Char = p1Char || CHARACTERS.find(c=>c.id==='doge') || CHARACTERS[0];
-                    p2Char = p2Char || CHARACTERS.find(c=>c.id==='chad') || CHARACTERS[1];
-                    selectedMap = MAPS[0];
-                    sendNet({t:'start', mode:'meme', p1:p1Char.id, p2:p2Char.id, map:selectedMap.id});
-                    document.getElementById('online-screen').classList.add('hidden');
-                    document.getElementById('hud').classList.remove('hidden');
-                    isMemeBall = true; isSurvival = false; isTraining = false;
-                    beginMemeBall();
-                } catch(e) {}
+                document.getElementById('online-status').textContent = 'Connected! Waiting for host...';
+                netPeerReady = true;
             }
         } else if (msg.t === 'inp' && isHost) {
-            // Host maps client key events to P2 inputs
+            // Host maps client inputs to player slots (P2, P3, P4) by playerId
             const k = msg.k; const v = msg.v ? 1 : 0;
+            const pid = msg.playerId;
+            
+            // Assign player slot based on connection order
+            let slot = 'p2'; // default
+            const playerIndex = netConnectedPlayers.findIndex(p => p.id === pid);
+            if (playerIndex === 1) slot = 'p2';
+            else if (playerIndex === 2) slot = 'p3';
+            else if (playerIndex === 3) slot = 'p4';
+            
             try {
-                const left = getControl('p2','left') || 'ArrowLeft';
-                const right = getControl('p2','right') || 'ArrowRight';
-                const up = getControl('p2','up') || 'ArrowUp';
-                const down = getControl('p2','down') || 'ArrowDown';
-                const attack = getControl('p2','attack') || 'l';
-                const ult = getControl('p2','ult') || 'Shift';
-                const shield = getControl('p2','shield') || 'k';
+                // All online players use WASD by default
+                const left = getControl(slot,'left') || 'a';
+                const right = getControl(slot,'right') || 'd';
+                const up = getControl(slot,'up') || 'w';
+                const down = getControl(slot,'down') || 's';
+                const attack = getControl(slot,'attack') || 'f';
+                const ult = getControl(slot,'ult') || 'r';
+                const shield = getControl(slot,'shield') || 'g';
                 const eq = (a,b) => (a===b) || (a && b && a.toLowerCase && b.toLowerCase && a.toLowerCase()===b.toLowerCase());
-                if (eq(k,left)) netP2Inputs.l = v;
-                if (eq(k,right)) netP2Inputs.r = v;
-                if (eq(k,up)) { netP2Inputs.u = v; netP2Inputs.j = v; }
-                if (eq(k,down)) netP2Inputs.d = v;
-                if (eq(k,attack)) netP2Inputs.a = v;
-                if (eq(k,ult)) netP2Inputs.U = v;
-                if (eq(k,shield)) netP2Inputs.S = v;
+                
+                let targetInputs = netP2Inputs;
+                if (slot === 'p3') targetInputs = netP3Inputs;
+                else if (slot === 'p4') targetInputs = netP4Inputs;
+                
+                if (eq(k,left)) targetInputs.l = v;
+                if (eq(k,right)) targetInputs.r = v;
+                if (eq(k,up)) { targetInputs.u = v; targetInputs.j = v; }
+                if (eq(k,down)) targetInputs.d = v;
+                if (eq(k,attack)) targetInputs.a = v;
+                if (eq(k,ult)) targetInputs.U = v;
+                if (eq(k,shield)) targetInputs.S = v;
             } catch(e) {}
         } else if (msg.t === 'start') {
             // Host instructs client to start with chosen settings
             isMemeBall = msg.mode === 'meme'; isSurvival = false; isTraining = false;
+            netGameMode = msg.gameMode || '1v1'; // Receive mode from host
             p1Char = CHARACTERS.find(c=>c.id===msg.p1);
             p2Char = CHARACTERS.find(c=>c.id===msg.p2);
             selectedMap = MAPS.find(m=>m.id===msg.map) || MAPS[0];
-            document.getElementById('title-screen').classList.add('hidden');
-            document.getElementById('hud').classList.remove('hidden');
+            customStocks = msg.stocks || 3;
+            rulesItemsEnabled = msg.items !== undefined ? msg.items : true;
+            rulesHazardsEnabled = msg.hazards !== undefined ? msg.hazards : true;
+            rulesTeamAttack = msg.teamAttack || false;
+            const ts = document.getElementById('title-screen'); if (ts) ts.classList.add('hidden');
+            const os = document.getElementById('online-screen'); if (os) os.classList.add('hidden');
+            const sb = document.getElementById('online-start-box'); if (sb) sb.style.display='none';
+            const hud = document.getElementById('hud'); if (hud) hud.classList.remove('hidden');
             // Initialize scene but as client renderer
             if (isMemeBall) beginMemeBall(); else startGame();
         } else if (msg.t === 'state') {
@@ -4336,7 +4813,162 @@ function initSocket() {
         if (isOnline) document.getElementById('online-status').textContent = 'Disconnected';
     };
 }
+function showDisconnectNotification(isHostDisconnect = false) {
+    // Create overlay notification
+    const overlay = document.createElement('div');
+    overlay.id = 'disconnect-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center';
+    const title = document.createElement('div');
+    title.style.cssText = "font-family:'Press Start 2P';font-size:24px;color:#ff4444;margin-bottom:20px";
+    title.textContent = isHostDisconnect ? 'HOST DISCONNECTED' : 'PLAYER DISCONNECTED';
+    const msg = document.createElement('div');
+    msg.style.cssText = "font-family:'Press Start 2P';font-size:12px;color:#fff;margin-bottom:30px;text-align:center;max-width:500px;line-height:1.8";
+    msg.textContent = isHostDisconnect ? 'The host has left the match.' : 'A player has disconnected from the match.';
+    const btn = document.createElement('button');
+    btn.className = 'menu-btn';
+    btn.textContent = 'RETURN TO LOBBY';
+    btn.onclick = () => {
+        document.body.removeChild(overlay);
+        hideOnline();
+        showTitle();
+    };
+    overlay.appendChild(title);
+    overlay.appendChild(msg);
+    overlay.appendChild(btn);
+    document.body.appendChild(overlay);
+}
+function showDisconnectNotification(isHostDisconnect = false) {
+    // Create overlay notification
+    const overlay = document.createElement('div');
+    overlay.id = 'disconnect-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center';
+    const title = document.createElement('div');
+    title.style.cssText = "font-family:'Press Start 2P';font-size:24px;color:#ff4444;margin-bottom:20px";
+    title.textContent = isHostDisconnect ? 'HOST DISCONNECTED' : 'PLAYER DISCONNECTED';
+    const msg = document.createElement('div');
+    msg.style.cssText = "font-family:'Press Start 2P';font-size:12px;color:#fff;margin-bottom:30px;text-align:center;max-width:500px;line-height:1.8";
+    msg.textContent = isHostDisconnect ? 'The host has left the match.' : 'A player has disconnected from the match.';
+    const btn = document.createElement('button');
+    btn.className = 'menu-btn';
+    btn.textContent = 'RETURN TO LOBBY';
+    btn.onclick = () => {
+        document.body.removeChild(overlay);
+        hideOnline();
+        showTitle();
+    };
+    overlay.appendChild(title);
+    overlay.appendChild(msg);
+    overlay.appendChild(btn);
+    document.body.appendChild(overlay);
+}
 function sendNet(obj) { try { if (netSocket && netSocket.readyState===1) netSocket.send(JSON.stringify(obj)); } catch(e) {} }
+
+function selectOnlineMode(mode) {
+    if (!isHost) return;
+    netGameMode = mode;
+    // Update button styles
+    const btn1v1 = document.getElementById('mode-1v1-btn');
+    const btn2v2 = document.getElementById('mode-2v2-btn');
+    if (mode === '1v1') {
+        if (btn1v1) { btn1v1.style.background = '#0f0'; btn1v1.style.color = '#000'; }
+        if (btn2v2) { btn2v2.style.background = ''; btn2v2.style.color = ''; }
+    } else {
+        if (btn1v1) { btn1v1.style.background = ''; btn1v1.style.color = ''; }
+        if (btn2v2) { btn2v2.style.background = '#0f0'; btn2v2.style.color = '#000'; }
+    }
+    // Re-check player count requirement
+    const minPlayers = (netGameMode === '2v2') ? 4 : 2;
+    if (netReadyCount >= minPlayers) {
+        netPeerReady = true;
+        document.getElementById('online-status').textContent = `Ready! ${netReadyCount}/${minPlayers} players`;
+        const box = document.getElementById('online-start-box'); if (box) box.style.display='flex';
+    } else {
+        netPeerReady = false;
+        document.getElementById('online-status').textContent = `Waiting... ${netReadyCount}/${minPlayers} players`;
+        const box = document.getElementById('online-start-box'); if (box) box.style.display='none';
+    }
+}
+
+function updateLobbyList() {
+    const listEl = document.getElementById('online-player-list');
+    const lobbyEl = document.getElementById('online-lobby-list');
+    const ctrlEl = document.getElementById('online-controls-help');
+    if (!listEl || !lobbyEl) return;
+    
+    if (netConnectedPlayers.length > 0) {
+        lobbyEl.style.display = 'flex';
+        if (ctrlEl) ctrlEl.style.display = 'flex';
+        let html = '';
+        netConnectedPlayers.forEach((p, i) => {
+            const icon = p.ready ? '✓' : '○';
+            const color = p.ready ? '#0f0' : '#888';
+            html += `<div style="color:${color}">${icon} ${p.name || 'Player ' + (i+1)}</div>`;
+        });
+        listEl.innerHTML = html;
+    } else {
+        lobbyEl.style.display = 'none';
+        if (ctrlEl) ctrlEl.style.display = 'none';
+    }
+}
+
+function initOnlineCharSelect() {
+    try {
+        const p1Sel = document.getElementById('online-p1-char');
+        const p2Sel = document.getElementById('online-p2-char');
+        if (!p1Sel || !p2Sel) return;
+        // Populate options
+        const makeOpts = sel => {
+            sel.innerHTML = '';
+            CHARACTERS.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = `${c.icon} ${c.name}`;
+                sel.appendChild(opt);
+            });
+        };
+        makeOpts(p1Sel); makeOpts(p2Sel);
+        // Set defaults
+        p1Sel.value = (p1Char && p1Char.id) || 'doge';
+        p2Sel.value = (p2Char && p2Char.id) || 'chad';
+        const prev = document.getElementById('online-picked-preview');
+        const renderPrev = () => {
+            const c1 = CHARACTERS.find(x=>x.id===p1Sel.value);
+            const c2 = CHARACTERS.find(x=>x.id===p2Sel.value);
+            if (prev) prev.textContent = `P1: ${c1 ? (c1.icon+ ' ' + c1.name) : p1Sel.value} | P2: ${c2 ? (c2.icon+ ' ' + c2.name) : p2Sel.value}`;
+        };
+        p1Sel.onchange = renderPrev; p2Sel.onchange = renderPrev; renderPrev();
+    } catch(e) {}
+}
+
+function onlineStart(mode) {
+    if (!isHost || !netPeerReady) return;
+    try {
+        // Default characters if not chosen yet
+        const p1Sel = document.getElementById('online-p1-char');
+        const p2Sel = document.getElementById('online-p2-char');
+        const p1Pick = p1Sel && p1Sel.value ? p1Sel.value : ((p1Char && p1Char.id) || 'doge');
+        const p2Pick = p2Sel && p2Sel.value ? p2Sel.value : ((p2Char && p2Char.id) || 'chad');
+        p1Char = CHARACTERS.find(c=>c.id===p1Pick) || CHARACTERS.find(c=>c.id==='doge') || CHARACTERS[0];
+        p2Char = CHARACTERS.find(c=>c.id===p2Pick) || CHARACTERS.find(c=>c.id==='chad') || CHARACTERS[1];
+        const stageSel = document.getElementById('online-stage-sel');
+        const stocksInput = document.getElementById('online-stocks');
+        const stageId = (stageSel && stageSel.value) || 'flat';
+        const stocks = (stocksInput && parseInt(stocksInput.value)) || 3;
+        customStocks = stocks; // Set global for host
+        // Read custom rules
+        const itemsCheck = document.getElementById('online-items');
+        const hazardsCheck = document.getElementById('online-hazards');
+        const teamAttackCheck = document.getElementById('online-teamattack');
+        rulesItemsEnabled = itemsCheck ? itemsCheck.checked : true;
+        rulesHazardsEnabled = hazardsCheck ? hazardsCheck.checked : true;
+        rulesTeamAttack = teamAttackCheck ? teamAttackCheck.checked : false;
+        selectedMap = MAPS.find(m=>m.id===stageId) || MAPS[0];
+        sendNet({t:'start', mode: mode === 'meme' ? 'meme' : 'vs', gameMode: netGameMode, p1: p1Char.id, p2: p2Char.id, map: selectedMap.id, stocks: stocks, items: rulesItemsEnabled, hazards: rulesHazardsEnabled, teamAttack: rulesTeamAttack});
+        document.getElementById('online-screen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+        isSurvival = false; isTraining = false; isMemeBall = (mode === 'meme');
+        if (isMemeBall) beginMemeBall(); else startGame();
+    } catch(e) {}
+}
 
 // Client: capture inputs and send to host
 window.addEventListener('keydown', e => {
@@ -4349,14 +4981,17 @@ window.addEventListener('keyup', e => {
 function applyNetState(s) {
     try {
         if (!isOnline || isHost) return;
-        // players
-        if (players && s.players && players.length===2) {
-            for (let i=0;i<2;i++) {
+        // players - sync all received player states
+        if (players && s.players) {
+            const numPlayers = Math.min(players.length, s.players.length);
+            for (let i=0; i<numPlayers; i++) {
                 const sp = s.players[i];
-                if (!players[i]) continue;
+                if (!players[i] || !sp) continue;
                 players[i].x = sp.x; players[i].y = sp.y; players[i].vx = sp.vx; players[i].vy = sp.vy;
                 players[i].pct = sp.pct; players[i].stocks = sp.stocks; players[i].ult = sp.ult;
             }
+            // Refresh HUD to reflect authoritative host values (damage %, stocks, ult charge)
+            if (typeof updateHUD === 'function') updateHUD();
         }
         if (typeof isMemeBall !== 'undefined' && s.ball && ball) {
             ball.x = s.ball.x; ball.y = s.ball.y; ball.vx = s.ball.vx; ball.vy = s.ball.vy;
@@ -4983,13 +5618,15 @@ function hideControlsConfig() {
 function loadControlsDisplay() {
     if (!saveData.customControls) {
         saveData.customControls = {
-            p1: {left: 'a', right: 'd', up: 'w', down: 's', attack: 'f', ult: 'r', shield: 'g'},
-            p2: {left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', attack: 'l', ult: 'Shift', shield: 'k'}
+            p1: {left: 'a', right: 'd', up: 'w', down: 's', attack: 'f', ult: 'q', shield: 'g'},
+            p2: {left: 'a', right: 'd', up: 'w', down: 's', attack: 'f', ult: 'r', shield: 'g'},
+            p3: {left: 'a', right: 'd', up: 'w', down: 's', attack: 'f', ult: 'r', shield: 'g'},
+            p4: {left: 'a', right: 'd', up: 'w', down: 's', attack: 'f', ult: 'r', shield: 'g'}
         };
     }
     
     // Update button displays
-    for (const player of ['p1', 'p2']) {
+    for (const player of ['p1', 'p2', 'p3', 'p4']) {
         for (const action in saveData.customControls[player]) {
             const btn = document.querySelector(`button[onclick="remapKey('${player}','${action}')"]`);
             if (btn) btn.textContent = saveData.customControls[player][action];
@@ -5140,6 +5777,70 @@ function isCharMastered(charId) {
     }
 }
 
+function checkJackUnlock() {
+    // Check if Jack is already unlocked
+    if (saveData.unlocks.includes('jack')) return false;
+    
+    // Get all characters except Jack
+    const nonJackChars = CHARACTERS.filter(c => c.id !== 'jack');
+    
+    // Check if ALL non-Jack characters are mastered
+    const allMastered = nonJackChars.every(c => isCharMastered(c.id));
+    
+    if (allMastered) {
+        saveData.unlocks.push('jack');
+        saveGame();
+        // Show unlock notification
+        showJackUnlock();
+        return true;
+    }
+    return false;
+}
+
+function showJackUnlock() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:fadeIn 0.5s';
+    
+    const icon = document.createElement('div');
+    icon.style.cssText = "font-size:120px;margin-bottom:30px;animation:bounce 1s infinite";
+    icon.textContent = '🃏';
+    
+    const title = document.createElement('div');
+    title.style.cssText = "font-family:'Press Start 2P';font-size:32px;color:#FFD700;margin-bottom:20px;text-align:center";
+    title.textContent = 'CHARACTER UNLOCKED!';
+    
+    const charName = document.createElement('div');
+    charName.style.cssText = "font-family:'Press Start 2P';font-size:24px;color:#fff;margin-bottom:40px;text-align:center";
+    charName.textContent = 'JACK OF ALL TRADES';
+    
+    const desc = document.createElement('div');
+    desc.style.cssText = "font-family:'Press Start 2P';font-size:12px;color:#aaa;margin-bottom:40px;text-align:center;max-width:600px;line-height:2";
+    desc.innerHTML = 'Master of None<br/>You have mastered every character!<br/>The ultimate fighter awaits...';
+    
+    const btn = document.createElement('button');
+    btn.className = 'menu-btn';
+    btn.textContent = 'CONTINUE';
+    btn.onclick = () => {
+        document.body.removeChild(overlay);
+        renderCharGrid();
+    };
+    
+    overlay.appendChild(icon);
+    overlay.appendChild(title);
+    overlay.appendChild(charName);
+    overlay.appendChild(desc);
+    overlay.appendChild(btn);
+    document.body.appendChild(overlay);
+    
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    `;
+    document.head.appendChild(style);
+}
+
 function updateMasteryToggles() {
     const b1 = document.getElementById('p1-mastery-toggle');
     const b2 = document.getElementById('p2-mastery-toggle');
@@ -5247,6 +5948,7 @@ function goToMapSelect() {
 }
 function startGame() {
     document.getElementById('hud').classList.remove('hidden');
+    audioFiles.init();
     initGame();
     saveMatchSettings();
     gameState = 'GAME';
@@ -5483,17 +6185,19 @@ function initGame() {
             vy: 0,
             angle: 0
         });
-        platforms.push({
-            x: -1000,
-            y: 400,
-            w: 2000,
-            h: 200,
-            t: 'lava',
+        if (rulesHazardsEnabled) {
+            platforms.push({
+                x: -1000,
+                y: 400,
+                w: 2000,
+                h: 200,
+                t: 'lava',
             c: '#e74c3c',
             vx: 0,
             vy: -0.2,
             angle: 0
-        });
+            });
+        }
     } else if (selectedMap.id === 'machine') {
         platforms.push({
             x: -400,
@@ -5531,11 +6235,43 @@ function initGame() {
     });
     let p2C = !p2IsCpu && !isTraining;
     let p2CPU = p2IsCpu || isTraining;
-    players = [new Fighter(1, p1Char, -200, 0, !0, !1), new Fighter(2, p2Char, 200, 0, p2C, p2CPU)];
+    
+    // Determine player count based on mode
+    const playerCount = (isOnline && netGameMode === '2v2') ? 4 : 2;
+    
+    if (playerCount === 4) {
+        // 2v2: 4 fighters
+        const p3Char = CHARACTERS.find(c => c.id === 'pepe') || CHARACTERS[2] || CHARACTERS[0];
+        const p4Char = CHARACTERS.find(c => c.id === 'wojak') || CHARACTERS[3] || CHARACTERS[1];
+        players = [
+            new Fighter(1, p1Char, -300, 0, true, false),   // Team 1
+            new Fighter(2, p2Char, 300, 0, true, false),    // Team 2
+            new Fighter(3, p3Char, -150, 0, true, false),   // Team 1
+            new Fighter(4, p4Char, 150, 0, true, false)     // Team 2
+        ];
+        players[0].team = 1; players[2].team = 1;  // P1 & P3 = Team 1
+        players[1].team = 2; players[3].team = 2;  // P2 & P4 = Team 2
+            // Ensure no boss behavior in online
+            players.forEach(p => { p.isBoss = false; console.log(`P${p.id}: ${p.stats.id}, isBoss=${p.isBoss}`); });
+        // Apply custom stocks if in online mode
+        if (isOnline && typeof customStocks !== 'undefined') {
+            players.forEach(p => p.stocks = customStocks);
+        }
+    } else {
+        // 1v1: 2 fighters
+        players = [new Fighter(1, p1Char, -200, 0, true, false), new Fighter(2, p2Char, 200, 0, p2C, p2CPU)];
+            // Ensure no boss behavior in online
+            if (isOnline) players.forEach(p => { p.isBoss = false; console.log(`P${p.id}: ${p.stats.id}, isBoss=${p.isBoss}`); });
+        // Apply custom stocks if in online mode
+        if (isOnline && typeof customStocks !== 'undefined') {
+            players.forEach(p => p.stocks = customStocks);
+        }
+    }
+    
     // Ensure mastery flags reflect latest toggles
     try {
         players[0].masteryActive = (isCharMastered(p1Char.id) && useMasteryP1);
-        players[1].masteryActive = (isCharMastered(p2Char.id) && useMasteryP2);
+        if (players.length > 1) players[1].masteryActive = (isCharMastered(p2Char.id) && useMasteryP2);
     } catch(e) {}
     document.getElementById('p1-name').innerText = p1Char.name;
     document.getElementById('p2-name').innerText = p2Char.name;
@@ -5580,8 +6316,12 @@ function endGame(w) {
         
         if (masteryMsg) {
             document.getElementById('mastery-progress').innerHTML = `<div style="color:#ffd700">MASTERY UP!</div>${masteryMsg}`;
+            // Check if Jack should be unlocked
+            setTimeout(() => checkJackUnlock(), 1000);
         } else {
             document.getElementById('mastery-progress').innerHTML = '';
+            // Still check for Jack unlock even without level up
+            checkJackUnlock();
         }
     }
     
@@ -5655,7 +6395,7 @@ function loop() {
     if (!isMemeBall) {
         itemTimer++;
         if (itemTimer > 400) {
-            if (Math.random() < 0.7) items.push(new Item());
+            if (rulesItemsEnabled && Math.random() < 0.7) items.push(new Item());
             itemTimer = 0;
         }
         if (!megaCoinSpawned && selectedMap.id !== 'machine' && mapTimer > 600 && Math.random() < 0.01) {
@@ -5804,7 +6544,10 @@ function loop() {
             let ax = atk.x + atk.box.relX,
                 ay = atk.y + atk.box.relY;
             players.forEach(def => {
-                if (def.stocks > 0 && atk.id !== def.id && ax < def.x + def.w && ax + atk.box.w > def.x && ay < def.y + def.h && ay + atk.box.h > def.y) {
+                // Skip if same player, or same team in 2v2 mode (unless team attack enabled)
+                const sameTeam = (atk.team && def.team && atk.team === def.team);
+                const skipTeammate = sameTeam && !rulesTeamAttack;
+                if (def.stocks > 0 && atk.id !== def.id && !skipTeammate && ax < def.x + def.w && ax + atk.box.w > def.x && ay < def.y + def.h && ay + atk.box.h > def.y) {
                     let d = atk.dir ? 1 : -1;
                     // Mastery Lucky Block global buffs to all moves
                     let kbx = atk.box.kbx;
@@ -5848,7 +6591,7 @@ function loop() {
     if (isOnline && isHost && netPeerReady) {
         if ((netTick++ % 2) === 0) {
             const snap = {
-                players: players.slice(0,2).map(p => ({x:p.x,y:p.y,vx:p.vx,vy:p.vy,pct:p.pct,stocks:p.stocks,ult:p.ult})),
+                players: players.map(p => ({x:p.x,y:p.y,vx:p.vx,vy:p.vy,pct:p.pct,stocks:p.stocks,ult:p.ult})),
                 score: [p1Score, p2Score]
             };
             if (isMemeBall && ball) {
