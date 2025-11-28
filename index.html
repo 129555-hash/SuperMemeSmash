@@ -174,6 +174,7 @@
     <button class="menu-btn" onclick="showSoundTest()">SOUND TEST</button>
     <button class="menu-btn" onclick="startOnline()">ONLINE (BETA)</button>
     <button class="menu-btn" onclick="openSettings()">SETTINGS</button>
+    <button class="menu-btn" onclick="openFeedback()">FEEDBACK</button>
 </div>
 <div id="pause-menu" class="screen hidden">
     <h1>PAUSED</h1>
@@ -310,6 +311,10 @@
             <input type="text" id="online-nickname" placeholder="Player" maxlength="12" style="width:180px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff">
         </div>
         <div>
+            <button class="menu-btn" onclick="quickMatch()" style="background:#0f0;color:#000;font-weight:bold">⚡ QUICK MATCH</button>
+            <div style="font-family:'Press Start 2P';font-size:9px;color:#666;margin-top:5px">Join any available room</div>
+        </div>
+        <div style="margin-top:10px;border-top:1px solid #555;padding-top:15px">
             <button class="menu-btn" onclick="hostRoom()">HOST ROOM</button>
             <div style="font-family:'Press Start 2P';font-size:12px;color:#aaa;margin-top:8px">Room Code: <span id="online-room-code">—</span></div>
         </div>
@@ -521,6 +526,25 @@
     <div id="btn-jump" class="touch-btn">JUMP</div>
     <div id="btn-ult" class="touch-btn">U</div>
     <div id="btn-shield" class="touch-btn">S</div>
+</div>
+<div id="feedback-screen" class="screen hidden">
+    <h2>FEEDBACK</h2>
+    <div style="width: 80%; max-width: 600px; display: flex; flex-direction: column; gap: 20px;">
+        <textarea id="feedback-text" style="width: 100%; height: 150px; background: #333; color: white; border: 2px solid #555; padding: 10px; font-family: 'Roboto', sans-serif; resize: none;" placeholder="Enter your feedback here..."></textarea>
+        
+        <div style="display: flex; align-items: center; gap: 10px; background: #222; padding: 10px; border: 1px solid #444;">
+            <input type="checkbox" id="include-screenshot" checked>
+            <label for="include-screenshot" style="font-family: 'Press Start 2P'; font-size: 10px; cursor: pointer;">INCLUDE SCREENSHOT</label>
+            <div id="screenshot-preview" style="width: 50px; height: 30px; background: #000; border: 1px solid #fff; margin-left: auto; background-size: cover; background-position: center;"></div>
+        </div>
+
+        <button class="menu-btn" onclick="submitFeedback()">SUBMIT</button>
+        <div id="feedback-status" style="text-align: center; font-family: 'Press Start 2P'; font-size: 12px; min-height: 20px;"></div>
+    </div>
+    <div id="feedback-list" class="hidden" style="width: 80%; max-width: 800px; height: 400px; overflow-y: auto; background: #222; border: 2px solid #555; padding: 20px; margin-top: 20px;">
+        <!-- Feedback items will be populated here -->
+    </div>
+    <button class="menu-btn" style="margin-top: 20px;" onclick="closeFeedback()">BACK</button>
 </div>
 <script>
 console.log("RUNNING FILE VERSION: 15:15 PM");
@@ -4645,6 +4669,18 @@ function joinRoom() {
     const lobby = document.getElementById('online-lobby-list'); if (lobby) lobby.style.display='none';
     initSocket();
 }
+function quickMatch() {
+    const nickInput = document.getElementById('online-nickname');
+    const nickname = (nickInput && nickInput.value.trim()) || 'Player';
+    // Generate a quick match code with "QM" prefix
+    const quickCode = 'QM' + Math.random().toString(36).slice(2,6).toUpperCase();
+    isHost = false; isOnline = true; netRoom = quickCode; netReadyCount = 0; netPeerReady = false;
+    netConnectedPlayers = [];
+    const box = document.getElementById('online-start-box'); if (box) box.style.display='none';
+    const lobby = document.getElementById('online-lobby-list'); if (lobby) lobby.style.display='none';
+    document.getElementById('online-status').textContent = 'Quick matching...';
+    initSocket();
+}
 function normalizeWSURL(raw) {
     let u = (raw || '').trim();
     if (!u) return 'ws://localhost:8080';
@@ -4696,7 +4732,9 @@ function initSocket() {
         netOpened = true;
         const nickInput = document.getElementById('online-nickname');
         const nickname = (nickInput && nickInput.value.trim()) || 'Player';
-        sendNet({t:'join', room: netRoom, host: !!isHost, nickname: nickname});
+        // Include friendCode so peers can verify and record stats
+        try { initFriendCode(); } catch(e) {}
+        sendNet({t:'join', room: netRoom, host: !!isHost, nickname: nickname, friendCode: saveData && saveData.friendCode ? saveData.friendCode : undefined});
         document.getElementById('online-status').textContent = 'Joined relay. Negotiating room...';
     };
     netSocket.onmessage = ev => {
@@ -4709,7 +4747,13 @@ function initSocket() {
             // Server sends updated player list
             if (msg.players) {
                 const oldCount = netConnectedPlayers.length;
-                netConnectedPlayers = msg.players;
+                // Preserve friendCode if provided by server; otherwise keep name/ready/id
+                netConnectedPlayers = msg.players.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    ready: !!p.ready,
+                    friendCode: p.friendCode || p.code || p.fc
+                }));
                 const newCount = netConnectedPlayers.length;
                 // If player left during match, pause and notify
                 if (gameState === 'GAME' && newCount < oldCount && !netDisconnected) {
@@ -4719,6 +4763,7 @@ function initSocket() {
                 }
                 netReadyCount = msg.players.length;
                 updateLobbyList();
+                try { verifyFriendsAgainstLobby(); } catch(e) {}
                 if (isHost) {
                     const minPlayers = (netGameMode === '2v2') ? 4 : 2;
                     if (netReadyCount >= minPlayers) {
@@ -4902,13 +4947,30 @@ function updateLobbyList() {
         netConnectedPlayers.forEach((p, i) => {
             const icon = p.ready ? '✓' : '○';
             const color = p.ready ? '#0f0' : '#888';
-            html += `<div style="color:${color}">${icon} ${p.name || 'Player ' + (i+1)}</div>`;
+            const fc = p.friendCode ? ` <span style="color:#666">(${p.friendCode})</span>` : '';
+            html += `<div style="color:${color}">${icon} ${p.name || 'Player ' + (i+1)}${fc}</div>`;
         });
         listEl.innerHTML = html;
     } else {
         lobbyEl.style.display = 'none';
         if (ctrlEl) ctrlEl.style.display = 'none';
     }
+}
+
+// Mark friends as verified if their code appears in the current lobby
+function verifyFriendsAgainstLobby() {
+    if (!saveData || !saveData.friends || saveData.friends.length === 0) return;
+    let changed = false;
+    const codesInLobby = new Set(netConnectedPlayers.filter(p => p.friendCode).map(p => p.friendCode));
+    saveData.friends.forEach(f => {
+        if (f && f.code && codesInLobby.has(f.code)) {
+            if (!f.verified) { f.verified = true; changed = true; }
+            const p = netConnectedPlayers.find(p => p.friendCode === f.code);
+            if (p && p.name && f.name !== p.name) { f.name = p.name; changed = true; }
+            f.lastSeenAt = Date.now();
+        }
+    });
+    if (changed) { try { saveGame(); renderFriends(); } catch(e) {} }
 }
 
 function initOnlineCharSelect() {
@@ -5535,16 +5597,17 @@ function addFriend() {
         return;
     }
     
-    // In a real implementation, this would fetch from a server
+    // Add as unverified until seen online (or validated by server)
     saveData.friends.push({
         code: code,
         name: `Player ${code.substr(0, 4)}`,
-        addedAt: Date.now()
+        addedAt: Date.now(),
+        verified: false
     });
     saveGame();
     input.value = '';
     renderFriends();
-    showNotification('FRIEND ADDED!', code);
+    showNotification('FRIEND ADDED', code + ' (UNVERIFIED)');
     sfx.play('coin');
 }
 function removeFriend(code) {
@@ -5562,15 +5625,33 @@ function renderFriends() {
         return;
     }
     
-    list.innerHTML = saveData.friends.map(f => `
-        <div style="background:#222;border:2px solid #555;padding:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-            <div>
-                <div style="font-family:'Press Start 2P';font-size:14px;color:#fff">${f.name}</div>
-                <div style="font-family:'Press Start 2P';font-size:10px;color:#666;margin-top:5px">${f.code}</div>
+    list.innerHTML = saveData.friends.map(f => {
+        const hasStats = f.stats && typeof f.stats.wins === 'number' && typeof f.stats.losses === 'number' && f.stats.favoriteChar;
+        let statsHtml = '<div style="font-family: \'Press Start 2P\'; font-size:10px; color:#666; margin-top:8px">No stats yet</div>';
+        if (hasStats) {
+            const total = (f.stats.wins || 0) + (f.stats.losses || 0);
+            const winRate = total > 0 ? Math.floor(((f.stats.wins || 0) / total) * 100) : 0;
+            statsHtml = `
+            <div style="display:flex;gap:15px;flex-wrap:wrap;font-family:'Press Start 2P';font-size:9px;color:#aaa;border-top:1px solid #444;padding-top:10px">
+                <div style="color:#0f0">W: ${f.stats.wins}</div>
+                <div style="color:#f00">L: ${f.stats.losses}</div>
+                <div style="color:#ffd700">WR: ${winRate}%</div>
+                <div style="color:#fff">Main: ${String(f.stats.favoriteChar).toUpperCase()}</div>
+            </div>`;
+        }
+        return `
+        <div style="background:#222;border:2px solid #555;padding:15px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <div>
+                    <div style="font-family:'Press Start 2P';font-size:14px;color:#fff">${f.name} ${f.verified ? '<span style=\'color:#0f0;font-size:10px\'>[VERIFIED]</span>' : '<span style=\'color:#999;font-size:10px\'>[UNVERIFIED]</span>'}</div>
+                    <div style="font-family:'Press Start 2P';font-size:10px;color:#666;margin-top:5px">${f.code}</div>
+                </div>
+                <button class="menu-btn danger-btn" onclick="removeFriend('${f.code}')" style="font-size:10px;padding:8px 16px">REMOVE</button>
             </div>
-            <button class="menu-btn danger-btn" onclick="removeFriend('${f.code}')" style="font-size:10px;padding:8px 16px">REMOVE</button>
+            ${statsHtml}
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // ========== SOUND TEST ==========
@@ -5956,6 +6037,20 @@ function startGame() {
     loop();
 }
 const startGameLoop = startGame;
+function togglePause() {
+    // Toggle between running and paused game states
+    if (gameState === 'GAME') {
+        gameState = 'PAUSED';
+        const pm = document.getElementById('pause-menu');
+        if (pm) pm.classList.remove('hidden');
+    } else if (gameState === 'PAUSED') {
+        gameState = 'GAME';
+        const pm = document.getElementById('pause-menu');
+        if (pm) pm.classList.add('hidden');
+        // Resume the game loop
+        loop();
+    }
+}
 function beginSurvival() {
     killCount = 0;
     survivalWave = 1;
@@ -6085,7 +6180,6 @@ function beginMemeBall() {
         players[0].masteryActive = (isCharMastered(p1Char.id) && useMasteryP1);
         players[1].masteryActive = (isCharMastered(p2Char.id) && useMasteryP2);
     } catch(e) {}
-    players[1].stats.speed *= 1.3;
     players.forEach(p => {
         p.stocks = 99;
     });
@@ -6325,6 +6419,31 @@ function endGame(w) {
         }
     }
     
+    // Record vs-friend stats for online 1v1 when opponent is a verified friend
+    try {
+        if (isOnline && netConnectedPlayers && netConnectedPlayers.length >= 2) {
+            const myNickInput = document.getElementById('online-nickname');
+            const myName = (myNickInput && myNickInput.value.trim()) || 'Player';
+            const opponent = netConnectedPlayers.find(p => p && p.name && p.name !== myName);
+            const oppCode = opponent && opponent.friendCode;
+            if (oppCode && saveData && Array.isArray(saveData.friends)) {
+                const friend = saveData.friends.find(f => f.code === oppCode);
+                if (friend) {
+                    friend.verified = true;
+                    friend.lastSeenAt = Date.now();
+                    if (!friend.stats) friend.stats = { wins:0, losses:0, favoriteChar: p2Char && p2Char.id ? p2Char.id : '' };
+                    // Winner is w (1 for P1, 2 for P2). Assume you are P1 when hosting or local.
+                    // If you are not host, mapping may vary; we use myName to infer winner string on the GAME! text.
+                    if (w === 1) friend.losses = (friend.losses||0) + 1; else friend.wins = (friend.wins||0) + 1;
+                    // Update favoriteChar heuristic: most recently used char when winning
+                    if (w === 2 && p2Char && p2Char.id) friend.stats.favoriteChar = p2Char.id;
+                    if (w === 1 && p1Char && p1Char.id) friend.stats.favoriteChar = p1Char.id;
+                    try { saveGame(); renderFriends(); } catch(e) {}
+                }
+            }
+        }
+    } catch(e) {}
+
     if (isSurvival) {
         document.getElementById('winner-display').innerText = `KILLS: ${killCount}`;
         if (killCount >= 50) unlockTrophy('kills_50');
@@ -6850,6 +6969,107 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     b('btn-ult', 'ult');
     b('btn-shield', 'shield');
 }
+let pendingScreenshot = null;
+
+function openFeedback() {
+    // Capture screenshot before hiding other screens
+    try {
+        pendingScreenshot = canvas.toDataURL('image/jpeg', 0.5);
+        document.getElementById('screenshot-preview').style.backgroundImage = `url(${pendingScreenshot})`;
+    } catch (e) {
+        console.error("Screenshot failed", e);
+        pendingScreenshot = null;
+        document.getElementById('screenshot-preview').style.backgroundImage = 'none';
+    }
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('feedback-screen').classList.remove('hidden');
+    document.getElementById('feedback-status').innerText = '';
+    document.getElementById('feedback-list').classList.add('hidden');
+}
+
+function closeFeedback() {
+    document.getElementById('feedback-screen').classList.add('hidden');
+    document.getElementById('title-screen').classList.remove('hidden');
+}
+
+function submitFeedback() {
+    const text = document.getElementById('feedback-text').value;
+    if (!text.trim()) return;
+    
+    const includeScreenshot = document.getElementById('include-screenshot').checked;
+
+    // Save to local storage for now
+    let feedbacks = JSON.parse(localStorage.getItem('smash_feedback') || '[]');
+    feedbacks.push({
+        date: new Date().toLocaleString(),
+        text: text,
+        image: includeScreenshot ? pendingScreenshot : null
+    });
+    localStorage.setItem('smash_feedback', JSON.stringify(feedbacks));
+    
+    document.getElementById('feedback-text').value = '';
+    document.getElementById('feedback-status').innerText = 'FEEDBACK SENT! THANK YOU!';
+    document.getElementById('feedback-status').style.color = '#2ecc71';
+    
+    setTimeout(() => {
+        document.getElementById('feedback-status').innerText = '';
+    }, 3000);
+}
+
+// Cheat Code: "feedback"
+let feedbackCheatInput = '';
+const feedbackCheatCode = 'feedback';
+
+window.addEventListener('keydown', (e) => {
+    // Only listen if feedback screen is open
+    if (document.getElementById('feedback-screen').classList.contains('hidden')) return;
+    
+    // Ignore non-character keys to keep it simple
+    if (e.key.length > 1) return;
+
+    feedbackCheatInput += e.key.toLowerCase();
+    if (feedbackCheatInput.length > feedbackCheatCode.length) {
+        feedbackCheatInput = feedbackCheatInput.slice(-feedbackCheatCode.length);
+    }
+    
+    if (feedbackCheatInput === feedbackCheatCode) {
+        showFeedbackList();
+        feedbackCheatInput = '';
+    }
+});
+
+function showFeedbackList() {
+    const list = document.getElementById('feedback-list');
+    list.classList.remove('hidden');
+    list.innerHTML = '';
+    
+    const feedbacks = JSON.parse(localStorage.getItem('smash_feedback') || '[]');
+    if (feedbacks.length === 0) {
+        list.innerHTML = '<div style="color: #aaa; text-align: center;">NO FEEDBACK YET</div>';
+        return;
+    }
+    
+    feedbacks.reverse().forEach(f => {
+        const item = document.createElement('div');
+        item.style.borderBottom = '1px solid #444';
+        item.style.padding = '10px';
+        item.style.marginBottom = '10px';
+        
+        let imgHtml = '';
+        if (f.image) {
+            imgHtml = `<img src="${f.image}" style="max-width: 100%; border: 1px solid #555; margin-top: 10px; border-radius: 4px;">`;
+        }
+
+        item.innerHTML = `
+            <div style="color: #888; font-size: 10px; margin-bottom: 5px;">${f.date}</div>
+            <div style="color: #fff; white-space: pre-wrap;">${f.text}</div>
+            ${imgHtml}
+        `;
+        list.appendChild(item);
+    });
+}
+
 loadGame();
 resize();
 </script>
