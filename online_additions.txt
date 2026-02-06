@@ -1,0 +1,163 @@
+STEP 1: Add nickname input field after Server URL input (around line 306)
+FIND:
+        <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
+            <span style="font-family:'Press Start 2P';font-size:12px;color:#ffd700">Server URL</span>
+            <input type="text" id="online-ws-url" placeholder="wss://your-relay.example.com" style="width:320px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff" value="https://supermemesmashmutliplayer-production.up.railway.app/">
+        </div>
+        <div>
+
+ADD AFTER:
+        <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center">
+            <span style="font-family:'Press Start 2P';font-size:12px;color:#ffd700">Your Name</span>
+            <input type="text" id="online-nickname" placeholder="Player" maxlength="12" style="width:180px;padding:10px;font-family:'Press Start 2P';font-size:12px;background:#222;border:2px solid #fff;color:#fff">
+        </div>
+
+---
+
+STEP 2: Replace "SELECT MAP" section with "MATCH SETTINGS" (around line 353)
+FIND:
+            <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700;margin-top:10px">SELECT MAP</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+                <button class="menu-btn" onclick="onlineStart('meme')">START MEME BALL</button>
+                <button class="menu-btn" onclick="onlineStart('vs')">START VS MATCH</button>
+            </div>
+
+REPLACE WITH:
+            <div style="font-family:'Press Start 2P';font-size:10px;color:#ffd700;margin-top:10px">MATCH SETTINGS</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center">
+                <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">Stage:
+                    <select id="online-stage-sel" style="padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px">
+                        <option value="flat">Flat</option>
+                        <option value="plat">Platforms</option>
+                        <option value="edge">Edge</option>
+                        <option value="machine">Machine</option>
+                    </select>
+                </label>
+                <label style="font-family:'Press Start 2P';font-size:9px;color:#ddd">Stocks:
+                    <input type="number" id="online-stocks" min="1" max="5" value="3" style="width:50px;padding:6px;background:#222;border:2px solid #fff;color:#fff;font-family:'Press Start 2P';font-size:9px">
+                </label>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+                <button class="menu-btn" onclick="onlineStart('meme')">START MEME BALL</button>
+                <button class="menu-btn" onclick="onlineStart('vs')">START VS MATCH</button>
+            </div>
+
+---
+
+STEP 3: Update hostRoom() to include nickname (search for "function hostRoom")
+FIND:
+function hostRoom() {
+    isHost = true; isOnline = true; netRoom = Math.random().toString(36).slice(2,8).toUpperCase(); netReadyCount = 0; netPeerReady = false;
+    netConnectedPlayers = [{id:'host', name:'Host (You)', ready:true}];
+
+REPLACE WITH:
+function hostRoom() {
+    const nickInput = document.getElementById('online-nickname');
+    const nickname = (nickInput && nickInput.value.trim()) || 'Host';
+    isHost = true; isOnline = true; netRoom = Math.random().toString(36).slice(2,8).toUpperCase(); netReadyCount = 0; netPeerReady = false;
+    netConnectedPlayers = [{id:'host', name:nickname + ' (Host)', ready:true}];
+
+---
+
+STEP 4: Update joinRoom() to send nickname (search for "function joinRoom")
+FIND:
+    netSocket.onopen = () => {
+        netOpened = true;
+        sendNet({t:'join', room: netRoom, host: !!isHost});
+
+REPLACE WITH:
+    netSocket.onopen = () => {
+        netOpened = true;
+        const nickInput = document.getElementById('online-nickname');
+        const nickname = (nickInput && nickInput.value.trim()) || 'Player';
+        sendNet({t:'join', room: netRoom, host: !!isHost, nickname: nickname});
+
+---
+
+STEP 5: Update onlineStart() to include stage and stocks (search for "function onlineStart")
+FIND:
+        p1Char = CHARACTERS.find(c=>c.id===p1Pick) || CHARACTERS.find(c=>c.id==='doge') || CHARACTERS[0];
+        p2Char = CHARACTERS.find(c=>c.id===p2Pick) || CHARACTERS.find(c=>c.id==='chad') || CHARACTERS[1];
+        selectedMap = MAPS[0];
+        sendNet({t:'start', mode: mode === 'meme' ? 'meme' : 'vs', gameMode: netGameMode, p1: p1Char.id, p2: p2Char.id, map: selectedMap.id});
+
+REPLACE WITH:
+        p1Char = CHARACTERS.find(c=>c.id===p1Pick) || CHARACTERS.find(c=>c.id==='doge') || CHARACTERS[0];
+        p2Char = CHARACTERS.find(c=>c.id===p2Pick) || CHARACTERS.find(c=>c.id==='chad') || CHARACTERS[1];
+        const stageSel = document.getElementById('online-stage-sel');
+        const stocksInput = document.getElementById('online-stocks');
+        const stageId = (stageSel && stageSel.value) || 'flat';
+        const stocks = (stocksInput && parseInt(stocksInput.value)) || 3;
+        selectedMap = MAPS.find(m=>m.id===stageId) || MAPS[0];
+        sendNet({t:'start', mode: mode === 'meme' ? 'meme' : 'vs', gameMode: netGameMode, p1: p1Char.id, p2: p2Char.id, map: selectedMap.id, stocks: stocks});
+
+---
+
+STEP 6: Update start message handler to apply stocks (search for "else if (msg.t === 'start')")
+FIND:
+        } else if (msg.t === 'start') {
+            // Host instructs client to start with chosen settings
+            isMemeBall = msg.mode === 'meme'; isSurvival = false; isTraining = false;
+            netGameMode = msg.gameMode || '1v1'; // Receive mode from host
+            p1Char = CHARACTERS.find(c=>c.id===msg.p1);
+            p2Char = CHARACTERS.find(c=>c.id===msg.p2);
+            selectedMap = MAPS.find(m=>m.id===msg.map) || MAPS[0];
+
+REPLACE WITH:
+        } else if (msg.t === 'start') {
+            // Host instructs client to start with chosen settings
+            isMemeBall = msg.mode === 'meme'; isSurvival = false; isTraining = false;
+            netGameMode = msg.gameMode || '1v1'; // Receive mode from host
+            p1Char = CHARACTERS.find(c=>c.id===msg.p1);
+            p2Char = CHARACTERS.find(c=>c.id===msg.p2);
+            selectedMap = MAPS.find(m=>m.id===msg.map) || MAPS[0];
+            const customStocks = msg.stocks || 3;
+
+---
+
+STEP 7: Apply custom stocks in startGame() (search for "this.stocks = 3" in Fighter constructor OR players array initialization)
+FIND in startGame():
+        players = [new Fighter(1, p1Char, -200, 0, true, false), new Fighter(2, p2Char, 200, 0, p2C, p2CPU)];
+
+REPLACE WITH:
+        players = [new Fighter(1, p1Char, -200, 0, true, false), new Fighter(2, p2Char, 200, 0, p2C, p2CPU)];
+        // Apply custom stocks if in online mode
+        if (isOnline && typeof customStocks !== 'undefined') {
+            players.forEach(p => p.stocks = customStocks);
+        }
+
+ALSO FIND for 2v2:
+        players = [
+            new Fighter(1, p1Char, -300, 0, true, false),   // Team 1
+            new Fighter(2, p2Char, 300, 0, true, false),    // Team 2
+            new Fighter(3, p3Char, -150, 0, true, false),   // Team 1
+            new Fighter(4, p4Char, 150, 0, true, false)     // Team 2
+        ];
+
+ADD AFTER:
+        // Apply custom stocks if in online mode
+        if (isOnline && typeof customStocks !== 'undefined') {
+            players.forEach(p => p.stocks = customStocks);
+        }
+
+---
+
+STEP 8: Update server.js to handle nickname in join message
+FIND in server.js:
+                    rooms[room].clients.push(ws);
+                    const playerIndex = rooms[room].players.length + 1;
+                    rooms[room].players.push({ 
+                        id: playerId, 
+                        name: `Player ${playerIndex}`, 
+                        ready: true 
+                    });
+
+REPLACE WITH:
+                    rooms[room].clients.push(ws);
+                    const playerIndex = rooms[room].players.length + 1;
+                    const playerName = msg.nickname || `Player ${playerIndex}`;
+                    rooms[room].players.push({ 
+                        id: playerId, 
+                        name: playerName, 
+                        ready: true 
+                    });

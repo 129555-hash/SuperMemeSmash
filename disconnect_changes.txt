@@ -1,0 +1,74 @@
+MANUAL EDITS NEEDED FOR DISCONNECT HANDLING:
+
+==========================================
+STEP 1: Update netSocket.onclose handler (around line 4520)
+==========================================
+
+FIND:
+    netSocket.onclose = () => {
+        if (isOnline) document.getElementById('online-status').textContent = 'Disconnected';
+    };
+
+REPLACE WITH:
+    netSocket.onclose = () => {
+        if (netOpened && isOnline) {
+            document.getElementById('online-status').textContent = 'Disconnected';
+            // If disconnect happens mid-match, pause and show notification
+            if (gameState === 'GAME' && !netDisconnected) {
+                netDisconnected = true;
+                gameState = 'PAUSED';
+                showDisconnectNotification();
+            }
+        }
+    };
+
+==========================================
+STEP 2: Add error handler before closing brace of netSocket.onmessage (around line 4515)
+==========================================
+
+FIND:
+        } else if (msg.t === 'ping') {
+            sendNet({t:'pong'});
+        }
+    };
+
+REPLACE WITH:
+        } else if (msg.t === 'ping') {
+            sendNet({t:'pong'});
+        } else if (msg.t === 'error') {
+            const st = document.getElementById('online-status');
+            if (st) st.textContent = msg.msg || 'Connection error';
+            // If host disconnects during match, end game gracefully
+            if (msg.msg && msg.msg.includes('Host disconnected') && gameState === 'GAME') {
+                netDisconnected = true;
+                gameState = 'PAUSED';
+                showDisconnectNotification(true);
+            }
+        }
+    };
+
+==========================================
+SUMMARY OF COMPLETED CHANGES:
+==========================================
+
+✅ Added global variables:
+   - rulesItemsEnabled, rulesHazardsEnabled, rulesTeamAttack
+   - netDisconnected
+
+✅ Added custom ruleset checkboxes to match settings UI:
+   - Items (checked by default)
+   - Hazards (checked by default)  
+   - Team Attack (unchecked by default)
+
+✅ Wired rulesets through start message and applied in game:
+   - Items: Only spawn if rulesItemsEnabled
+   - Hazards: Only create lava platform if rulesHazardsEnabled
+   - Team Attack: Allow friendly fire if rulesTeamAttack
+
+✅ Created showDisconnectNotification() function
+
+✅ Updated playerlist handler to detect mid-match disconnects
+
+⚠️ NEEDS MANUAL EDIT: netSocket.onclose and error handler (steps above)
+
+==========================================
