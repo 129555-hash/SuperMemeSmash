@@ -1938,6 +1938,13 @@
             confetti = [];
         let worldFlipped = !1,
             flipTimer = 0;
+        // Combo counter system
+        let comboCount = 0, comboTimer = 0, comboLastHitter = 0, comboBestThisGame = 0;
+        // Announcer hype system
+        let announceText = '', announceTimer = 0, announceColor = '#fff';
+        function showAnnounce(text, color) { announceText = text; announceTimer = 120; announceColor = color || '#fff'; }
+        // Weather system
+        let weatherType = 'none', weatherTimer = 0, weatherParticles = [];
         const keys = {};
         const touchInput = {
             left: !1,
@@ -2353,7 +2360,7 @@
                 if (forceType) {
                     this.type = forceType;
                 } else {
-                    this.type = Math.random() > 0.8 ? 'nyan' : (Math.random() > 0.5 ? 'hammer' : 'coin');
+                    this.type = Math.random() > 0.8 ? 'nyan' : (Math.random() > 0.6 ? 'hammer' : (Math.random() > 0.4 ? 'coin' : (Math.random() > 0.3 ? 'star' : 'freeze')));
                 }
                 this.active = !0;
                 this.w = 30;
@@ -2381,6 +2388,8 @@
                     else if (this.type === 'landmine') this.icon = '💣';
                     else if (this.type === 'potion') this.icon = '🧪';
                     else if (this.type === 'tomato') this.icon = '🍅';
+                    else if (this.type === 'star') this.icon = '⭐';
+                    else if (this.type === 'freeze') this.icon = '🧊';
                     else this.icon = '💰';
                 }
                 this.placed = !1;
@@ -2726,6 +2735,33 @@
                 // BERSERK: Red aura while active
                 if (this.berserkActive && Math.random() < 0.05) {
                     particles.push({ x: this.x + (Math.random()-0.5)*this.w*1.5, y: this.y + Math.random()*this.h, vx: 0, vy: -1, life: 10, color: '#f00', size: 3 });
+                }
+                // RICKROLL DOT: Take damage while rickrolled
+                if (this.rickrolled && this.rickrollTimer > 0) {
+                    this.rickrollTimer--;
+                    if (this.rickrollTimer % 30 === 0) {
+                        this.pct += 3;
+                        particles.push({ x: this.x + this.w/2, y: this.y - 10, text: '🎵', life: 15, vy: -2, color: '#FF6347' });
+                    }
+                    if (this.rickrollTimer % 20 === 0) {
+                        particles.push({ x: this.x + (Math.random()-0.5)*30, y: this.y + Math.random()*this.h, vx: (Math.random()-0.5)*3, vy: -1, life: 12, text: ['🎤','🎵','🎶'][Math.floor(Math.random()*3)], color: '#FF6347' });
+                    }
+                    if (this.rickrollTimer <= 0) { this.rickrolled = false; }
+                }
+                // NYAN CAT: Leave rainbow trail while moving fast
+                if (this.stats.id === 'nyancat' && Math.abs(this.vx) > 3 && Math.random() < 0.3) {
+                    const colors = ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#8B00FF'];
+                    for (let rc = 0; rc < 6; rc++) {
+                        particles.push({
+                            x: this.x + (this.dir ? -5 : this.w+5), y: this.y + 5 + rc * 7,
+                            vx: (this.dir ? -1 : 1) * 1, vy: 0,
+                            life: 15, color: colors[rc], size: 3
+                        });
+                    }
+                }
+                // SHREK RAGE: Damage boost while ult active
+                if (this.shrekRage && Math.random() < 0.08) {
+                    particles.push({ x: this.x + Math.random()*this.w, y: this.y + Math.random()*this.h, vx: 0, vy: -1, life: 10, color: '#4a8c2a', size: 4 });
                 }
                 let l = 0,
                     r = 0,
@@ -3188,6 +3224,78 @@
                         audioFiles.stop('VIVALDI');
                     }, 2400);
                     sfx.play('ult');
+                // ====== NYAN CAT ULT: NYAN STORM ======
+                } else if (this.stats.id === 'nyancat') {
+                    // Rain rainbow projectiles across the entire stage
+                    shake = 40;
+                    for (let i = 0; i < 15; i++) {
+                        setTimeout(() => {
+                            ultEffects.push({
+                                t: 'nyan_rainbow',
+                                x: -800 + Math.random() * 1600,
+                                y: -400 - Math.random() * 200,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: 6 + Math.random() * 3,
+                                l: 120,
+                                owner: this.id
+                            });
+                        }, i * 100);
+                    }
+                    // Screen flash rainbow
+                    for (let i = 0; i < 30; i++) {
+                        const angle = (i / 30) * Math.PI * 2;
+                        particles.push({
+                            x: this.x + this.w/2, y: this.y + this.h/2,
+                            vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12,
+                            life: 40, color: ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#8B00FF'][i % 6], size: 6
+                        });
+                    }
+                // ====== SHREK ULT: GET OUT OF MY SWAMP ======
+                } else if (this.stats.id === 'shrek') {
+                    // Massive shockwave pushes everyone away + swamp zone
+                    shake = 50;
+                    players.forEach(p => {
+                        if (p.id !== this.id && p.stocks > 0) {
+                            const dir = p.x > this.x ? 1 : -1;
+                            p.hit(30 * dir, -20, 40);
+                            p.stun = 90;
+                        }
+                    });
+                    // Swamp eruption
+                    for (let i = 0; i < 25; i++) {
+                        particles.push({
+                            x: this.x + this.w/2 + (Math.random()-0.5)*200,
+                            y: this.y + this.h,
+                            vx: (Math.random()-0.5)*15, vy: -Math.random()*15 - 5,
+                            life: 50, color: ['#2d5a1e','#4a8c2a','#3b7a24','#1a3d12'][Math.floor(Math.random()*4)], size: 8
+                        });
+                    }
+                    // Temporary super armor for 5 seconds
+                    this.inv = 300;
+                    this.shrekRage = true;
+                    setTimeout(() => { this.shrekRage = false; }, 5000);
+                    particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "GET OUT OF MY SWAMP!", life: 60, vy: -1, color: '#4a8c2a' });
+                // ====== RICK ASTLEY ULT: RICKROLL ======
+                } else if (this.stats.id === 'rickastley') {
+                    // All enemies are stunned and forced to dance, take damage over time
+                    shake = 30;
+                    players.forEach(p => {
+                        if (p.id !== this.id && p.stocks > 0) {
+                            p.stun = 180; // 3 second stun
+                            p.rickrolled = true;
+                            p.rickrollTimer = 180;
+                        }
+                    });
+                    // Musical explosion
+                    for (let i = 0; i < 20; i++) {
+                        particles.push({
+                            x: this.x + this.w/2 + (Math.random()-0.5)*100,
+                            y: this.y + this.h/2 + (Math.random()-0.5)*100,
+                            vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8,
+                            life: 50, text: ['🎵','🎶','🎤','🎵','🎶'][i%5], color: '#FF6347'
+                        });
+                    }
+                    particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "🎤 NEVER GONNA GIVE YOU UP!", life: 80, vy: -0.5, color: '#FF6347' });
                 } else t.hit(20 * (this.x < t.x ? 1 : -1), -20, 40);
             }
             atk(u, d, l, r) {
@@ -4473,6 +4581,222 @@
                         return;
                     }
                 }
+                // ====== NYAN CAT ======
+                if (s.id === 'nyancat') {
+                    if (l || r) {
+                        // Rainbow Dash: Fast horizontal charge leaving rainbow trail
+                        this.vx = (this.dir ? 1 : -1) * 20;
+                        this.box = {
+                            relX: this.dir ? 30 : -80, relY: -10, w: 60, h: 40,
+                            act: !0, own: this.id,
+                            kbx: 18 * s.power, kby: -6 * s.power, dmg: 11 * s.power, f: 8
+                        };
+                        // Leave rainbow trail
+                        const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#8B00FF'];
+                        for (let i = 0; i < 6; i++) {
+                            particles.push({
+                                x: this.x + this.w/2, y: this.y + 5 + i * 7,
+                                vx: (this.dir ? -1 : 1) * (3 + Math.random() * 2), vy: 0,
+                                life: 30, color: colors[i], size: 5
+                            });
+                        }
+                        this.cd = 25;
+                        return;
+                    }
+                    if (u) {
+                        // Pop-Tart Launch: Fly up with sparkles
+                        this.vy = -16;
+                        this.vx = (this.dir ? 1 : -1) * 4;
+                        this.box = {
+                            relX: -20, relY: -40, w: 70, h: 50,
+                            act: !0, own: this.id,
+                            kbx: 4 * s.power, kby: -18 * s.power, dmg: 9 * s.power, f: 6
+                        };
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: this.x + this.w/2 + (Math.random()-0.5)*20, y: this.y + this.h,
+                                vx: (Math.random()-0.5)*4, vy: Math.random()*4+2,
+                                life: 20, color: ['#ff0','#f0f','#0ff','#f90'][i%4], size: 3
+                            });
+                        }
+                        this.cd = 35;
+                        return;
+                    }
+                    if (d) {
+                        // Bass Drop: Ground slam with shockwave
+                        this.vy = 15;
+                        this.box = {
+                            relX: -50, relY: 20, w: 150, h: 30,
+                            act: !0, own: this.id,
+                            kbx: 8 * s.power, kby: -14 * s.power, dmg: 14 * s.power, f: 10
+                        };
+                        // Musical note particles
+                        for (let i = 0; i < 6; i++) {
+                            particles.push({
+                                x: this.x + this.w/2 + (Math.random()-0.5)*60, y: this.y + this.h,
+                                vx: (Math.random()-0.5)*6, vy: -Math.random()*5-2,
+                                life: 25, text: ['🎵','🎶','🎵'][i%3], color: '#ff69b4'
+                            });
+                        }
+                        this.cd = 40;
+                        return;
+                    }
+                    // Neutral: Quick paw swipe with rainbow spark
+                    this.box = {
+                        relX: this.dir ? 30 : -60, relY: -5, w: 45, h: 40,
+                        act: !0, own: this.id,
+                        kbx: 8 * s.power, kby: -6 * s.power, dmg: 7 * s.power, f: 4
+                    };
+                    particles.push({
+                        x: this.x + (this.dir ? 50 : -20), y: this.y + 15,
+                        vx: (this.dir ? 1 : -1) * 3, vy: 0,
+                        life: 10, color: '#ff69b4', size: 4
+                    });
+                    this.cd = 12;
+                    return;
+                }
+                // ====== SHREK ======
+                if (s.id === 'shrek') {
+                    if (l || r) {
+                        // Ogre Slam: Heavy forward charge, massive knockback
+                        this.vx = (this.dir ? 1 : -1) * 10;
+                        this.box = {
+                            relX: this.dir ? 20 : -80, relY: -10, w: 70, h: 60,
+                            act: !0, own: this.id,
+                            kbx: 25 * s.power, kby: -8 * s.power, dmg: 16 * s.power, f: 12
+                        };
+                        // Ground crack effect
+                        for (let i = 0; i < 5; i++) {
+                            particles.push({
+                                x: this.x + (this.dir ? 40 : -20) + (Math.random()-0.5)*30, y: this.y + this.h,
+                                vx: (Math.random()-0.5)*4, vy: -Math.random()*3,
+                                life: 15, color: '#5a3a1a', size: 4
+                            });
+                        }
+                        this.cd = 40;
+                        return;
+                    }
+                    if (u) {
+                        // Swamp Geyser: Launch upward on swamp blast
+                        this.vy = -14;
+                        this.box = {
+                            relX: -30, relY: -40, w: 80, h: 70,
+                            act: !0, own: this.id,
+                            kbx: 5 * s.power, kby: -20 * s.power, dmg: 12 * s.power, f: 8
+                        };
+                        // Swamp splash
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: this.x + this.w/2, y: this.y + this.h,
+                                vx: (Math.random()-0.5)*8, vy: Math.random()*5+3,
+                                life: 20, color: ['#2d5a1e','#4a8c2a','#3b7a24'][i%3], size: 5
+                            });
+                        }
+                        this.cd = 45;
+                        return;
+                    }
+                    if (d) {
+                        // Onion Layers: Counter shield — if hit during this, reflect with big damage
+                        this.isParrying = !0;
+                        this.parryTimer = 20;
+                        // Swamp aura
+                        for (let i = 0; i < 10; i++) {
+                            const angle = (i / 10) * Math.PI * 2;
+                            particles.push({
+                                x: this.x + this.w/2 + Math.cos(angle)*25, y: this.y + this.h/2 + Math.sin(angle)*25,
+                                vx: Math.cos(angle)*2, vy: Math.sin(angle)*2,
+                                life: 20, color: '#4a8c2a', size: 6
+                            });
+                        }
+                        this.cd = 50;
+                        return;
+                    }
+                    // Neutral: Heavy swamp fist
+                    this.box = {
+                        relX: this.dir ? 20 : -60, relY: -5, w: 55, h: 50,
+                        act: !0, own: this.id,
+                        kbx: 14 * s.power, kby: -8 * s.power, dmg: 12 * s.power, f: 6
+                    };
+                    this.cd = 20;
+                    return;
+                }
+                // ====== RICK ASTLEY ======
+                if (s.id === 'rickastley') {
+                    if (l || r) {
+                        // Never Gonna Run Around: Dance dash forward with mic swing
+                        this.vx = (this.dir ? 1 : -1) * 14;
+                        this.box = {
+                            relX: this.dir ? 30 : -70, relY: -5, w: 50, h: 50,
+                            act: !0, own: this.id,
+                            kbx: 15 * s.power, kby: -8 * s.power, dmg: 12 * s.power, f: 8
+                        };
+                        // Musical notes
+                        for (let i = 0; i < 4; i++) {
+                            particles.push({
+                                x: this.x + this.w/2, y: this.y + (Math.random()-0.5)*20,
+                                vx: (this.dir ? -1 : 1) * (2+Math.random()*2), vy: -Math.random()*3,
+                                life: 25, text: ['🎵','🎶','🎤','🎵'][i], color: '#FF6347'
+                            });
+                        }
+                        this.cd = 28;
+                        return;
+                    }
+                    if (u) {
+                        // Never Gonna Give You Up: Launch upward, enemy can't escape (pulls enemy)
+                        this.vy = -15;
+                        let t = players.find(p => p.id !== this.id && p.stocks > 0);
+                        if (t) {
+                            const dist = Math.abs(t.x - this.x) + Math.abs(t.y - this.y);
+                            if (dist < 200) {
+                                // Pull enemy toward Rick
+                                t.vx += (this.x - t.x) * 0.1;
+                                t.vy += (this.y - t.y) * 0.1;
+                                particles.push({ x: t.x + 25, y: t.y - 10, text: "🎤 GOTCHA", life: 20, vy: -1, color: '#FF6347' });
+                            }
+                        }
+                        this.box = {
+                            relX: -25, relY: -40, w: 70, h: 60,
+                            act: !0, own: this.id,
+                            kbx: 4 * s.power, kby: -14 * s.power, dmg: 10 * s.power, f: 6
+                        };
+                        this.cd = 35;
+                        return;
+                    }
+                    if (d) {
+                        // Desert You: Teleport behind enemy, backstab
+                        let t = players.find(p => p.id !== this.id && p.stocks > 0);
+                        if (t) {
+                            const oldX = this.x;
+                            this.x = t.x + (t.dir ? -60 : 60);
+                            this.y = t.y;
+                            this.dir = t.x > this.x;
+                            // Poof particles at old position
+                            for (let i = 0; i < 6; i++) {
+                                particles.push({
+                                    x: oldX + this.w/2, y: this.y + this.h/2,
+                                    vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
+                                    life: 15, color: '#888', size: 4
+                                });
+                            }
+                            this.box = {
+                                relX: this.dir ? 20 : -60, relY: -10, w: 50, h: 50,
+                                act: !0, own: this.id,
+                                kbx: 12 * s.power, kby: -10 * s.power, dmg: 15 * s.power, f: 8
+                            };
+                            particles.push({ x: this.x + 25, y: this.y - 15, text: "🎵 Deserted!", life: 25, vy: -1, color: '#f55' });
+                        }
+                        this.cd = 50;
+                        return;
+                    }
+                    // Neutral: Mic check — quick jab
+                    this.box = {
+                        relX: this.dir ? 25 : -55, relY: -5, w: 45, h: 40,
+                        act: !0, own: this.id,
+                        kbx: 9 * s.power, kby: -7 * s.power, dmg: 8 * s.power, f: 4
+                    };
+                    this.cd = 14;
+                    return;
+                }
                 if (!u && !d && !l && !r) {
                     this.box = {
                         relX: -30,
@@ -4700,6 +5024,8 @@
             phys() {
                 let gv = 0.6;
                 if (worldFlipped) gv = -0.6;
+                // Space map: low gravity
+                if (selectedMap && selectedMap.lowGravity) gv *= 0.5;
                 if (!this.isParrying) {
                     this.vy += gv;
                     if (!worldFlipped && this.vy > 25) this.vy = 25;
@@ -4845,6 +5171,40 @@
                         } else if (i.type === 'nyan') {
                             this.hit(20 * (i.vx > 0 ? 1 : -1), -10, 15);
                             i.active = !1;
+                        } else if (i.type === 'star') {
+                            // STAR: 5 sec invincibility + speed + golden glow
+                            this.inv = 300;
+                            this.starPower = true;
+                            this.starTimer = 300;
+                            const origSpeed = this.stats.speed;
+                            this.stats = { ...this.stats, speed: this.stats.speed * 1.5 };
+                            sfx.play('ult');
+                            showAnnounce('⭐ STAR POWER!', '#FFD700');
+                            for (let sp = 0; sp < 10; sp++) {
+                                particles.push({ x: this.x + Math.random()*this.w, y: this.y + Math.random()*this.h, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 30, color: '#FFD700', size: 5 });
+                            }
+                            setTimeout(() => {
+                                this.starPower = false;
+                                this.stats = { ...this.stats, speed: origSpeed };
+                            }, 5000);
+                            i.active = !1;
+                        } else if (i.type === 'freeze') {
+                            // FREEZE: Freezes all enemies for 2 seconds
+                            players.forEach(p => {
+                                if (p.id !== this.id && p.stocks > 0) {
+                                    p.stun = 120;
+                                    p.vx = 0;
+                                    p.vy = 0;
+                                    // Ice VFX on frozen player
+                                    for (let ic = 0; ic < 8; ic++) {
+                                        particles.push({ x: p.x + Math.random()*p.w, y: p.y + Math.random()*p.h, vx: (Math.random()-0.5)*3, vy: -Math.random()*3, life: 25, color: '#88ccff', size: 4 });
+                                    }
+                                    particles.push({ x: p.x + p.w/2, y: p.y - 15, text: '🧊 FROZEN!', life: 40, vy: -1, color: '#88ccff' });
+                                }
+                            });
+                            sfx.play('break');
+                            showAnnounce('🧊 FREEZE!', '#88ccff');
+                            i.active = !1;
                         }
                     }
                 });
@@ -4872,6 +5232,11 @@
                 if (saveData.goldMode && this.id === 1) {
                     ctx.shadowColor = '#ffd700';
                     ctx.shadowBlur = 15;
+                } else if (this.starPower) {
+                    // Star power golden rainbow glow
+                    const hue = (Date.now() / 10) % 360;
+                    ctx.shadowColor = `hsl(${hue}, 100%, 50%)`;
+                    ctx.shadowBlur = 20;
                 } else {
                     ctx.shadowBlur = 0;
                 }
@@ -5705,6 +6070,86 @@
                     ]
                 }
             }
+        }, {
+            id: 'nyancat',
+            name: 'Nyan Cat',
+            icon: '🌈',
+            speed: 1.6,
+            weight: 0.6,
+            power: 0.9,
+            jump: 1.3,
+            desc: "Rainbow Rush",
+            moves: {
+                side: "Rainbow Dash",
+                up: "Pop-Tart Launch",
+                down: "Bass Drop",
+                ult: "NYAN STORM"
+            },
+            colors: {
+                '0': null,
+                '1': '#808080',
+                '2': '#FFB6C1',
+                '3': '#FF69B4',
+                '4': '#FF0000',
+                '5': '#FFA500',
+                '6': '#FFFF00',
+                '7': '#00FF00',
+                '8': '#00BFFF',
+                '9': '#8B00FF'
+            },
+            spriteData: ["0000000000000000", "0000011111100000", "0001122222210000", "0012233333321000", "0123333333332100", "0133333333333100", "0133311331133100", "0133333333333100", "0133331111333100", "0123333333332100", "0012233333321000", "0001122222210000", "0000456789000000", "0000456789000000", "0000456789000000", "0000000000000000"]
+        }, {
+            id: 'shrek',
+            name: 'Shrek',
+            icon: '🟢',
+            speed: 0.7,
+            weight: 2.0,
+            power: 1.5,
+            jump: 0.7,
+            desc: "Ogre Tank",
+            moves: {
+                side: "Ogre Slam",
+                up: "Swamp Geyser",
+                down: "Onion Layers",
+                ult: "GET OUT OF MY SWAMP"
+            },
+            colors: {
+                '0': null,
+                '1': '#2d5a1e',
+                '2': '#4a8c2a',
+                '3': '#5aad33',
+                '4': '#3b7a24',
+                '5': '#8b6f47',
+                '6': '#FFFFFF',
+                '7': '#1a3d12'
+            },
+            spriteData: ["0000000000000000", "0000011111100000", "0001122222210000", "0012233333321000", "0123344443332100", "0133344443333100", "0133366633333100", "0133333333333100", "0133333333333100", "0133337733333100", "0123344444332100", "0012233333321000", "0001155555510000", "0000155555510000", "0000015555100000", "0000000000000000"]
+        }, {
+            id: 'rickastley',
+            name: 'Rick Astley',
+            icon: '🎤',
+            speed: 1.0,
+            weight: 1.0,
+            power: 1.1,
+            jump: 1.1,
+            desc: "Never Gonna",
+            moves: {
+                side: "Never Gonna Run Around",
+                up: "Never Gonna Give You Up",
+                down: "Desert You",
+                ult: "RICKROLL"
+            },
+            colors: {
+                '0': null,
+                '1': '#8B4513',
+                '2': '#D2691E',
+                '3': '#FFD39B',
+                '4': '#1a1a1a',
+                '5': '#333333',
+                '6': '#FFFFFF',
+                '7': '#FF6347'
+            },
+            spriteData: ["0000000000000000", "0000111111000000", "0001122211100000", "0001111111100000", "0001133311100000", "0000133310000000", "0000444444000000", "0000477744000000", "0000444444000000", "0000455554000000", "0000455554000000", "0000444444000000", "0000044440000000", "0000055550000000", "0000050050000000", "0000050050000000"]
         }];
         const MAPS = [{
             id: 'flat',
@@ -5731,6 +6176,16 @@
         }, {
             id: 'arasaka_tower',
             c: '#0a0008'
+        }, {
+            id: 'backrooms',
+            c: '#c4b078'
+        }, {
+            id: 'space',
+            c: '#000010',
+            lowGravity: true
+        }, {
+            id: 'minecraft',
+            c: '#5b8731'
         }];
         let selectedMap = MAPS[0];
         const characterSprites = {};
@@ -9863,7 +10318,7 @@
                 goToMapSelect();
             } else if (isMemeBall) {
                 p1Char = c;
-                let normalChars = ['doge', 'frog', 'cat', 'capy', 'spongy', 'sanic', 'chad', 'troll', '67kid', 'amogus', 'sahur', 'primo', 'ocralito', 'mechabara', 'bluedude', 'johnpork'];
+                let normalChars = ['doge', 'frog', 'cat', 'capy', 'spongy', 'sanic', 'chad', 'troll', '67kid', 'amogus', 'sahur', 'primo', 'ocralito', 'mechabara', 'bluedude', 'johnpork', 'nyancat', 'shrek', 'rickastley'];
                 let enemyCharId = normalChars[Math.floor(Math.random() * normalChars.length)];
                 p2Char = CHARACTERS.find(c => c.id === enemyCharId);
                 try { initMastery(p1Char.id); useMasteryP1 = isCharMastered(p1Char.id); } catch (e) { }
@@ -10308,6 +10763,74 @@
                         x: -800, y: 500, w: 1600, h: 200, t: 'lava', c: '#ff0022', vx: 0, vy: -0.15, angle: 0
                     });
                 }
+            } else if (selectedMap.id === 'backrooms') {
+                // Backrooms: Eerie yellow liminal space with repeating rooms
+                platforms.push({
+                    x: -600, y: gy, w: 1200, h: 500, t: 'solid', c: '#9e8c5a', vx: 0, vy: 0, angle: 0
+                });
+                // Ceiling platforms
+                platforms.push({
+                    x: -500, y: gy - 200, w: 200, h: 12, t: 'pass', c: '#a8976a', vx: 0, vy: 0, angle: 0
+                });
+                platforms.push({
+                    x: 300, y: gy - 200, w: 200, h: 12, t: 'pass', c: '#a8976a', vx: 0, vy: 0, angle: 0
+                });
+                // Center platform
+                platforms.push({
+                    x: -100, y: gy - 100, w: 200, h: 12, t: 'pass', c: '#b5a478', vx: 0, vy: 0, angle: 0
+                });
+                // Wandering platform (entity)
+                if (rulesHazardsEnabled) {
+                    platforms.push({
+                        x: -60, y: gy - 150, w: 80, h: 10, t: 'pass', c: '#665533', vx: 0.8, vy: 0, angle: 0
+                    });
+                }
+            } else if (selectedMap.id === 'space') {
+                // Space: Floating asteroids, low gravity arena
+                // Center asteroid
+                platforms.push({
+                    x: -200, y: gy, w: 400, h: 500, t: 'solid', c: '#333340', vx: 0, vy: 0, angle: 0
+                });
+                // Left floating rock
+                platforms.push({
+                    x: -500, y: gy - 80, w: 150, h: 25, t: 'pass', c: '#4a4a5e', vx: 0, vy: 0, angle: 0
+                });
+                // Right floating rock
+                platforms.push({
+                    x: 350, y: gy - 80, w: 150, h: 25, t: 'pass', c: '#4a4a5e', vx: 0, vy: 0, angle: 0
+                });
+                // High platform
+                platforms.push({
+                    x: -80, y: gy - 200, w: 160, h: 15, t: 'pass', c: '#555568', vx: 0, vy: 0, angle: 0
+                });
+                // Orbiting platform
+                platforms.push({
+                    x: -50, y: gy - 120, w: 100, h: 12, t: 'pass', c: '#6a6a80', vx: 1.2, vy: 0, angle: 0
+                });
+            } else if (selectedMap.id === 'minecraft') {
+                // Minecraft: Blocky terrain with dirt, grass, trees
+                platforms.push({
+                    x: -600, y: gy, w: 1200, h: 500, t: 'solid', c: '#8B6914', vx: 0, vy: 0, angle: 0
+                });
+                // Left hill
+                platforms.push({
+                    x: -550, y: gy - 60, w: 200, h: 60, t: 'solid', c: '#5b8731', vx: 0, vy: 0, angle: 0
+                });
+                // Right hill
+                platforms.push({
+                    x: 350, y: gy - 40, w: 180, h: 40, t: 'solid', c: '#5b8731', vx: 0, vy: 0, angle: 0
+                });
+                // Floating block platforms
+                platforms.push({
+                    x: -200, y: gy - 120, w: 80, h: 25, t: 'pass', c: '#b8a042', vx: 0, vy: 0, angle: 0
+                });
+                platforms.push({
+                    x: 120, y: gy - 150, w: 80, h: 25, t: 'pass', c: '#b8a042', vx: 0, vy: 0, angle: 0
+                });
+                // Center tree trunk
+                platforms.push({
+                    x: -15, y: gy - 80, w: 30, h: 80, t: 'solid', c: '#6b4423', vx: 0, vy: 0, angle: 0
+                });
             } else platforms.push({
                 x: -600,
                 y: gy,
@@ -10546,6 +11069,21 @@
                 return;
             }
             mapTimer++;
+            // Combo timer decay
+            if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
+            // Announcer timer
+            if (announceTimer > 0) announceTimer--;
+            // Weather system tick
+            if (weatherType !== 'none') {
+                weatherTimer--;
+                if (weatherTimer <= 0) { weatherType = 'none'; weatherParticles = []; }
+            } else if (mapTimer % 3600 === 0 && Math.random() < 0.4) {
+                // Random weather event every ~60 seconds
+                const weathers = ['rain', 'snow', 'wind', 'meteor'];
+                weatherType = weathers[Math.floor(Math.random() * weathers.length)];
+                weatherTimer = 600 + Math.floor(Math.random() * 600);
+                showAnnounce('⚠️ ' + weatherType.toUpperCase() + ' INCOMING!', '#aaf');
+            }
             if (selectedMap.id === 'plat') {
                 platforms[1].x = -300 + Math.sin(mapTimer * 0.05) * 100;
                 platforms[1].vx = Math.cos(mapTimer * 0.05) * 5;
@@ -10618,7 +11156,7 @@
                 let rate = Math.max(60, 120 - (killCount * 2));
                 if (playersAlive > 1) rate = Math.max(30, 80 - (killCount * 2));
                 if (spawnTimer > rate && players.filter(p => p.cpu).length < 5) {
-                    let normalChars = ['doge', 'frog', 'cat', 'capy', 'spongy', 'sanic', 'chad', 'troll', '67kid', 'amogus', 'sahur', 'primo', 'ocralito', 'mechabara', 'bluedude', 'johnpork'];
+                    let normalChars = ['doge', 'frog', 'cat', 'capy', 'spongy', 'sanic', 'chad', 'troll', '67kid', 'amogus', 'sahur', 'primo', 'ocralito', 'mechabara', 'bluedude', 'johnpork', 'nyancat', 'shrek', 'rickastley'];
                     let enemyCharId = normalChars[Math.floor(Math.random() * normalChars.length)];
                     let enemyChar = CHARACTERS.find(c => c.id === enemyCharId);
                     let enemy = new Fighter(players.length + 1, enemyChar, Math.random() * 600 - 300, -300, !1, !0);
@@ -10863,6 +11401,30 @@
                         }
                         if (e.l > 1) e.l = 0;
                     }
+                } else if (e.t === 'nyan_rainbow') {
+                    // Nyan Storm rainbow projectile
+                    e.y += e.vy || 6;
+                    e.x += e.vx || 0;
+                    // Draw rainbow streak
+                    const rainbowColors = ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#8B00FF'];
+                    for (let rc = 0; rc < 6; rc++) {
+                        ctx.fillStyle = rainbowColors[rc];
+                        ctx.fillRect(e.x - 12 + rc * 4, e.y - 8, 4, 16);
+                    }
+                    // Sparkle trail
+                    if (Math.random() < 0.4) {
+                        particles.push({
+                            x: e.x + (Math.random()-0.5)*20, y: e.y - 10,
+                            vx: (Math.random()-0.5)*2, vy: -Math.random()*2,
+                            life: 12, color: rainbowColors[Math.floor(Math.random()*6)], size: 3
+                        });
+                    }
+                    players.forEach(p => {
+                        if (p.stocks > 0 && p.id !== e.owner && Math.abs(p.x + p.w/2 - e.x) < 30 && Math.abs(p.y + p.h/2 - e.y) < 30) {
+                            p.hit((Math.random()-0.5)*8, -8, 8);
+                            sfx.play('hit');
+                        }
+                    });
                 } else if (e.t === 'pride_bullet') {
                     // Pride Quick Draw bullet projectile
                     e.x += e.vx;
@@ -10928,6 +11490,22 @@
                             }
                             def.hit(Math.abs(kbx) * d, kby, dmg);
                             atk.box.act = !1;
+                            // COMBO COUNTER
+                            if (atk.id === comboLastHitter || comboTimer <= 0) {
+                                comboCount = (atk.id === comboLastHitter && comboTimer > 0) ? comboCount + 1 : 1;
+                            } else {
+                                comboCount = 1;
+                            }
+                            comboLastHitter = atk.id;
+                            comboTimer = 90; // 1.5 sec combo window
+                            if (comboCount > comboBestThisGame) comboBestThisGame = comboCount;
+                            // ANNOUNCER HYPE
+                            if (comboCount === 3) showAnnounce('NICE COMBO!', '#00ff88');
+                            if (comboCount === 5) showAnnounce('UNSTOPPABLE!', '#ff0');
+                            if (comboCount === 8) showAnnounce('GODLIKE!', '#f0f');
+                            if (comboCount >= 10) showAnnounce('🔥 LEGENDARY! 🔥', '#ff4400');
+                            if (dmg >= 30) showAnnounce('💥 HEAVY HIT!', '#ff3333');
+                            if (def.pct > 100 && def.pct - dmg <= 100) showAnnounce('⚠️ DANGER ZONE!', '#ff0');
                         }
                     });
                 }
@@ -11176,6 +11754,144 @@
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
             }
+            // ====== BACKROOMS BACKGROUND ======
+            if (selectedMap && selectedMap.id === 'backrooms') {
+                // Sickly yellow fluorescent glow
+                const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                bgGrad.addColorStop(0, '#c4b078');
+                bgGrad.addColorStop(0.5, '#b5a060');
+                bgGrad.addColorStop(1, '#9e8c50');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Repeating wall pattern
+                ctx.strokeStyle = '#a89860';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < canvas.width; x += 80) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += 60) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+                // Flickering fluorescent lights
+                const flickerAlpha = 0.3 + Math.sin(mapTimer * 0.15) * 0.1 + (Math.random() < 0.05 ? 0.3 : 0);
+                for (let lx = 60; lx < canvas.width; lx += 160) {
+                    ctx.fillStyle = `rgba(255, 255, 200, ${flickerAlpha})`;
+                    ctx.fillRect(lx - 30, 20, 60, 8);
+                    // Light cone
+                    ctx.fillStyle = `rgba(255, 255, 180, ${flickerAlpha * 0.15})`;
+                    ctx.beginPath();
+                    ctx.moveTo(lx - 30, 28); ctx.lineTo(lx + 30, 28);
+                    ctx.lineTo(lx + 80, canvas.height); ctx.lineTo(lx - 80, canvas.height);
+                    ctx.fill();
+                }
+                // Damp stain patches
+                ctx.fillStyle = 'rgba(120, 100, 50, 0.15)';
+                ctx.fillRect(200, 150, 80, 40);
+                ctx.fillRect(500, 250, 60, 30);
+                ctx.fillRect(50, 300, 90, 50);
+                // "LEVEL 0" text
+                ctx.fillStyle = 'rgba(80, 70, 40, 0.4)';
+                ctx.font = "bold 16px monospace";
+                ctx.fillText('LEVEL 0', 20, canvas.height - 20);
+                // Occasional glitch
+                if (Math.random() < 0.01) {
+                    ctx.fillStyle = 'rgba(200, 180, 100, 0.1)';
+                    ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 3);
+                }
+            }
+            // ====== SPACE BACKGROUND ======
+            if (selectedMap && selectedMap.id === 'space') {
+                // Deep space gradient
+                ctx.fillStyle = '#000010';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Stars (deterministic based on position for consistency)
+                for (let i = 0; i < 80; i++) {
+                    const sx = (i * 37 + 13) % canvas.width;
+                    const sy = (i * 53 + 7) % canvas.height;
+                    const brightness = 0.3 + Math.sin(mapTimer * 0.03 + i * 0.7) * 0.3;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+                    ctx.fillRect(sx, sy, i % 3 === 0 ? 2 : 1, i % 3 === 0 ? 2 : 1);
+                }
+                // Nebula glow
+                const nebX = canvas.width * 0.7;
+                const nebY = canvas.height * 0.3;
+                const nebGrad = ctx.createRadialGradient(nebX, nebY, 10, nebX, nebY, 150);
+                nebGrad.addColorStop(0, 'rgba(100, 0, 200, 0.15)');
+                nebGrad.addColorStop(0.5, 'rgba(50, 0, 150, 0.08)');
+                nebGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = nebGrad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Planet in background
+                ctx.fillStyle = '#1a3060';
+                ctx.beginPath();
+                ctx.arc(120, canvas.height - 100, 60, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#2a4080';
+                ctx.beginPath();
+                ctx.arc(120, canvas.height - 100, 60, 0.3, 2.8);
+                ctx.fill();
+                // Planet ring
+                ctx.strokeStyle = 'rgba(150, 180, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(120, canvas.height - 100, 90, 20, 0.3, 0, Math.PI * 2);
+                ctx.stroke();
+                // "DEEP SPACE" text
+                ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
+                ctx.font = "bold 14px monospace";
+                ctx.fillText('DEEP SPACE', canvas.width - 140, 30);
+            }
+            // ====== MINECRAFT BACKGROUND ======
+            if (selectedMap && selectedMap.id === 'minecraft') {
+                // Minecraft sky
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                skyGrad.addColorStop(0, '#7ec8e3');
+                skyGrad.addColorStop(0.6, '#a8d8ea');
+                skyGrad.addColorStop(1, '#87ceeb');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Blocky clouds
+                ctx.fillStyle = '#ffffff';
+                for (let i = 0; i < 5; i++) {
+                    const cx = ((mapTimer * 0.3 + i * 180) % (canvas.width + 200)) - 100;
+                    const cy = 30 + i * 25;
+                    ctx.fillRect(cx, cy, 60, 15);
+                    ctx.fillRect(cx + 10, cy - 10, 40, 10);
+                    ctx.fillRect(cx - 15, cy + 5, 20, 10);
+                }
+                // Distant blocky mountains
+                ctx.fillStyle = '#5b8731';
+                for (let bx = 0; bx < canvas.width; bx += 30) {
+                    const bh = 40 + Math.sin(bx * 0.05) * 25 + Math.cos(bx * 0.03) * 15;
+                    ctx.fillRect(bx, canvas.height - 60 - bh, 30, bh);
+                }
+                // Dirt layer
+                ctx.fillStyle = '#8B6914';
+                ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+                // Grass top
+                ctx.fillStyle = '#5b8731';
+                ctx.fillRect(0, canvas.height - 62, canvas.width, 5);
+                // Pixel sun
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(canvas.width - 80, 30, 20, 20);
+                ctx.fillRect(canvas.width - 70, 20, 20, 40);
+                ctx.fillRect(canvas.width - 90, 30, 40, 20);
+                // Trees in background
+                for (let tx = 0; tx < canvas.width; tx += 150) {
+                    // Trunk
+                    ctx.fillStyle = '#6b4423';
+                    ctx.fillRect(tx + 65, canvas.height - 120, 15, 60);
+                    // Leaves (blocky)
+                    ctx.fillStyle = '#2d7a1e';
+                    ctx.fillRect(tx + 45, canvas.height - 160, 55, 15);
+                    ctx.fillRect(tx + 50, canvas.height - 175, 45, 15);
+                    ctx.fillRect(tx + 55, canvas.height - 190, 35, 15);
+                }
+            }
             if (isTraining) {
                 ctx.fillStyle = '#1a1a1a';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -11367,6 +12083,87 @@
                 });
             }
             ctx.restore();
+            // ====== COMBO COUNTER HUD (screen space) ======
+            if (comboCount >= 2) {
+                const comboAlpha = Math.min(1, comboTimer / 30);
+                ctx.save();
+                ctx.globalAlpha = comboAlpha;
+                const comboSize = Math.min(40, 20 + comboCount * 2);
+                ctx.font = `bold ${comboSize}px 'Press Start 2P', monospace`;
+                ctx.textAlign = 'right';
+                const comboColors = comboCount >= 10 ? '#ff4400' : comboCount >= 8 ? '#f0f' : comboCount >= 5 ? '#ff0' : comboCount >= 3 ? '#00ff88' : '#fff';
+                ctx.fillStyle = comboColors;
+                ctx.shadowColor = comboColors;
+                ctx.shadowBlur = 15;
+                ctx.fillText(`${comboCount}x COMBO`, canvas.width - 20, 80);
+                ctx.shadowBlur = 0;
+                ctx.font = "12px monospace";
+                ctx.fillStyle = '#aaa';
+                ctx.fillText(`Best: ${comboBestThisGame}x`, canvas.width - 20, 100);
+                ctx.restore();
+            }
+            // ====== ANNOUNCER HUD (screen space) ======
+            if (announceTimer > 0) {
+                ctx.save();
+                const scale = announceTimer > 100 ? 1 + (120 - announceTimer) * 0.03 : 1;
+                ctx.globalAlpha = Math.min(1, announceTimer / 30);
+                ctx.translate(canvas.width / 2, 140);
+                ctx.scale(scale, scale);
+                ctx.font = "bold 36px 'Press Start 2P', monospace";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = announceColor;
+                ctx.shadowColor = announceColor;
+                ctx.shadowBlur = 25;
+                ctx.fillText(announceText, 0, 0);
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+            // ====== WEATHER EFFECTS (screen space) ======
+            if (weatherType === 'rain') {
+                ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
+                for (let i = 0; i < 30; i++) {
+                    const rx = (mapTimer * 3 + i * 53) % canvas.width;
+                    const ry = (mapTimer * 8 + i * 97) % canvas.height;
+                    ctx.fillRect(rx, ry, 1, 8);
+                }
+                // Rain affects friction
+            } else if (weatherType === 'snow') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                for (let i = 0; i < 25; i++) {
+                    const sx = (mapTimer * 0.5 + i * 67 + Math.sin(mapTimer * 0.02 + i) * 30) % canvas.width;
+                    const sy = (mapTimer * 2 + i * 83) % canvas.height;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 2 + (i % 3), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (weatherType === 'wind') {
+                // Horizontal wind lines
+                ctx.strokeStyle = 'rgba(200, 200, 200, 0.15)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 15; i++) {
+                    const wy = (i * 41 + 20) % canvas.height;
+                    const wx = (mapTimer * 5 + i * 120) % (canvas.width + 200) - 100;
+                    ctx.beginPath();
+                    ctx.moveTo(wx, wy); ctx.lineTo(wx + 40 + i * 3, wy);
+                    ctx.stroke();
+                }
+            } else if (weatherType === 'meteor') {
+                // Falling fireballs (visual only, they do damage too)
+                if (mapTimer % 20 === 0 && Math.random() < 0.3) {
+                    ultEffects.push({
+                        t: 'nyan_rainbow', // Reuse rainbow projectile handler for visual impact
+                        x: -400 + Math.random() * 800,
+                        y: -500,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: 8 + Math.random() * 4,
+                        l: 80,
+                        owner: 0 // No owner - hits everyone
+                    });
+                }
+                ctx.fillStyle = 'rgba(255, 80, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height * 0.15);
+            }
         }
         function drawShop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
