@@ -1507,31 +1507,30 @@
         .apoc-stat-val { color: #ff6600; font-size: 1.2em; font-weight: bold; }
         .apoc-stat-lbl { color: #666; font-size: 0.6em; }
         #apoc-hud { position: fixed; top: 0; left: 0; width: 100%; pointer-events: none; z-index: 50; font-family: 'Press Start 2P', monospace; }
-        .apoc-hp-bar { position: absolute; top: 15px; left: 15px; width: 260px; height: 26px; background: #1a1a1a; border: 2px solid #555; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #cc0000, #ff4400, #ff2200); border-radius: 3px; transition: width 0.2s; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); }
-        .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 11px; line-height: 26px; text-shadow: 1px 1px 3px black; font-family: 'Press Start 2P', monospace; }
-        .apoc-shield-bar { position: absolute; top: 44px; left: 15px; width: 180px; height: 14px; background: #1a1a2a; border: 1px solid #446; border-radius: 3px; }
-        .apoc-shield-fill { height: 100%; background: linear-gradient(90deg, #2266cc, #44aaff, #66ccff); border-radius: 2px; transition: width 0.2s; box-shadow: inset 0 1px 3px rgba(255,255,255,0.3); }
-        .apoc-shield-text { position: absolute; top: 0; left: 4px; color: #aaccff; font-size: 9px; line-height: 14px; text-shadow: 1px 1px 2px black; }
-        .apoc-coins { position: absolute; top: 15px; right: 15px; color: #FFD700; font-size: 16px; background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 5px; border: 1px solid #555; text-shadow: 0 0 6px rgba(255,215,0,0.4); }
-        .apoc-quest-tracker { position: absolute; top: 55px; right: 15px; max-width: 280px; background: rgba(0,0,0,0.75); border: 1px solid #ff6600; border-radius: 6px; padding: 10px; font-size: 10px; box-shadow: 0 0 15px rgba(255,102,0,0.15); }
-        .apoc-quest-title { color: #ff6600; font-weight: bold; margin-bottom: 4px; }
-        .apoc-quest-obj { color: #ccc; }
+        .apoc-hp-bar { position: absolute; top: 12px; left: 12px; width: 200px; height: 18px; background: #111; border: 2px solid #444; border-radius: 3px; overflow: hidden; }
+        .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #cc0000, #ff3300); border-radius: 2px; transition: width 0.15s; }
+        .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 8px; line-height: 18px; text-shadow: 1px 1px 2px #000; }
+        .apoc-xp-bar { position: absolute; top: 34px; left: 12px; width: 200px; height: 8px; background: #111; border: 1px solid #333; border-radius: 2px; overflow: hidden; }
+        .apoc-xp-fill { height: 100%; background: linear-gradient(90deg, #4488ff, #66bbff); border-radius: 1px; transition: width 0.2s; }
+        .apoc-xp-text { position: absolute; top: -1px; left: 0; width: 100%; text-align: center; color: #aaccff; font-size: 6px; line-height: 8px; }
+        .apoc-level { position: absolute; top: 10px; left: 218px; color: #FFD700; font-size: 14px; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+        .apoc-coins { position: absolute; top: 12px; right: 12px; color: #FFD700; font-size: 12px; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 4px; border: 1px solid #444; }
+        .apoc-quest-tracker { position: absolute; top: 50px; right: 12px; max-width: 260px; background: rgba(0,0,0,0.8); border: 1px solid #ff6600; border-radius: 5px; padding: 8px; font-size: 8px; }
+        .apoc-quest-title { color: #ff6600; font-weight: bold; margin-bottom: 3px; }
+        .apoc-quest-obj { color: #aaa; font-size: 7px; }
+        .apoc-inventory { position: absolute; top: 48px; left: 12px; display: flex; gap: 6px; }
+        .apoc-inv-item { color: #ccc; background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 3px; border: 1px solid #444; font-family: 'Press Start 2P', monospace; font-size: 8px; }
         .apoc-dialogue-box {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 600px; max-width: 90vw; background: rgba(0,0,0,0.9); border: 2px solid #ff6600;
-            border-radius: 10px; padding: 20px; z-index: 100; pointer-events: auto;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 580px; max-width: 90vw; background: rgba(0,0,0,0.92); border: 2px solid #ff6600;
+            border-radius: 8px; padding: 16px; z-index: 100; pointer-events: auto;
         }
-        .apoc-dialogue-name { color: #ff6600; font-weight: bold; font-size: 1.1em; margin-bottom: 8px; }
-        .apoc-dialogue-text { color: #ddd; font-size: 0.9em; line-height: 1.5; min-height: 40px; }
-        .apoc-dialogue-prompt { color: #888; font-size: 0.7em; margin-top: 10px; text-align: right; }
-        .apoc-interact-prompt { position: absolute; color: #FFD700; font-size: 12px; text-align: center; text-shadow: 0 0 5px rgba(255,215,0,0.5); animation: apocPulse 1s infinite; }
-        @keyframes apocPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .apoc-reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.95); border: 2px solid #FFD700; border-radius: 15px; padding: 30px; z-index: 110; text-align: center; min-width: 300px; }
-        .apoc-reward-title { color: #FFD700; font-size: 1.5em; margin-bottom: 15px; }
-        .apoc-reward-item { color: #ccc; font-size: 1em; margin: 5px 0; }
-        .apoc-inventory { position: absolute; top: 64px; left: 15px; display: flex; gap: 10px; font-size: 13px; }
-        .apoc-inv-item { color: #ccc; background: rgba(0,0,0,0.65); padding: 4px 10px; border-radius: 4px; border: 1px solid #555; font-family: 'Press Start 2P', monospace; font-size: 10px; }
+        .apoc-dialogue-name { color: #ff6600; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
+        .apoc-dialogue-text { color: #ddd; font-size: 9px; line-height: 1.6; min-height: 30px; }
+        .apoc-dialogue-prompt { color: #666; font-size: 7px; margin-top: 8px; text-align: right; }
+        .apoc-reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.95); border: 2px solid #FFD700; border-radius: 12px; padding: 24px; z-index: 110; text-align: center; min-width: 280px; }
+        .apoc-reward-title { color: #FFD700; font-size: 1.3em; margin-bottom: 12px; }
+        .apoc-reward-item { color: #ccc; font-size: 0.9em; margin: 4px 0; }
     </style>
 </head>
 
@@ -2142,6 +2141,7 @@
         <div class="apoc-subtitle">THE END OF ALL MEMES</div>
         <div class="apoc-stats-bar" id="apoc-stats-bar">
             <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-hp">100</div><div class="apoc-stat-lbl">HP</div></div>
+            <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-lvl">1</div><div class="apoc-stat-lbl">LVL</div></div>
             <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-coins">0</div><div class="apoc-stat-lbl">COINS</div></div>
             <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-kills">0</div><div class="apoc-stat-lbl">KILLS</div></div>
             <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-quests">0/20</div><div class="apoc-stat-lbl">QUESTS</div></div>
@@ -2152,7 +2152,8 @@
     </div>
     <div id="apoc-hud" class="hidden">
         <div class="apoc-hp-bar"><div class="apoc-hp-fill" id="apoc-hp-fill" style="width:100%"></div><div class="apoc-hp-text" id="apoc-hp-text">100/100</div></div>
-        <div class="apoc-shield-bar"><div class="apoc-shield-fill" id="apoc-shield-fill" style="width:100%"></div><div class="apoc-shield-text">🛡️</div></div>
+        <div class="apoc-xp-bar"><div class="apoc-xp-fill" id="apoc-xp-fill" style="width:0%"></div><div class="apoc-xp-text" id="apoc-xp-text">LV 1</div></div>
+        <div class="apoc-level" id="apoc-level">LV 1</div>
         <div class="apoc-inventory" id="apoc-inventory"></div>
         <div class="apoc-coins" id="apoc-coins-hud">🪙 0</div>
         <div class="apoc-quest-tracker" id="apoc-quest-tracker" style="display:none"></div>
@@ -14688,6 +14689,127 @@
         const APOC_LOOT_ICONS = { coin:'🪙', scrap:'⚙️', medkit:'🩹', ammo:'🔫', cyberware:'💿', quest_radio:'📻',
             data_fragment:'💾', package:'📦', echo_locket:'💍', terminal_data:'🖥️', data_cache:'💰', power_cell:'🔋', meme_archive:'📜' };
 
+        // ====== APOCALYPSE PIXEL SPRITES (16x16 grid, same system as main game) ======
+        const APOC_SPRITE_PIXELS = {
+            humanoid: [
+                '0000022220000000','0000023320000000','0002222222200000','0000011111000000',
+                '000001A1A1000000','0000011111000000','0000077770000000','0004444444400000',
+                '00B44444444B0000','0000488984000000','0000055550000000','0000050050000000',
+                '0000050050000000','0000060060000000','0000060060000000','0000000000000000'
+            ],
+            humanoid_atk: [
+                '0000022220000000','0000023320000000','0002222222200000','0000011111000000',
+                '000001A1A1000000','0000011111000000','0000077770000000','0004444444400000',
+                '00B444444444CCCC','0000488984000000','0000055550000000','0000050050000000',
+                '0000050050000000','0000060060000000','0000060060000000','0000000000000000'
+            ],
+            doge: [
+                '0001100001100000','0001120001120000','0001222222100000','0000222222000000',
+                '000022A2A2200000','0000024420000000','0000022220000000','0000033330000000',
+                '0003333333300000','0003333333300000','0000033033000000','0000033033000000',
+                '0000044044000000','0000044044000000','0000000000000000','0000000000000000'
+            ],
+            frog: [
+                '0000550005500000','000A5A00A5A00000','0000222222000000','0000222222000000',
+                '0000222332000000','0000022220000000','0000044440000000','0004444444400000',
+                '0004444444400000','0000044044000000','0000044044000000','0000066066000000',
+                '0000066066000000','0000000000000000','0000000000000000','0000000000000000'
+            ],
+            glitchling: [
+                '0000000000000000','0000000000000000','0000011110000000','0000111111000000',
+                '0001A1111A100000','0001111111100000','0001122211100000','0000111111000000',
+                '0000011110000000','0000011110000000','0000010010000000','0000010010000000',
+                '0000020020000000','0000000000000000','0000000000000000','0000000000000000'
+            ],
+            shade: [
+                '0000000000000000','0000022220000000','0000222222000000','0002222222200000',
+                '0002222222200000','0002A2002A200000','0002222222200000','0000222222000000',
+                '0000333333000000','0000333333000000','0000333333000000','0000033330000000',
+                '0000033330000000','0000003300000000','0000003300000000','0000000000000000'
+            ],
+            troll: [
+                '0000011110000000','0000111111000000','0001111111100000','000A11111A100000',
+                '0001111111100000','0000122221000000','0000011110000000','0002222222200000',
+                '0022222222220000','0022222222220000','0002222222200000','0000022220000000',
+                '0000020020000000','0000020020000000','0000030030000000','0000000000000000'
+            ],
+            ghost: [
+                '0000000000000000','0000011110000000','0000111111000000','0001111111100000',
+                '0001A1111A100000','0001111111100000','0001111111100000','0000111111000000',
+                '0000111111000000','0000111111000000','0000111111000000','0000101101000000',
+                '0000010010000000','0000010010000000','0000000000000000','0000000000000000'
+            ],
+            robot: [
+                '0000002200000000','0000022220000000','0000222222000000','0000222222000000',
+                '000022A2A2200000','0000222222000000','0000033330000000','0000333333000000',
+                '0003333333300000','0003333333300000','0000333333000000','0000033330000000',
+                '0000044044000000','0000044044000000','0000044044000000','0000000000000000'
+            ],
+            wizard: [
+                '0000001100000000','0000011110000000','0000111111000000','0001111111100000',
+                '0000022220000000','000002A2A2000000','0000033330000000','0000444444000000',
+                '0003334443300000','0003344443300000','0000044440000000','0000044440000000',
+                '0000044440000000','0000044440000000','0000004400000000','0000000000000000'
+            ],
+            crowned: [
+                '0005050505000000','0055555555500000','0001111111000000','0001111111000000',
+                '000A11111A000000','0001111111000000','0002222222000000','0022222222200000',
+                '0222222222220000','0022222222200000','0022222222200000','0002222222000000',
+                '0000033330000000','0000033330000000','0000044044000000','0000000000000000'
+            ],
+            fox: [
+                '0001000001000000','0001100011000000','0000222222000000','0000222222000000',
+                '000022A2A2000000','0000022220000000','0000033330000000','0003333333300000',
+                '0003333333300000','0000033330000000','0000033033000000','0000044044000000',
+                '0000044044000000','0000000000000000','0000000000000000','0000000000000000'
+            ],
+            cat: [
+                '0000000000000000','0001000001000000','0001100011000000','0000111111000000',
+                '0000111111000000','000011A1A1000000','0000011110000000','0000022220000000',
+                '0002222222200000','0002222222200000','0000022020000000','0000022020000000',
+                '0000033030000000','0000033030000000','0000000000000000','0000000000000000'
+            ],
+            skull_fig: [
+                '0000000000000000','0000011110000000','0000111111000000','0000111111000000',
+                '0000A1111A000000','0000011110000000','0000012210000000','0000022220000000',
+                '0000033330000000','0000333333000000','0000333333000000','0000033330000000',
+                '0000033330000000','0000030030000000','0000030030000000','0000000000000000'
+            ]
+        };
+        const APOC_SPRITE_CONFIGS = {
+            player:          { p:'humanoid',     c:{'0':null,'1':'#D4B56A','2':'#8B6914','3':'#6a4a00','4':'#553311','5':'#4a3520','6':'#3a2010','7':'#CC2200','8':'#222','9':'#C4A55A','A':'#000','B':'#553311','C':'#ccc'} },
+            player_atk:      { p:'humanoid_atk', c:{'0':null,'1':'#D4B56A','2':'#8B6914','3':'#6a4a00','4':'#553311','5':'#4a3520','6':'#3a2010','7':'#CC2200','8':'#222','9':'#C4A55A','A':'#000','B':'#553311','C':'#ccc'} },
+            survivor_doge:   { p:'doge',    c:{'0':null,'1':'#D48A6A','2':'#C4943A','3':'#C4943A','4':'#5a3a1a','A':'#222'} },
+            data_doge:       { p:'doge',    c:{'0':null,'1':'#B8860B','2':'#DAA520','3':'#B8860B','4':'#6a4a1a','A':'#00ccff'} },
+            old_pepe:        { p:'frog',    c:{'0':null,'2':'#6aa84f','3':'#2a4a18','4':'#55883a','5':'#ffffff','6':'#3a6a20','A':'#222'} },
+            hacker_frog:     { p:'frog',    c:{'0':null,'2':'#4a884f','3':'#1a3a18','4':'#3a6830','5':'#ccffcc','6':'#2a5a15','A':'#00ff00'} },
+            echo_npc:        { p:'humanoid',c:{'0':null,'1':'#D4B56A','2':'#C4A55A','3':'#B49A4A','4':'#8B7020','5':'#6a5530','6':'#4a3520','7':'#FFD700','8':'#333','9':'#FFD700','A':'#222','B':'#8B7020'} },
+            hermit:          { p:'wizard',  c:{'0':null,'1':'#4a2a6a','2':'#D4B56A','3':'#cccccc','4':'#3a1a5a','A':'#000'} },
+            wasteland_trader:{ p:'fox',     c:{'0':null,'1':'#ff8800','2':'#DD6600','3':'#CC5500','4':'#883300','A':'#000'} },
+            courier_cat:     { p:'cat',     c:{'0':null,'1':'#888888','2':'#666666','3':'#444444','A':'#44ff44'} },
+            program_npc:     { p:'robot',   c:{'0':null,'2':'#5588aa','3':'#446688','4':'#334455','A':'#00ff00'} },
+            last_survivor:   { p:'skull_fig',c:{'0':null,'1':'#ddddcc','2':'#aaaaaa','3':'#333333','A':'#000'} },
+            glitchling:      { p:'glitchling',c:{'0':null,'1':'#00ff44','2':'#00aa22','A':'#ffff00'} },
+            corrupt_doge:    { p:'doge',    c:{'0':null,'1':'#5a2a0a','2':'#704020','3':'#6a3a1a','4':'#3a1a05','A':'#ff0000'} },
+            sus_shade:       { p:'shade',   c:{'0':null,'2':'#2a004a','3':'#1a0030','A':'#aa00ff'} },
+            troll_spawn:     { p:'troll',   c:{'0':null,'1':'#555555','2':'#444444','3':'#333333','A':'#ff0000'} },
+            pixel_wraith:    { p:'ghost',   c:{'0':null,'1':'#44ddff','A':'#000066'} },
+            virus_beast:     { p:'troll',   c:{'0':null,'1':'#00cc00','2':'#009900','3':'#006600','A':'#ffff00'} },
+            data_sentinel:   { p:'robot',   c:{'0':null,'2':'#336699','3':'#224466','4':'#112233','A':'#00ffff'} },
+            echo_boss:       { p:'humanoid',c:{'0':null,'1':'#D4B56A','2':'#C4A55A','3':'#B49A4A','4':'#8B7020','5':'#6a5530','6':'#4a3520','7':'#FFD700','8':'#333','9':'#FFD700','A':'#222','B':'#8B7020'} },
+            meme_god:        { p:'crowned', c:{'0':null,'1':'#FFD700','2':'#CC3300','3':'#FFD700','4':'#AA2200','5':'#FFD700','A':'#000'} }
+        };
+        let apocSpritesReady = false;
+        const apocSprites = {};
+        function initApocSprites() {
+            if (apocSpritesReady) return;
+            for (const [id, cfg] of Object.entries(APOC_SPRITE_CONFIGS)) {
+                const pixels = APOC_SPRITE_PIXELS[cfg.p];
+                if (pixels) apocSprites[id] = generateSprite(pixels, cfg.c);
+            }
+            apocSpritesReady = true;
+        }
+
         // ====== INITIALIZE APOCALYPSE STATE ======
         function initApocState() {
             return {
@@ -14695,6 +14817,7 @@
                 playerHP: 100, playerMaxHP: 100, playerGrounded: false, playerDir: true,
                 playerAttacking: false, playerAttackTimer: 0, playerInv: 0, playerCd: 0,
                 playerShielding: false, shieldHP: 100, shieldMaxHP: 100, shieldCooldown: 0, shieldBreakTimer: 0,
+                xp: 0, level: 1, xpToNext: 100,
                 coins: 0, scrap: 0, ammo: 30, medkits: 3,
                 inventory: [], // cyberware equipped
                 questItems: {}, // { itemId: count }
@@ -14831,6 +14954,7 @@
         // ====== ENTER AREA (START GAMEPLAY) ======
         function enterApocArea(areaIdx) {
             if (!apoc.unlockedAreas[areaIdx]) return;
+            initApocSprites();
             isMemeApocalypse = true;
             isSurvival = false; isMemeBall = false; isTraining = false; isBossEvent = false;
             const area = APOC_AREAS[areaIdx];
@@ -15115,6 +15239,22 @@
                     // Track kill
                     apoc.totalKills++;
                     apoc.killsByType[e.type] = (apoc.killsByType[e.type] || 0) + 1;
+                    // XP gain
+                    const xpGain = et.boss ? 50 : (10 + Math.floor(et.hp / 5));
+                    apoc.xp += xpGain;
+                    apoc.worldParticles.push({ x: e.x, y: e.y - 20, text: '+' + xpGain + ' XP', vx: 0, vy: -0.8, life: 40, color: '#44ffdd', size: 10 });
+                    // Level up check
+                    while (apoc.xp >= apoc.xpToNext) {
+                        apoc.xp -= apoc.xpToNext;
+                        apoc.level++;
+                        apoc.xpToNext = Math.floor(apoc.xpToNext * 1.4);
+                        apoc.playerMaxHP += 10;
+                        apoc.playerHP = apoc.playerMaxHP;
+                        apoc.shieldMaxHP += 10;
+                        apoc.shieldHP = apoc.shieldMaxHP;
+                        apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 40, text: 'LEVEL UP! LV' + apoc.level, vx: 0, vy: -0.5, life: 90, color: '#FFD700', size: 14 });
+                        apoc.shakeCam = 8;
+                    }
                     // Update quest objectives
                     updateApocQuestProgress('kill', e.type);
                     // Check boss kills
@@ -15227,340 +15367,38 @@
             apoc.cameraX = Math.max(0, Math.min(area.width - canvas.width, apoc.cameraX));
         }
 
-        // ====== NPC PIXEL SPRITE HELPER ======
+        // ====== NPC SPRITE HELPER (uses generateSprite system) ======
         function drawPixelNPC(ctx, npcId, nx, ny, t) {
+            const sprite = apocSprites[npcId] || apocSprites.survivor_doge;
+            if (!sprite) return;
             ctx.save();
-            ctx.translate(nx, ny);
+            ctx.imageSmoothingEnabled = false;
             const bob = Math.sin(t * 0.04 + nx * 0.01) * 1.5;
-            ctx.translate(0, bob);
-
-            if (npcId === 'survivor_doge' || npcId === 'data_doge') {
-                const isData = npcId === 'data_doge';
-                // Feet
-                ctx.fillStyle = '#5a3a1a';
-                ctx.fillRect(-10, 6, 7, 6);
-                ctx.fillRect(3, 6, 7, 6);
-                // Legs
-                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
-                ctx.fillRect(-9, -4, 7, 12);
-                ctx.fillRect(2, -4, 7, 12);
-                // Body
-                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
-                ctx.fillRect(-12, -24, 24, 22);
-                if (isData) {
-                    // Tech vest
-                    ctx.fillStyle = '#1a3a5a';
-                    ctx.fillRect(-12, -24, 24, 12);
-                    ctx.fillStyle = '#00ccff';
-                    ctx.fillRect(-4, -20, 2, 2);
-                    ctx.fillRect(2, -20, 2, 2);
-                } else {
-                    // Bandana
-                    ctx.fillStyle = '#cc4400';
-                    ctx.fillRect(-12, -26, 24, 4);
-                }
-                // Head
-                ctx.fillStyle = isData ? '#DAA520' : '#D4A84A';
-                ctx.fillRect(-11, -42, 22, 20);
-                // Ears (triangles)
-                ctx.beginPath();
-                ctx.moveTo(-10, -42); ctx.lineTo(-6, -52); ctx.lineTo(-2, -42);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(2, -42); ctx.lineTo(6, -52); ctx.lineTo(10, -42);
-                ctx.fill();
-                // Inner ears
-                ctx.fillStyle = '#D48A6A';
-                ctx.beginPath();
-                ctx.moveTo(-8, -42); ctx.lineTo(-6, -48); ctx.lineTo(-4, -42);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(4, -42); ctx.lineTo(6, -48); ctx.lineTo(8, -42);
-                ctx.fill();
-                // Muzzle
-                ctx.fillStyle = '#F0D8A8';
-                ctx.fillRect(-6, -32, 12, 8);
-                // Eyes
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-8, -38, 4, 4);
-                ctx.fillRect(4, -38, 4, 4);
-                // Eye shine
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-7, -37, 2, 2);
-                ctx.fillRect(5, -37, 2, 2);
-                // Nose
-                ctx.fillStyle = '#333';
-                ctx.fillRect(-2, -30, 4, 3);
-                // Arms
-                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
-                ctx.fillRect(-15, -22, 5, 14);
-                ctx.fillRect(10, -22, 5, 14);
-            } else if (npcId === 'old_pepe') {
-                // Feet
-                ctx.fillStyle = '#3a5a20';
-                ctx.fillRect(-10, 6, 8, 6);
-                ctx.fillRect(2, 6, 8, 6);
-                // Legs
-                ctx.fillStyle = '#4a7a30';
-                ctx.fillRect(-9, -4, 7, 12);
-                ctx.fillRect(2, -4, 7, 12);
-                // Body
-                ctx.fillStyle = '#55883a';
-                ctx.fillRect(-13, -24, 26, 22);
-                // Head (wide frog head)
-                ctx.fillStyle = '#6aa84f';
-                ctx.fillRect(-15, -46, 30, 24);
-                // Big eyes (bulging, classic Pepe)
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-14, -50, 12, 10);
-                ctx.fillRect(2, -50, 12, 10);
-                ctx.fillStyle = '#222';
-                ctx.fillRect(-9, -48, 5, 7);
-                ctx.fillRect(5, -48, 5, 7);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-8, -47, 2, 2);
-                ctx.fillRect(6, -47, 2, 2);
-                // Wide mouth
-                ctx.fillStyle = '#3a6a25';
-                ctx.fillRect(-12, -26, 24, 3);
-                // Sad frown line
-                ctx.strokeStyle = '#2a4a15';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(-10, -25);
-                ctx.quadraticCurveTo(0, -20, 10, -25);
-                ctx.stroke();
-                // Old Pepe hat
-                ctx.fillStyle = '#553a22';
-                ctx.fillRect(-17, -54, 34, 4);
-                ctx.fillRect(-10, -64, 20, 12);
-                ctx.fillStyle = '#443018';
-                ctx.fillRect(-8, -56, 16, 2);
-                // Arms
-                ctx.fillStyle = '#55883a';
-                ctx.fillRect(-16, -22, 5, 14);
-                ctx.fillRect(11, -22, 5, 14);
-            } else if (npcId === 'echo_npc') {
-                // Cowboy NPC - tan/gold themed
-                // Boots
-                ctx.fillStyle = '#3a2010';
-                ctx.fillRect(-10, 4, 8, 8);
-                ctx.fillRect(2, 4, 8, 8);
-                // Pants
-                ctx.fillStyle = '#4a3520';
-                ctx.fillRect(-9, -10, 7, 16);
-                ctx.fillRect(2, -10, 7, 16);
-                // Belt
-                ctx.fillStyle = '#222';
-                ctx.fillRect(-12, -12, 24, 3);
-                ctx.fillStyle = '#C4A55A';
-                ctx.fillRect(-2, -13, 4, 5);
-                // Coat
-                ctx.fillStyle = '#6a5020';
-                ctx.fillRect(-13, -32, 26, 22);
-                ctx.fillStyle = '#7a6030';
-                ctx.fillRect(-11, -32, 10, 8);
-                ctx.fillRect(1, -32, 10, 8);
-                // Scarf
-                ctx.fillStyle = '#C4A55A';
-                ctx.fillRect(-8, -36, 16, 5);
-                const sw = Math.sin(t * 0.08) * 2;
-                ctx.fillRect(-10, -32, 5, 8 + sw);
-                // Head
-                ctx.fillStyle = '#D4B56A';
-                ctx.fillRect(-8, -48, 16, 14);
-                // Hat
-                ctx.fillStyle = '#C4A55A';
-                ctx.fillRect(-14, -54, 28, 4);
-                ctx.fillStyle = '#B49A4A';
-                ctx.fillRect(-6, -62, 12, 10);
-                ctx.fillStyle = '#A48A3A';
-                ctx.fillRect(-5, -55, 10, 2);
-                // Eyes
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-5, -44, 3, 3);
-                ctx.fillRect(2, -44, 3, 3);
-                // Mouth
-                ctx.fillStyle = '#9a6a3a';
-                ctx.fillRect(-3, -38, 6, 2);
-                // Arms
-                ctx.fillStyle = '#6a5020';
-                ctx.fillRect(-16, -30, 5, 16);
-                ctx.fillRect(11, -30, 5, 16);
-            } else if (npcId === 'hermit') {
-                // Wizard hermit
-                // Robe bottom / feet hidden
-                ctx.fillStyle = '#3a1a5a';
-                ctx.fillRect(-12, -2, 24, 14);
-                // Body robe
-                ctx.fillStyle = '#4a2a6a';
-                ctx.fillRect(-13, -30, 26, 30);
-                // Robe details
-                ctx.fillStyle = '#5a3a7a';
-                ctx.fillRect(-6, -28, 2, 26);
-                ctx.fillRect(4, -28, 2, 26);
-                // Head
-                ctx.fillStyle = '#D4B56A';
-                ctx.fillRect(-8, -44, 16, 16);
-                // Beard
-                ctx.fillStyle = '#ccc';
-                ctx.fillRect(-6, -30, 12, 8);
-                ctx.fillRect(-4, -22, 8, 5);
-                ctx.fillRect(-2, -17, 4, 3);
-                // Eyes
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-5, -40, 3, 3);
-                ctx.fillRect(2, -40, 3, 3);
-                // Hat brim
-                ctx.fillStyle = '#3a1a5a';
-                ctx.fillRect(-12, -48, 24, 4);
-                // Wizard hat (pointy)
-                ctx.fillStyle = '#4a2a6a';
-                ctx.beginPath();
-                ctx.moveTo(-8, -48);
-                ctx.lineTo(0, -72);
-                ctx.lineTo(8, -48);
-                ctx.closePath();
-                ctx.fill();
-                // Star on hat
-                ctx.fillStyle = '#FFD700';
-                ctx.font = '8px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('✦', 0, -56);
-                // Staff
-                ctx.fillStyle = '#6a4a2a';
-                ctx.fillRect(16, -50, 3, 54);
-                // Staff orb
-                ctx.fillStyle = '#aa44ff';
-                ctx.shadowColor = '#aa44ff';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(17, -52, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                // Arms (hidden in robe, just sleeves)
-                ctx.fillStyle = '#4a2a6a';
-                ctx.fillRect(-16, -26, 5, 12);
-                ctx.fillRect(11, -26, 5, 12);
-            } else {
-                // Fallback: generic NPC body
-                ctx.fillStyle = '#888';
-                ctx.fillRect(-10, 4, 7, 8);
-                ctx.fillRect(3, 4, 7, 8);
-                ctx.fillRect(-12, -24, 24, 30);
-                ctx.fillStyle = '#aaa';
-                ctx.fillRect(-9, -40, 18, 18);
-                ctx.fillStyle = '#000';
-                ctx.fillRect(-5, -36, 3, 3);
-                ctx.fillRect(2, -36, 3, 3);
-            }
-
+            const sprW = 50, sprH = 56;
+            ctx.drawImage(sprite, nx - sprW / 2, ny - sprH + bob, sprW, sprH);
             ctx.restore();
         }
 
-        // ====== ENEMY PIXEL SPRITE HELPER ======
+        // ====== ENEMY SPRITE HELPER (uses generateSprite system) ======
         function drawPixelEnemy(ctx, e, et, ex, t) {
-            const hurtFlash = e.hurtTimer > 0;
-            const bc = hurtFlash ? '#fff' : et.color;
-            const w = et.w;
-            const h = et.h;
-            const hw = w * 0.5;
-
+            const sprite = apocSprites[e.type] || apocSprites.glitchling;
+            if (!sprite) return;
             ctx.save();
-            ctx.translate(ex, e.y + h);
-
-            // Walking bob
+            ctx.imageSmoothingEnabled = false;
+            const hurtFlash = e.hurtTimer > 0;
+            if (hurtFlash) { ctx.globalAlpha = 0.5 + Math.sin(t * 0.5) * 0.3; }
             const walkBob = Math.sin(t * 0.08 + e.x * 0.05) * 1.5;
-
-            // Legs
-            ctx.fillStyle = hurtFlash ? '#ddd' : '#222';
-            const legW = Math.max(5, hw * 0.35);
-            const legH = Math.max(6, h * 0.22);
-            const legSpread = hw * 0.15;
-            ctx.fillRect(-legSpread - legW, -legH + walkBob, legW, legH);
-            ctx.fillRect(legSpread, -legH - walkBob, legW, legH);
-
-            // Body/torso
-            ctx.fillStyle = bc;
-            ctx.globalAlpha = hurtFlash ? 0.9 : 0.85;
-            const bodyW = hw * 1.2;
-            const bodyH = h * 0.45;
-            const bodyY = -(legH + bodyH);
-            ctx.fillRect(-bodyW * 0.5, bodyY, bodyW, bodyH);
-            // Body shading
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.fillRect(-bodyW * 0.5, bodyY, bodyW * 0.15, bodyH);
-            ctx.fillRect(bodyW * 0.35, bodyY, bodyW * 0.15, bodyH);
-
-            // Arms
-            ctx.fillStyle = bc;
-            ctx.globalAlpha = hurtFlash ? 0.85 : 0.75;
-            const armW = Math.max(4, hw * 0.22);
-            const armH = Math.max(8, h * 0.3);
-            const armSwing = Math.sin(t * 0.06 + e.x) * 2;
-            ctx.fillRect(-bodyW * 0.5 - armW - 1, bodyY + 2 + armSwing, armW, armH);
-            ctx.fillRect(bodyW * 0.5 + 1, bodyY + 2 - armSwing, armW, armH);
-
-            // Head
-            ctx.globalAlpha = hurtFlash ? 0.95 : 0.9;
-            ctx.fillStyle = bc;
-            const headW = hw * 0.9;
-            const headH = h * 0.28;
-            const headY = bodyY - headH + 2;
-            ctx.fillRect(-headW * 0.5, headY, headW, headH);
-
-            // Eyes (menacing)
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = '#000';
-            const eyeW = Math.max(3, headW * 0.18);
-            const eyeH = Math.max(3, headH * 0.3);
-            const eyeY = headY + headH * 0.3;
-            ctx.fillRect(-headW * 0.3, eyeY, eyeW, eyeH);
-            ctx.fillRect(headW * 0.12, eyeY, eyeW, eyeH);
-            // Eye color (glowing)
-            const eyeColor = et.boss ? '#ff0' : (et.color === '#00ff44' ? '#ff0' : '#f44');
-            ctx.fillStyle = eyeColor;
-            const pupilW = Math.max(2, eyeW * 0.6);
-            const pupilH = Math.max(2, eyeH * 0.6);
-            ctx.fillRect(-headW * 0.3 + 1, eyeY + 1, pupilW, pupilH);
-            ctx.fillRect(headW * 0.12 + 1, eyeY + 1, pupilW, pupilH);
-
-            // Mouth (angry line)
-            ctx.fillStyle = '#000';
-            ctx.fillRect(-headW * 0.25, headY + headH - 4, headW * 0.5, 2);
-
-            // Boss crown/glow
-            if (et.boss) {
-                ctx.shadowColor = et.color;
-                ctx.shadowBlur = 10 + Math.sin(t * 0.05) * 5;
-                ctx.strokeStyle = et.color;
-                ctx.lineWidth = 2;
-                ctx.strokeRect(-bodyW * 0.5 - 2, bodyY - 2, bodyW + 4, bodyH + legH + 4);
-                // Crown for bosses
-                ctx.fillStyle = '#FFD700';
-                ctx.shadowColor = '#FFD700';
-                ctx.shadowBlur = 8;
-                const crownY = headY - 8;
-                ctx.fillRect(-headW * 0.4, crownY, headW * 0.8, 6);
-                // Crown points
-                ctx.beginPath();
-                ctx.moveTo(-headW * 0.35, crownY);
-                ctx.lineTo(-headW * 0.25, crownY - 6);
-                ctx.lineTo(-headW * 0.15, crownY);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(-headW * 0.05, crownY);
-                ctx.lineTo(0, crownY - 8);
-                ctx.lineTo(headW * 0.05, crownY);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(headW * 0.15, crownY);
-                ctx.lineTo(headW * 0.25, crownY - 6);
-                ctx.lineTo(headW * 0.35, crownY);
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            // Flip based on movement direction
+            const facingLeft = e.vx < 0;
+            const drawX = ex - et.w / 2;
+            const drawY = e.y + walkBob;
+            if (facingLeft) {
+                ctx.translate(drawX + et.w / 2, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(sprite, -et.w / 2, drawY, et.w, et.h);
+            } else {
+                ctx.drawImage(sprite, drawX, drawY, et.w, et.h);
             }
-
             ctx.globalAlpha = 1;
             ctx.restore();
         }
@@ -15574,6 +15412,7 @@
             const t = apoc.timer;
 
             ctx.save();
+            ctx.imageSmoothingEnabled = false;
             if (apoc.shakeCam > 0) {
                 ctx.translate((Math.random()-0.5)*apoc.shakeCam*3, (Math.random()-0.5)*apoc.shakeCam*3);
             }
@@ -15586,7 +15425,7 @@
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // ── STARS / atmosphere dots (only in dark areas) ──
+            // ── STARS / atmosphere dots ──
             const areaId = apoc.area;
             if (areaId === 1 || areaId === 3 || areaId === 4) {
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
@@ -15645,7 +15484,6 @@
                     if (dx > -120 && dx < canvas.width + 120) {
                         ctx.font = sz + 'px Arial';
                         ctx.textAlign = 'center';
-                        // Shadow underneath
                         ctx.globalAlpha = 0.3;
                         ctx.fillStyle = '#000';
                         ctx.beginPath();
@@ -15665,22 +15503,18 @@
                               areaId === 4 ? ['#3a1a40','#4a2a55','#2a0a30'] :
                                              ['#4a3a1a','#5a4a28','#3a2a10'];
             area.platforms.forEach(p => {
-                const px = p.x - cam;
-                if (px + p.w < -50 || px > canvas.width + 50) return;
+                const ppx = p.x - cam;
+                if (ppx + p.w < -50 || ppx > canvas.width + 50) return;
                 if (p.y >= gY) {
-                    // ── GROUND FILL ──
-                    // Top soil layer
                     const groundGrad = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
                     groundGrad.addColorStop(0, platTheme[1]);
                     groundGrad.addColorStop(0.15, platTheme[0]);
                     groundGrad.addColorStop(1, '#1a1008');
                     ctx.fillStyle = groundGrad;
-                    ctx.fillRect(px, p.y, p.w, p.h);
-                    // Grass edge on top
+                    ctx.fillRect(ppx, p.y, p.w, p.h);
                     ctx.fillStyle = grassColors[areaId % 3];
-                    ctx.fillRect(px, p.y - 3, p.w, 6);
-                    // Grass tufts (triangular blades)
-                    for (let gx = px; gx < px + p.w; gx += 10 + (gx * 7 % 8)) {
+                    ctx.fillRect(ppx, p.y - 3, p.w, 6);
+                    for (let gx = ppx; gx < ppx + p.w; gx += 10 + (gx * 7 % 8)) {
                         const gh = 3 + (gx * 3 % 4);
                         const lean = Math.sin(gx * 0.3 + t * 0.03) * 1.5;
                         ctx.fillStyle = grassColors[((gx * 3) >> 0) % 3];
@@ -15690,39 +15524,32 @@
                         ctx.lineTo(gx + 2, p.y);
                         ctx.fill();
                     }
-                    // Ground texture lines
                     ctx.strokeStyle = 'rgba(0,0,0,0.15)';
                     ctx.lineWidth = 1;
                     for (let ty = p.y + 15; ty < p.y + p.h; ty += 12) {
                         ctx.beginPath();
-                        ctx.moveTo(px, ty);
-                        for (let tx = px; tx < px + p.w; tx += 20) {
+                        ctx.moveTo(ppx, ty);
+                        for (let tx = ppx; tx < ppx + p.w; tx += 20) {
                             ctx.lineTo(tx + 10, ty + Math.sin(tx * 0.1) * 3);
                         }
                         ctx.stroke();
                     }
                 } else {
-                    // ── ELEVATED PLATFORM ──
-                    // 3D effect with side
                     const sideH = 8;
                     ctx.fillStyle = platTheme[2];
-                    ctx.fillRect(px + 3, p.y + p.h, p.w - 6, sideH);
-                    // Main body with gradient
+                    ctx.fillRect(ppx + 3, p.y + p.h, p.w - 6, sideH);
                     const platGrad = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
                     platGrad.addColorStop(0, platTheme[1]);
                     platGrad.addColorStop(1, platTheme[0]);
                     ctx.fillStyle = platGrad;
-                    ctx.fillRect(px, p.y, p.w, p.h);
-                    // Top highlight
+                    ctx.fillRect(ppx, p.y, p.w, p.h);
                     ctx.fillStyle = 'rgba(255,255,255,0.12)';
-                    ctx.fillRect(px, p.y, p.w, 3);
-                    // Left/right edges
+                    ctx.fillRect(ppx, p.y, p.w, 3);
                     ctx.fillStyle = 'rgba(255,255,255,0.06)';
-                    ctx.fillRect(px, p.y, 2, p.h);
+                    ctx.fillRect(ppx, p.y, 2, p.h);
                     ctx.fillStyle = 'rgba(0,0,0,0.15)';
-                    ctx.fillRect(px + p.w - 2, p.y, 2, p.h);
-                    // Grass tufts on platforms (small triangles)
-                    for (let gx = px + 4; gx < px + p.w - 4; gx += 8 + (gx * 5 % 6)) {
+                    ctx.fillRect(ppx + p.w - 2, p.y, 2, p.h);
+                    for (let gx = ppx + 4; gx < ppx + p.w - 4; gx += 8 + (gx * 5 % 6)) {
                         const gh = 2 + (gx * 2 % 3);
                         ctx.fillStyle = grassColors[((gx * 2) >> 0) % 3];
                         ctx.beginPath();
@@ -15731,11 +15558,10 @@
                         ctx.lineTo(gx + 2, p.y);
                         ctx.fill();
                     }
-                    // Shadow below
                     ctx.fillStyle = 'rgba(0,0,0,0.25)';
                     for (let s = 0; s < 6; s++) {
                         ctx.globalAlpha = 0.04;
-                        ctx.fillRect(px + 4 + s, p.y + p.h + sideH + s, p.w - 8 - s*2, 2);
+                        ctx.fillRect(ppx + 4 + s, p.y + p.h + sideH + s, p.w - 8 - s*2, 2);
                     }
                     ctx.globalAlpha = 1;
                 }
@@ -15746,7 +15572,6 @@
                 const lx = l.x - cam;
                 if (lx < -50 || lx > canvas.width + 50) return;
                 const bob = Math.sin(l.bobTimer) * 5;
-                // Glow ring
                 ctx.save();
                 ctx.shadowColor = '#FFD700';
                 ctx.shadowBlur = 12 + Math.sin(t * 0.08) * 4;
@@ -15754,7 +15579,6 @@
                 ctx.textAlign = 'center';
                 ctx.fillText(l.icon, lx, l.y + bob);
                 ctx.restore();
-                // Ground glow
                 ctx.fillStyle = 'rgba(255,215,0,0.2)';
                 ctx.beginPath();
                 ctx.ellipse(lx, l.y + 12, 14, 4, 0, 0, Math.PI * 2);
@@ -15766,21 +15590,11 @@
                 area.npcs.forEach(npc => {
                     const nx = npc.x - cam;
                     if (nx < -60 || nx > canvas.width + 60) return;
-                    // Shadow
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
                     ctx.ellipse(nx, npc.y + 20, 18, 5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Pixel body
                     drawPixelNPC(ctx, npc.id, nx, npc.y, t);
-                    // Name plate
-                    ctx.font = "bold 11px 'Press Start 2P', monospace";
-                    ctx.textAlign = 'center';
-                    const nameW = ctx.measureText(npc.name).width;
-                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                    ctx.fillRect(nx - nameW/2 - 4, npc.y - 62, nameW + 8, 16);
-                    ctx.fillStyle = '#FFD700';
-                    ctx.fillText(npc.name, nx, npc.y - 50);
                     // Quest indicator
                     const hasQuest = npc.quests && npc.quests.some(qid => {
                         if (apoc.completedQuests.has(qid)) return false;
@@ -15790,7 +15604,7 @@
                         }
                         const q = APOC_QUESTS.find(x => x.id === qid);
                         if (!q) return false;
-                        if (q.prereqs && !q.prereqs.every(p => apoc.completedQuests.has(p))) return false;
+                        if (q.prereqs && !q.prereqs.every(pr => apoc.completedQuests.has(pr))) return false;
                         return true;
                     });
                     if (hasQuest) {
@@ -15801,12 +15615,13 @@
                         });
                         const bounce = Math.sin(t * 0.08) * 4;
                         ctx.font = '24px Arial';
+                        ctx.textAlign = 'center';
                         ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 70 + bounce);
                     }
-                    // Interact prompt
                     if (apoc.interactTarget && apoc.interactTarget.id === npc.id) {
                         ctx.font = "bold 12px 'Press Start 2P', monospace";
                         ctx.fillStyle = '#FFD700';
+                        ctx.textAlign = 'center';
                         ctx.globalAlpha = 0.5 + Math.sin(t * 0.1) * 0.5;
                         ctx.fillText('[F] TALK', nx, npc.y + 36);
                         ctx.globalAlpha = 1;
@@ -15821,14 +15636,11 @@
                 const ex = e.x - cam;
                 if (ex < -120 || ex > canvas.width + 120) return;
                 if (e.hurtTimer > 0 && e.hurtTimer % 4 < 2) return;
-                // Shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
                 ctx.ellipse(ex, e.y + et.h + 2, et.w * 0.4, 5, 0, 0, Math.PI * 2);
                 ctx.fill();
-                // Pixel body
                 drawPixelEnemy(ctx, e, et, ex, t);
-                // HP bar (wider, clearer)
                 if (e.hp < e.maxHp) {
                     const barW = et.w + 16;
                     const barH = 6;
@@ -15842,7 +15654,6 @@
                     const hpColor = hpRatio > 0.5 ? '#0f0' : hpRatio > 0.25 ? '#ff0' : '#f00';
                     ctx.fillStyle = hpColor;
                     ctx.fillRect(barX, barY, barW * hpRatio, barH);
-                    // Boss name above bar
                     if (et.boss) {
                         ctx.font = "bold 10px 'Press Start 2P', monospace";
                         ctx.fillStyle = et.color;
@@ -15852,107 +15663,43 @@
                 }
             });
 
-            // ── PLAYER ──
+            // ── PLAYER (sprite-based) ──
             const px = Math.round(apoc.playerX - cam);
             const py = Math.round(apoc.playerY);
-            const pH = 60; // player visual height
+            const pH = 60;
             if (!(apoc.playerInv > 0 && apoc.playerInv % 4 < 2)) {
-                ctx.save();
-                ctx.translate(px, py + pH);
-                if (!apoc.playerDir) ctx.scale(-1, 1);
-
-                // Shadow on ground
+                const playerSpr = apocSprites[apoc.playerAttacking ? 'player_atk' : 'player'];
+                // Shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
-                ctx.ellipse(0, 2, 16, 4, 0, 0, Math.PI * 2);
+                ctx.ellipse(px, py + pH + 2, 16, 4, 0, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Boots
-                ctx.fillStyle = '#3a2010';
-                ctx.fillRect(-12, -12, 10, 12);
-                ctx.fillRect(4, -12, 10, 12);
-
-                // Pants
-                ctx.fillStyle = '#4a3520';
-                ctx.fillRect(-12, -28, 10, 18);
-                ctx.fillRect(4, -28, 10, 18);
-
-                // Coat / torso
-                ctx.fillStyle = '#553311';
-                ctx.fillRect(-16, -50, 34, 24);
-                // Coat lapel
-                ctx.fillStyle = '#664422';
-                ctx.fillRect(-14, -50, 12, 8);
-                ctx.fillRect(4, -50, 12, 8);
-                // Belt
-                ctx.fillStyle = '#222';
-                ctx.fillRect(-15, -28, 32, 3);
-                ctx.fillStyle = '#C4A55A';
-                ctx.fillRect(-2, -29, 6, 5); // buckle
-
-                // Scarf
-                ctx.fillStyle = '#CC2200';
-                ctx.fillRect(-10, -53, 22, 5);
-                // Scarf tail (animated)
-                const scarfWave = Math.sin(t * 0.1) * 3;
-                ctx.fillStyle = '#BB1100';
-                ctx.fillRect(-12, -50, 6, 10 + scarfWave);
-
-                // Head (skin)
-                ctx.fillStyle = '#D4B56A';
-                ctx.fillRect(-9, -66, 20, 16);
-
-                // Hat (cowboy)
-                ctx.fillStyle = '#8B6914';
-                ctx.fillRect(-16, -72, 34, 4); // brim
-                ctx.fillStyle = '#7a5a0a';
-                ctx.fillRect(-8, -80, 18, 10); // crown
-                ctx.fillStyle = '#6a4a00';
-                ctx.fillRect(-6, -77, 14, 2); // band
-
-                // Face
-                ctx.fillStyle = '#000';
-                ctx.fillRect(3, -62, 3, 3); // right eye
-                ctx.fillRect(-4, -62, 3, 3); // left eye
-                // Smirk
-                ctx.fillStyle = '#8a5a2a';
-                ctx.fillRect(-2, -56, 8, 2);
-
-                // Arms
-                ctx.fillStyle = '#553311';
-                // Back arm
-                ctx.fillRect(-18, -48, 6, 20);
-                // Front arm (slash position if attacking)
-                if (apoc.playerAttacking) {
+                // Draw player sprite with direction flipping
+                if (playerSpr) {
                     ctx.save();
-                    ctx.translate(16, -42);
-                    ctx.rotate(-0.5 + Math.sin(t * 0.5) * 0.3);
-                    ctx.fillRect(0, 0, 6, 22);
-                    // Knife
-                    ctx.fillStyle = '#ccc';
-                    ctx.fillRect(1, 20, 4, 14);
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(2, 32, 2, 4);
+                    if (!apoc.playerDir) {
+                        ctx.translate(px, 0);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(playerSpr, -25, py, 50, pH);
+                    } else {
+                        ctx.drawImage(playerSpr, px - 25, py, 50, pH);
+                    }
                     ctx.restore();
-                    // Slash arc effect
+                }
+                // Slash effect
+                if (apoc.playerAttacking) {
+                    const slashDir = apoc.playerDir ? 1 : -1;
                     ctx.strokeStyle = 'rgba(255,255,255,0.6)';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(22, -36, 28, -0.8, 0.6);
+                    ctx.arc(px + 22 * slashDir, py + pH/2, 28, -0.8, 0.6);
                     ctx.stroke();
                     ctx.strokeStyle = 'rgba(255,200,100,0.4)';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(22, -36, 22, -0.6, 0.4);
+                    ctx.arc(px + 22 * slashDir, py + pH/2, 22, -0.6, 0.4);
                     ctx.stroke();
-                } else {
-                    ctx.fillRect(14, -48, 6, 20);
-                    // Holstered gun hint
-                    ctx.fillStyle = '#444';
-                    ctx.fillRect(16, -30, 4, 8);
                 }
-
-                ctx.restore();
             }
 
             // ── SHIELD VISUAL ──
@@ -16122,19 +15869,16 @@
             const invHud = document.getElementById('apoc-inventory');
             if (hpFill) hpFill.style.width = (apoc.playerHP / apoc.playerMaxHP * 100) + '%';
             if (hpText) hpText.innerText = Math.round(apoc.playerHP) + '/' + apoc.playerMaxHP;
-            // Shield bar
-            const shFill = document.getElementById('apoc-shield-fill');
-            if (shFill) {
-                const shPct = (apoc.shieldHP / apoc.shieldMaxHP * 100);
-                shFill.style.width = shPct + '%';
-                if (apoc.shieldBreakTimer > 0) {
-                    shFill.style.background = '#882222';
-                } else if (apoc.shieldHP < 30) {
-                    shFill.style.background = 'linear-gradient(90deg, #cc4400, #ff6622)';
-                } else {
-                    shFill.style.background = 'linear-gradient(90deg, #2266cc, #44aaff, #66ccff)';
-                }
-            }
+            // XP bar + Level
+            const xpFill = document.getElementById('apoc-xp-fill');
+            const xpText = document.getElementById('apoc-xp-text');
+            const lvlEl = document.getElementById('apoc-level');
+            if (xpFill) xpFill.style.width = (apoc.xp / apoc.xpToNext * 100) + '%';
+            if (xpText) xpText.innerText = apoc.xp + '/' + apoc.xpToNext;
+            if (lvlEl) lvlEl.innerText = 'LV ' + apoc.level;
+            // LVL stat in stats bar
+            const lvlStat = document.getElementById('apoc-stat-lvl');
+            if (lvlStat) lvlStat.innerText = apoc.level;
             if (coinsHud) coinsHud.innerText = '🪙 ' + apoc.coins;
             if (invHud) invHud.innerHTML = `<span class="apoc-inv-item">🩹 ${apoc.medkits}</span><span class="apoc-inv-item">🔫 ${apoc.ammo}</span><span class="apoc-inv-item">⚙️ ${apoc.scrap}</span>`;
 
