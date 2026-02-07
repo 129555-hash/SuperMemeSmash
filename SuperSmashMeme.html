@@ -6095,9 +6095,12 @@
                 '6': '#FFFF00',
                 '7': '#00FF00',
                 '8': '#00BFFF',
-                '9': '#8B00FF'
+                '9': '#8B00FF',
+                'A': '#FFFFFF',
+                'B': '#000000',
+                'C': '#FF99CC'
             },
-            spriteData: ["0000000000000000", "0000011111100000", "0001122222210000", "0012233333321000", "0123333333332100", "0133333333333100", "0133311331133100", "0133333333333100", "0133331111333100", "0123333333332100", "0012233333321000", "0001122222210000", "0000456789000000", "0000456789000000", "0000456789000000", "0000000000000000"]
+            spriteData: ["0000000000000000", "00B1B00000B1B000", "0011222222211000", "0222232323222200", "0221111111112200", "0221AB11AB112200", "022C111111C22200", "022111BBB1112200", "0222222222222200", "0001100110011000", "0044444444444400", "0055555555555500", "0066666666666600", "0077777777777700", "0088888888888800", "0099999999999900"]
         }, {
             id: 'shrek',
             name: 'Shrek',
@@ -6121,9 +6124,12 @@
                 '4': '#3b7a24',
                 '5': '#8b6f47',
                 '6': '#FFFFFF',
-                '7': '#1a3d12'
+                '7': '#1a3d12',
+                '8': '#000000',
+                '9': '#6b4423',
+                'A': '#FFD700'
             },
-            spriteData: ["0000000000000000", "0000011111100000", "0001122222210000", "0012233333321000", "0123344443332100", "0133344443333100", "0133366633333100", "0133333333333100", "0133333333333100", "0133337733333100", "0123344444332100", "0012233333321000", "0001155555510000", "0000155555510000", "0000015555100000", "0000000000000000"]
+            spriteData: ["0000012221000000", "0000123332100000", "3210123332101230", "2300188881003200", "0001268862100000", "0001233332100000", "0012286682210000", "0001233332100000", "0007555555700000", "0075559955570000", "007555A955570000", "0075555555570000", "0007555555700000", "0000122221000000", "0000012012000000", "0000018018000000"]
         }, {
             id: 'rickastley',
             name: 'Rick Astley',
@@ -6147,9 +6153,11 @@
                 '4': '#1a1a1a',
                 '5': '#333333',
                 '6': '#FFFFFF',
-                '7': '#FF6347'
+                '7': '#FF6347',
+                '8': '#000000',
+                '9': '#4169E1'
             },
-            spriteData: ["0000000000000000", "0000111111000000", "0001122211100000", "0001111111100000", "0001133311100000", "0000133310000000", "0000444444000000", "0000477744000000", "0000444444000000", "0000455554000000", "0000455554000000", "0000444444000000", "0000044440000000", "0000055550000000", "0000050050000000", "0000050050000000"]
+            spriteData: ["0001111111100000", "0012222222210000", "0012222222210000", "0011333333110000", "0013683683100000", "0001333831000000", "0001338831000000", "0000133310000000", "0005444444500000", "0054467644500000", "0054447444500000", "0054444444500000", "0054444444500000", "0005444444500000", "0000490094000000", "0000880088000000"]
         }];
         const MAPS = [{
             id: 'flat',
@@ -6396,6 +6404,21 @@
             cost: 1000,
             type: 'cosmetic',
             icon: '👑'
+        }, {
+            id: 'nyancat',
+            name: 'UNLOCK NYAN CAT',
+            cost: 800,
+            type: 'char'
+        }, {
+            id: 'shrek',
+            name: 'UNLOCK SHREK',
+            cost: 1200,
+            type: 'char'
+        }, {
+            id: 'rickastley',
+            name: 'UNLOCK RICK ASTLEY',
+            cost: 1500,
+            type: 'char'
         }, {
             id: 'sandevistan_zeta',
             name: 'ZETATECH SANDY',
@@ -8261,7 +8284,7 @@
                 if (roll < 50) {
                     // 50% - Featured banner character
                     reward = saveData.currentBanner;
-                    const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH' };
+                    const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH', rickastley: 'RICK ASTLEY', nyancat: 'NYAN CAT', shrek: 'SHREK' };
                     name = charNames[reward];
                     rarity = '⭐ BANNER FEATURED ⭐';
                     icon = '🌟';
@@ -8274,11 +8297,11 @@
                     }
                 } else if (roll < 80) {
                     // 30% - Other ultra rare characters
-                    const ultraChars = ['thememe', 'gps', 'johnpork', 'mechabara', 'bluedude', 'glitch'].filter(c => c !== saveData.currentBanner);
+                    const ultraChars = ['thememe', 'gps', 'johnpork', 'mechabara', 'bluedude', 'glitch', 'rickastley'].filter(c => c !== saveData.currentBanner);
                     const unlockedUltra = ultraChars.filter(c => !saveData.unlocks.includes(c));
                     if (unlockedUltra.length > 0) {
                         reward = unlockedUltra[Math.floor(Math.random() * unlockedUltra.length)];
-                        const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH' };
+                        const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH', rickastley: 'RICK ASTLEY' };
                         name = charNames[reward];
                         rarity = 'ULTRA RARE';
                         icon = '✨';
@@ -8295,11 +8318,11 @@
                     }
                 } else {
                     // 20% - Rare characters
-                    const rareChars = ['luckyblock', 'brokeboy'];
+                    const rareChars = ['luckyblock', 'brokeboy', 'nyancat', 'shrek'];
                     const unlockedRare = rareChars.filter(c => !saveData.unlocks.includes(c));
                     if (unlockedRare.length > 0) {
                         reward = unlockedRare[Math.floor(Math.random() * unlockedRare.length)];
-                        const charNames = { luckyblock: 'LUCKY BLOCK', brokeboy: 'BROKE BOY' };
+                        const charNames = { luckyblock: 'LUCKY BLOCK', brokeboy: 'BROKE BOY', nyancat: 'NYAN CAT', shrek: 'SHREK' };
                         name = charNames[reward];
                         rarity = 'RARE';
                         icon = '🌟';
@@ -8599,11 +8622,11 @@
                 // Premium gacha: guaranteed rare+ (characters and cosmetics)
                 if (roll < 20) {
                     // 20% - Ultra Rare Characters
-                    const ultraChars = ['thememe', 'gps', 'johnpork', 'mechabara', 'bluedude', 'glitch'];
+                    const ultraChars = ['thememe', 'gps', 'johnpork', 'mechabara', 'bluedude', 'glitch', 'rickastley'];
                     const unlockedUltra = ultraChars.filter(c => !saveData.unlocks.includes(c));
                     if (unlockedUltra.length > 0) {
                         reward = unlockedUltra[Math.floor(Math.random() * unlockedUltra.length)];
-                        const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH' };
+                        const charNames = { thememe: 'THE MEME', gps: 'GPS', johnpork: 'JOHN PORK', mechabara: 'MECHA-BARA', bluedude: 'BLUE DUDE', glitch: 'GLITCH', rickastley: 'RICK ASTLEY' };
                         name = charNames[reward];
                         rarity = 'ULTRA RARE';
                         icon = '✨';
@@ -8620,11 +8643,11 @@
                     }
                 } else if (roll < 50) {
                     // 30% - Rare Characters (only unlockable ones)
-                    const rareChars = ['luckyblock', 'brokeboy'];
+                    const rareChars = ['luckyblock', 'brokeboy', 'nyancat', 'shrek'];
                     const unlockedRare = rareChars.filter(c => !saveData.unlocks.includes(c));
                     if (unlockedRare.length > 0) {
                         reward = unlockedRare[Math.floor(Math.random() * unlockedRare.length)];
-                        const charNames = { luckyblock: 'LUCKY BLOCK', brokeboy: 'BROKE BOY' };
+                        const charNames = { luckyblock: 'LUCKY BLOCK', brokeboy: 'BROKE BOY', nyancat: 'NYAN CAT', shrek: 'SHREK' };
                         name = charNames[reward];
                         rarity = 'RARE';
                         icon = '🌟';
