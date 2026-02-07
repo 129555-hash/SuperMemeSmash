@@ -2760,6 +2760,11 @@
                 this.animOverride = null;
                 this.isParrying = !1;
                 this.parryTimer = 0;
+                // Echo gun state
+                this.gunDrawn = false;
+                this.gunAmmo = 6;
+                this.gunReloading = false;
+                this.gunReloadTimer = 0;
                 // Mastery variant active flag (per character)
                 try {
                     if (this.stats && this.stats.id) {
@@ -2830,6 +2835,15 @@
                 if (this.alpha < 1) this.alpha += 0.001;
                 if (this.friction > 0.85) this.friction -= 0.0005;
                 if (this.confused > 0) this.confused--;
+                // Echo gun reload timer
+                if (this.stats && this.stats.id === 'echo' && this.gunReloading) {
+                    this.gunReloadTimer--;
+                    if (this.gunReloadTimer <= 0) {
+                        this.gunReloading = false;
+                        this.gunAmmo = 6;
+                        particles.push({ x: this.x + this.w/2, y: this.y - 15, text: "🔫 LOADED!", life: 30, vy: -1, color: '#FFD700' });
+                    }
+                }
                 if (this.luckyBlockCrush && this.grounded) {
                     let t = players.find(p => p.id !== this.id && Math.abs(p.x - this.x) < 80 && Math.abs(p.y - this.y) < 100);
                     if (t) {
@@ -3617,6 +3631,67 @@
                         }
                     }, 1800);
                     particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "🤖 SMASHER PROTOCOL!", life: 80, vy: -0.5, color: '#FF0000' });
+                // ====== ECHO ULT: LAST STAND ======
+                } else if (this.stats.id === 'echo') {
+                    shake = 40;
+                    this.inv = 180;
+                    this.gunDrawn = true;
+                    this.gunAmmo = 6;
+                    // Dramatic slow-mo text
+                    particles.push({ x: this.x + this.w/2, y: this.y - 40, text: "🤠 LAST STAND!", life: 80, vy: -0.5, color: '#FFD700' });
+                    // Rapid dual-revolver barrage: 12 shots in all directions
+                    for (let i = 0; i < 12; i++) {
+                        setTimeout(() => {
+                            if (this.stocks <= 0) return;
+                            const angle = (i / 12) * Math.PI * 2 + (Math.random()-0.5)*0.3;
+                            const spd = 20 + Math.random()*5;
+                            ultEffects.push({
+                                t: 'bullet',
+                                x: this.x + this.w/2,
+                                y: this.y + this.h/2,
+                                vx: Math.cos(angle) * spd,
+                                vy: Math.sin(angle) * spd,
+                                owner: this.id,
+                                dmg: 10 * s.power,
+                                l: 35
+                            });
+                            // Muzzle flash
+                            for (let j = 0; j < 3; j++) {
+                                particles.push({
+                                    x: this.x + this.w/2, y: this.y + this.h/2,
+                                    vx: Math.cos(angle)*(6+Math.random()*4), vy: Math.sin(angle)*(6+Math.random()*4),
+                                    life: 10, color: ['#FFD700','#FF4500','#FFF'][j], size: 3
+                                });
+                            }
+                            sfx.play('hit');
+                        }, i * 120);
+                    }
+                    // Finale: massive dynamite explosion at 1.8s
+                    setTimeout(() => {
+                        if (this.stocks <= 0) return;
+                        shake = 50;
+                        players.forEach(p => {
+                            if (p.id !== this.id && p.stocks > 0) {
+                                const dx = p.x - this.x;
+                                const dist = Math.abs(dx);
+                                if (dist < 350) {
+                                    const dir = dx > 0 ? 1 : -1;
+                                    p.hit(25 * dir, -20, 40);
+                                }
+                            }
+                        });
+                        // Explosion particles
+                        for (let i = 0; i < 25; i++) {
+                            particles.push({
+                                x: this.x + this.w/2 + (Math.random()-0.5)*200,
+                                y: this.y + (Math.random()-0.5)*100,
+                                vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15,
+                                life: 35, color: ['#FF4500','#FFD700','#FF2200','#FFA500'][Math.floor(Math.random()*4)], size: 7
+                            });
+                        }
+                        particles.push({ x: this.x + this.w/2, y: this.y - 20, text: "🧨💥 BOOM!", life: 40, vy: -1, color: '#FF4500' });
+                    }, 1800);
+                    this.gunAmmo = 6; // Refill after ult
                 // ====== NEVER THE SAME ULT: Delegate to source character's ult ======
                 } else if (this.stats.id === 'nts') {
                     const build = this.ntsBuild;
@@ -5073,6 +5148,173 @@
                     };
                     this.cd = 20;
                     return;
+                }
+                // ====== ECHO (Dual Moveset: Melee + Gun) ======
+                if (s.id === 'echo') {
+                    // DOWN SPECIAL: Toggle gun mode / start reload
+                    if (d) {
+                        if (!this.gunDrawn && !this.gunReloading) {
+                            if (this.gunAmmo <= 0) {
+                                // No ammo - start 3 second reload
+                                this.gunReloading = true;
+                                this.gunReloadTimer = 180; // 3s at 60fps
+                                particles.push({ x: this.x + this.w/2, y: this.y - 10, text: "🔄 RELOADING...", life: 40, vy: -0.5, color: '#AAAAAA' });
+                                this.cd = 15;
+                                return;
+                            }
+                            // Draw revolver
+                            this.gunDrawn = true;
+                            particles.push({ x: this.x + this.w/2, y: this.y - 10, text: "🔫 DRAW!", life: 20, vy: -1, color: '#FFD700' });
+                            sfx.play('coin');
+                            this.cd = 12;
+                            return;
+                        } else if (this.gunDrawn) {
+                            // Holster revolver
+                            this.gunDrawn = false;
+                            particles.push({ x: this.x + this.w/2, y: this.y - 10, text: "✋ HOLSTER", life: 15, vy: -1, color: '#888' });
+                            this.cd = 10;
+                            return;
+                        }
+                        return;
+                    }
+
+                    if (this.gunDrawn) {
+                        // ====== GUN MODE ======
+                        if (l || r) {
+                            // RAPID FIRE: Shoot all remaining bullets fast
+                            const bulletsLeft = this.gunAmmo;
+                            if (bulletsLeft <= 0) {
+                                this.gunDrawn = false;
+                                this.cd = 10;
+                                return;
+                            }
+                            const dir = this.dir ? 1 : -1;
+                            for (let i = 0; i < bulletsLeft; i++) {
+                                setTimeout(() => {
+                                    if (this.stocks <= 0) return;
+                                    // Each bullet is an ultEffect projectile
+                                    ultEffects.push({
+                                        t: 'bullet',
+                                        x: this.x + (this.dir ? 50 : -10),
+                                        y: this.y + 15 + (Math.random()-0.5)*10,
+                                        vx: dir * 25,
+                                        vy: 0,
+                                        owner: this.id,
+                                        dmg: 8 * s.power,
+                                        l: 30
+                                    });
+                                    particles.push({
+                                        x: this.x + (this.dir ? 50 : 0), y: this.y + 15,
+                                        vx: dir * 3, vy: (Math.random()-0.5)*2,
+                                        life: 8, color: '#FFD700', size: 3
+                                    });
+                                    sfx.play('hit');
+                                }, i * 80);
+                            }
+                            this.gunAmmo = 0;
+                            // Auto-holster after emptying
+                            setTimeout(() => { this.gunDrawn = false; }, bulletsLeft * 80 + 50);
+                            particles.push({ x: this.x + this.w/2, y: this.y - 20, text: "💥 RAPID FIRE!", life: 25, vy: -1, color: '#FF2200' });
+                            this.cd = bulletsLeft * 5 + 15;
+                            return;
+                        }
+                        if (u) {
+                            // SMOKE GRENADE: Lob upward, AoE affects all
+                            ultEffects.push({
+                                t: 'smoke',
+                                x: this.x + this.w/2,
+                                y: this.y - 20,
+                                vx: (this.dir ? 1 : -1) * 6,
+                                vy: -12,
+                                owner: this.id,
+                                l: 90
+                            });
+                            particles.push({ x: this.x + this.w/2, y: this.y - 20, text: "💨 SMOKE OUT!", life: 20, vy: -2, color: '#888' });
+                            this.cd = 55;
+                            return;
+                        }
+                        // NEUTRAL: Single shot forward
+                        if (this.gunAmmo <= 0) {
+                            this.gunDrawn = false;
+                            particles.push({ x: this.x + this.w/2, y: this.y - 10, text: "*click*", life: 15, vy: -1, color: '#888' });
+                            this.cd = 10;
+                            return;
+                        }
+                        this.gunAmmo--;
+                        const bdir = this.dir ? 1 : -1;
+                        ultEffects.push({
+                            t: 'bullet',
+                            x: this.x + (this.dir ? 50 : -10),
+                            y: this.y + 15,
+                            vx: bdir * 25,
+                            vy: 0,
+                            owner: this.id,
+                            dmg: 12 * s.power,
+                            l: 30
+                        });
+                        // Muzzle flash
+                        for (let i = 0; i < 4; i++) {
+                            particles.push({
+                                x: this.x + (this.dir ? 55 : -5), y: this.y + 15,
+                                vx: bdir * (4 + Math.random()*4), vy: (Math.random()-0.5)*3,
+                                life: 8, color: ['#FFD700','#FF4500','#FFF'][Math.floor(Math.random()*3)], size: 3
+                            });
+                        }
+                        sfx.play('hit');
+                        if (this.gunAmmo <= 0) {
+                            // Auto-holster on empty
+                            setTimeout(() => { this.gunDrawn = false; }, 200);
+                            particles.push({ x: this.x + this.w/2, y: this.y - 10, text: "EMPTY", life: 15, vy: -1, color: '#AA0000' });
+                        }
+                        this.cd = 18;
+                        return;
+                    } else {
+                        // ====== MELEE MODE ======
+                        if (l || r) {
+                            // KNIFE FLURRY: 3-hit rapid slash combo
+                            this.vx = (this.dir ? 1 : -1) * 8;
+                            this.box = {
+                                relX: this.dir ? 25 : -65, relY: -10, w: 55, h: 50,
+                                act: !0, own: this.id,
+                                kbx: 10 * s.power, kby: -5 * s.power, dmg: 9 * s.power, f: 5
+                            };
+                            // Knife slash particles
+                            for (let i = 0; i < 5; i++) {
+                                particles.push({
+                                    x: this.x + (this.dir ? 50 : 0), y: this.y + 10 + (Math.random()-0.5)*20,
+                                    vx: (this.dir ? 1 : -1) * (3+Math.random()*4), vy: (Math.random()-0.5)*3,
+                                    life: 10, color: ['#CCC','#FFF','#AAA'][Math.floor(Math.random()*3)], size: 2
+                                });
+                            }
+                            this.cd = 16;
+                            return;
+                        }
+                        if (u) {
+                            // VAULT KICK: Launch upward with a powerful kick
+                            this.vy = -14 * s.jump;
+                            this.box = {
+                                relX: -25, relY: -50, w: 70, h: 60,
+                                act: !0, own: this.id,
+                                kbx: 6 * s.power, kby: -16 * s.power, dmg: 11 * s.power, f: 7
+                            };
+                            particles.push({ x: this.x + this.w/2, y: this.y + 30, text: "⬆️ VAULT!", life: 15, vy: 2, color: '#C4A55A' });
+                            this.cd = 30;
+                            return;
+                        }
+                        // NEUTRAL MELEE: Dynamite Throw
+                        ultEffects.push({
+                            t: 'dynamite',
+                            x: this.x + (this.dir ? 40 : -10),
+                            y: this.y - 10,
+                            vx: (this.dir ? 1 : -1) * 10,
+                            vy: -8,
+                            owner: this.id,
+                            l: 60
+                        });
+                        particles.push({ x: this.x + this.w/2, y: this.y - 15, text: "🧨 DYNAMITE!", life: 20, vy: -1, color: '#FF4500' });
+                        this.cd = 45;
+                        return;
+                    }
                 }
                 // ====== RICK ASTLEY ======
                 // ====== ADAM SMASHER ======
@@ -6591,6 +6833,54 @@
                 '9': '#4169E1'
             },
             spriteData: ["0001111111100000", "0012222222210000", "0012222222210000", "0011333333110000", "0013683683100000", "0001333831000000", "0001338831000000", "0000133310000000", "0005444444500000", "0054467644500000", "0054447444500000", "0054444444500000", "0054444444500000", "0005444444500000", "0000490094000000", "0000880088000000"]
+        }, {
+            id: 'echo',
+            name: 'Echo',
+            icon: '🔫',
+            speed: 1.2,
+            weight: 1.0,
+            power: 1.3,
+            jump: 1.0,
+            desc: "Bounty Hunter",
+            moves: {
+                side: "Knife Flurry / Rapid Fire",
+                up: "Vault Kick / Smoke Grenade",
+                down: "Dynamite / Draw Gun",
+                ult: "LAST STAND"
+            },
+            colors: {
+                '0': null,
+                '1': '#1a1a1a',
+                '2': '#8B6914',
+                '3': '#C4A55A',
+                '4': '#D2B48C',
+                '5': '#FF2200',
+                '6': '#666666',
+                '7': '#999999',
+                '8': '#553311',
+                '9': '#FFD700',
+                'A': '#3D2B1F',
+                'B': '#FFFFFF',
+                'C': '#7B5B3A'
+            },
+            spriteData: [
+                "0000122221000000",
+                "0001233332100000",
+                "0012333333210000",
+                "0112225222110000",
+                "0001B44B41000000",
+                "0001445441000000",
+                "0001144411000000",
+                "0000155510000000",
+                "0018888888100000",
+                "0188C888C8810000",
+                "0188899888810000",
+                "0018886688100000",
+                "0001888881000000",
+                "0000188810000000",
+                "000A181A10000000",
+                "000A110A11000000"
+            ]
         }];
         const MAPS = [{
             id: 'flat',
@@ -12003,6 +12293,112 @@
                             }
                         }
                     });
+                } else if (e.t === 'bullet') {
+                    // Echo's bullet projectile
+                    e.x += e.vx;
+                    if (e.vy) e.y += e.vy;
+                    // Draw bullet
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Trail particle
+                    if (Math.random() < 0.5) {
+                        particles.push({ x: e.x - e.vx * 0.3, y: e.y + (Math.random()-0.5)*3, vx: 0, vy: 0, life: 6, color: '#ffaa33', size: 1 });
+                    }
+                    // Collision
+                    players.forEach(p => {
+                        if (p.stocks > 0 && p.id !== e.owner && Math.abs(p.x + p.w/2 - e.x) < 25 && Math.abs(p.y + p.h/2 - e.y) < 25) {
+                            const bulletDmg = e.dmg || 8;
+                            p.hit(e.vx * 0.2, -3, bulletDmg);
+                            sfx.play('hit');
+                            e.l = 0;
+                            for (let sp = 0; sp < 3; sp++) {
+                                particles.push({ x: e.x, y: e.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 10, color: '#ffd700', size: 2 });
+                            }
+                        }
+                    });
+                } else if (e.t === 'dynamite') {
+                    // Echo's dynamite - arced trajectory, AoE explosion
+                    e.x += e.vx;
+                    e.vy = (e.vy || 0) + 0.3;
+                    e.y += e.vy;
+                    // Draw dynamite stick (spinning)
+                    ctx.save();
+                    ctx.translate(e.x, e.y);
+                    ctx.rotate(e.l * 0.15);
+                    ctx.fillStyle = '#cc3300';
+                    ctx.fillRect(-6, -3, 12, 6);
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.fillRect(-6, -3, 3, 6);
+                    ctx.restore();
+                    // Fuse spark
+                    if (Math.random() < 0.7) {
+                        particles.push({ x: e.x, y: e.y - 5, vx: (Math.random()-0.5)*3, vy: -Math.random()*3, life: 8, color: Math.random() > 0.5 ? '#ff0' : '#f80', size: 2 });
+                    }
+                    // Explode on ground, timer, or direct hit
+                    e.fuseTimer = e.fuseTimer !== undefined ? e.fuseTimer - 1 : 90;
+                    let dynamiteExplode = e.y > canvas.height - 50 || e.fuseTimer <= 0;
+                    players.forEach(p => {
+                        if (p.stocks > 0 && p.id !== e.owner && Math.abs(p.x + p.w/2 - e.x) < 20 && Math.abs(p.y + p.h/2 - e.y) < 20) {
+                            dynamiteExplode = true;
+                        }
+                    });
+                    if (dynamiteExplode) {
+                        players.forEach(p => {
+                            if (p.stocks > 0 && p.id !== e.owner) {
+                                const dist = Math.sqrt(Math.pow(p.x + p.w/2 - e.x, 2) + Math.pow(p.y + p.h/2 - e.y, 2));
+                                if (dist < 100) {
+                                    const dmgScale = 1 - (dist / 100);
+                                    p.hit((p.x > e.x ? 8 : -8) * dmgScale, -12 * dmgScale, Math.round((e.dmg || 18) * dmgScale));
+                                    sfx.play('break');
+                                }
+                            }
+                        });
+                        for (let ex = 0; ex < 15; ex++) {
+                            const angle = (ex / 15) * Math.PI * 2;
+                            particles.push({ x: e.x + Math.cos(angle)*10, y: e.y + Math.sin(angle)*10, vx: Math.cos(angle)*6, vy: Math.sin(angle)*6, life: 20, color: Math.random() > 0.5 ? '#ff4400' : '#ffcc00', size: 4 + Math.random()*3 });
+                        }
+                        particles.push({ x: e.x, y: e.y - 10, text: "💥", life: 30, vy: -1, color: '#ff0' });
+                        shake = Math.max(shake, 15);
+                        e.l = 0;
+                    }
+                } else if (e.t === 'smoke') {
+                    // Echo's smoke grenade - lobbed arc, stuns on detonation
+                    e.x += e.vx;
+                    e.vy = (e.vy || 0) + 0.25;
+                    e.y += e.vy;
+                    // Draw grenade
+                    ctx.fillStyle = '#555';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Trail smoke
+                    if (Math.random() < 0.4) {
+                        particles.push({ x: e.x, y: e.y, vx: (Math.random()-0.5)*2, vy: -Math.random(), life: 15, color: '#888', size: 3 });
+                    }
+                    // Detonate on ground or timer
+                    e.fuseTimer = e.fuseTimer !== undefined ? e.fuseTimer - 1 : 60;
+                    if (e.y > canvas.height - 50 || e.fuseTimer <= 0) {
+                        for (let sm = 0; sm < 20; sm++) {
+                            particles.push({ x: e.x + (Math.random()-0.5)*80, y: e.y + (Math.random()-0.5)*40, vx: (Math.random()-0.5)*1, vy: -Math.random()*0.5, life: 90, color: 'rgba(100,100,100,0.6)', size: 8 + Math.random()*8 });
+                        }
+                        players.forEach(p => {
+                            if (p.stocks > 0) {
+                                const dist = Math.sqrt(Math.pow(p.x + p.w/2 - e.x, 2) + Math.pow(p.y + p.h/2 - e.y, 2));
+                                if (dist < 120) {
+                                    p.stun = Math.max(p.stun || 0, 60);
+                                    particles.push({ x: p.x + p.w/2, y: p.y, text: "💨 SMOKED", life: 40, vy: -1, color: '#aaa' });
+                                }
+                            }
+                        });
+                        sfx.play('break');
+                        e.l = 0;
+                    }
                 }
                 if (e.l <= 0) ultEffects.splice(i, 1);
             }
