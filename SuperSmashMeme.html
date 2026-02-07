@@ -3582,6 +3582,41 @@
                         });
                     }
                     particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "🎤 NEVER GONNA GIVE YOU UP!", life: 80, vy: -0.5, color: '#FF6347' });
+                // ====== ADAM SMASHER ULT: SMASHER PROTOCOL ======
+                } else if (this.stats.id === 'boss_adamsmasher') {
+                    shake = 80;
+                    this.inv = 180;
+                    // Massive barrage: rockets + cannon blasts
+                    for (let i = 0; i < 12; i++) {
+                        setTimeout(() => {
+                            ultEffects.push({
+                                t: 'moon',
+                                x: (t ? t.x : 0) + (Math.random()-0.5)*300,
+                                y: -400 - Math.random()*200,
+                                l: 80
+                            });
+                        }, i * 150);
+                    }
+                    // Screen-wide shockwave
+                    setTimeout(() => {
+                        shake = 60;
+                        players.forEach(p => {
+                            if (p.id !== this.id && p.stocks > 0) {
+                                const dir = p.x > this.x ? 1 : -1;
+                                p.hit(30 * dir, -25, 50);
+                                p.stun = 120;
+                            }
+                        });
+                        for (let i = 0; i < 30; i++) {
+                            particles.push({
+                                x: this.x + this.w/2 + (Math.random()-0.5)*300,
+                                y: this.y + (Math.random()-0.5)*100,
+                                vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
+                                life: 40, color: ['#FF0000','#FF4500','#FFD700','#CC0000'][Math.floor(Math.random()*4)], size: 8
+                            });
+                        }
+                    }, 1800);
+                    particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "🤖 SMASHER PROTOCOL!", life: 80, vy: -0.5, color: '#FF0000' });
                 // ====== NEVER THE SAME ULT: Delegate to source character's ult ======
                 } else if (this.stats.id === 'nts') {
                     const build = this.ntsBuild;
@@ -5040,6 +5075,75 @@
                     return;
                 }
                 // ====== RICK ASTLEY ======
+                // ====== ADAM SMASHER ======
+                if (s.id === 'boss_adamsmasher') {
+                    if (l || r) {
+                        // Arm Cannon: Heavy projectile blast
+                        this.vx = (this.dir ? 1 : -1) * 6;
+                        this.box = {
+                            relX: this.dir ? 40 : -100, relY: -15, w: 80, h: 50,
+                            act: !0, own: this.id,
+                            kbx: 22 * s.power, kby: -8 * s.power, dmg: 18 * s.power, f: 10
+                        };
+                        // Cannon blast particles
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: this.x + (this.dir ? 60 : -20), y: this.y + 10,
+                                vx: (this.dir ? 1 : -1) * (8 + Math.random()*6), vy: (Math.random()-0.5)*4,
+                                life: 15, color: ['#FF0000','#FF4500','#FFD700'][Math.floor(Math.random()*3)], size: 5
+                            });
+                        }
+                        this.cd = 35;
+                        return;
+                    }
+                    if (u) {
+                        // Rocket Barrage: launch upward + rain explosions
+                        this.vy = -16 * s.jump;
+                        this.box = {
+                            relX: -40, relY: -60, w: 130, h: 60,
+                            act: !0, own: this.id,
+                            kbx: 5 * s.power, kby: -20 * s.power, dmg: 20 * s.power, f: 8
+                        };
+                        for (let i = 0; i < 10; i++) {
+                            particles.push({
+                                x: this.x + 25, y: this.y + 50,
+                                vx: (Math.random()-0.5)*10, vy: 4 + Math.random()*4,
+                                life: 20, color: '#FF4500', size: 6
+                            });
+                        }
+                        particles.push({ x: this.x + 25, y: this.y - 20, text: "🚀 ROCKETS!", life: 25, vy: -2, color: '#FF0000' });
+                        this.cd = 45;
+                        return;
+                    }
+                    if (d) {
+                        // Ground Stomp: massive AoE slam
+                        shake = 20;
+                        this.vy = 8;
+                        this.box = {
+                            relX: -60, relY: 10, w: 170, h: 60,
+                            act: !0, own: this.id,
+                            kbx: 15 * s.power, kby: -15 * s.power, dmg: 22 * s.power, f: 12
+                        };
+                        for (let i = 0; i < 12; i++) {
+                            particles.push({
+                                x: this.x + 25 + (Math.random()-0.5)*100, y: this.y + 50,
+                                vx: (Math.random()-0.5)*8, vy: -Math.random()*6,
+                                life: 18, color: ['#555','#888','#FF4500'][Math.floor(Math.random()*3)], size: 5
+                            });
+                        }
+                        particles.push({ x: this.x + 25, y: this.y - 10, text: "💥 STOMP!", life: 20, vy: -1, color: '#FF0000' });
+                        this.cd = 50;
+                        return;
+                    }
+                    // Neutral: Heavy chrome punch
+                    this.box = {
+                        relX: this.dir ? 30 : -70, relY: -10, w: 60, h: 50,
+                        act: !0, own: this.id,
+                        kbx: 14 * s.power, kby: -6 * s.power, dmg: 12 * s.power, f: 6
+                    };
+                    this.cd = 20;
+                    return;
+                }
                 if (s.id === 'rickastley') {
                     if (l || r) {
                         // Never Gonna Run Around: Dance dash forward with mic swing
@@ -5287,6 +5391,11 @@
                 if (this.stats && this.stats.id === 'yellowdude' && saveData.cyberSlots && saveData.cyberSlots.software === 'subdermal_armor') {
                     d = Math.round(d * 0.8);
                     if (Math.random() < 0.3) particles.push({ x: this.x + this.w/2, y: this.y, text: "🛡️", life: 12, vy: -1, color: '#888' });
+                }
+                // SMASHER ARMOR: 30% damage reduction (stacks with subdermal if both somehow equipped)
+                if (this.stats && this.stats.id === 'yellowdude' && saveData.cyberSlots && saveData.cyberSlots.software === 'smasher_armor') {
+                    d = Math.round(d * 0.7);
+                    if (Math.random() < 0.3) particles.push({ x: this.x + this.w/2, y: this.y, text: "🤖🛡️", life: 15, vy: -1, color: '#FF0000' });
                 }
                 // BERSERK: reduced knockback when active
                 if (this.berserkActive) {
@@ -6944,6 +7053,16 @@
             type: 'cyber',
             subtype: 'software',
             desc: 'Passive — Reduces all incoming damage by 20%'
+        },
+        // ===== ADAM SMASHER DROPS =====
+        {
+            id: 'smasher_armor',
+            name: 'SMASHER ARMOR',
+            cost: 0,
+            type: 'cyber',
+            subtype: 'software',
+            desc: 'Adam Smasher\'s Armor — 30% damage reduction. Full-borg plating.',
+            quest: true
         },
         // NEW LEGS CYBERWARE
         {
@@ -12965,6 +13084,50 @@
                     down: "System Crash",
                     ult: "BLUE SCREEN OF DEATH"
                 }
+            },
+            // ====== SECRET BOSS: ADAM SMASHER ======
+            {
+                id: 'adamsmasher',
+                name: 'ADAM SMASHER',
+                desc: 'Night City Legend. Full-borg killing machine.',
+                hp: 1200,
+                power: 2.2,
+                speed: 1.0,
+                weight: 4.0,
+                jump: 0.8,
+                icon: '🤖',
+                secret: true,
+                colors: {
+                    '0': null, '1': '#1a1a1a', '2': '#333333', '3': '#555555',
+                    '4': '#FF0000', '5': '#CC0000', '6': '#990000',
+                    '7': '#FFFFFF', '8': '#FFD700', '9': '#2a2a2a',
+                    'A': '#FF4500', 'B': '#444444', 'C': '#888888',
+                    'D': '#660000', 'E': '#AA0000'
+                },
+                spriteData: [
+                    "0000033333000000",
+                    "0003322222330000",
+                    "0032244442223000",
+                    "0322477742223000",
+                    "3224474742223000",
+                    "3224777742223000",
+                    "3222444442223000",
+                    "032244A442230000",
+                    "003BBBBBBBB30000",
+                    "03B1155511B30000",
+                    "3B11555551133000",
+                    "3B11E555E1133000",
+                    "03B1155511B30000",
+                    "003B111111300000",
+                    "0003390093000000",
+                    "0003310013000000"
+                ],
+                moves: {
+                    side: "Arm Cannon",
+                    up: "Rocket Barrage",
+                    down: "Ground Stomp",
+                    ult: "SMASHER PROTOCOL"
+                }
             }
         ];
 
@@ -13011,10 +13174,17 @@
             const container = document.getElementById('boss-card-container');
             container.innerHTML = '';
             BOSS_DATA.forEach((boss, idx) => {
+                // Secret boss: only show if requirements met
+                if (boss.secret) {
+                    const hasYellowDude = saveData.unlocks && saveData.unlocks.includes('yellowdude');
+                    const hasDavidSandy = saveData.cyberware && saveData.cyberware.includes('david_sandevistan');
+                    const hasProjectile = saveData.cyberware && saveData.cyberware.includes('projectile_launch');
+                    if (!hasYellowDude || !hasDavidSandy || !hasProjectile) return;
+                }
                 const card = document.createElement('div');
                 card.className = 'boss-card';
                 const defeated = saveData.bossDefeated[boss.id];
-                const locked = idx > 0 && !saveData.bossDefeated[BOSS_DATA[idx - 1].id];
+                const locked = boss.secret ? false : (idx > 0 && !saveData.bossDefeated[BOSS_DATA[idx - 1].id]);
                 if (defeated) card.classList.add('defeated');
                 if (locked) card.classList.add('locked-boss');
 
@@ -13047,6 +13217,16 @@
                 card.appendChild(descDiv);
                 card.appendChild(hpBar);
                 card.appendChild(hpLabel);
+
+                // Secret boss badge
+                if (boss.secret) {
+                    const badge = document.createElement('div');
+                    badge.style.cssText = "position:absolute;top:4px;right:4px;background:#ff0000;color:white;font-family:'Press Start 2P';font-size:5px;padding:2px 4px;border-radius:2px;z-index:2";
+                    badge.textContent = '🔒 SECRET';
+                    if (defeated) badge.textContent = '⭐ SECRET';
+                    card.style.position = 'relative';
+                    card.appendChild(badge);
+                }
 
                 if (!locked) {
                     card.onclick = () => startBossFight(idx);
@@ -13177,7 +13357,7 @@
                 saveData.bossDefeated[boss.id] = true;
 
                 // Award tokens
-                let tokenReward = [3, 5, 10][currentBossIndex] || 3;
+                let tokenReward = [3, 5, 10, 15][currentBossIndex] || 3;
                 if (saveData.eventItems && saveData.eventItems.token_magnet > 0) {
                     tokenReward *= 2;
                     saveData.eventItems.token_magnet--;
@@ -13214,17 +13394,28 @@
             tokenDiv.textContent = '🪙 +' + tokenReward + ' BOSS TOKENS';
             overlay.appendChild(tokenDiv);
 
-            // Roll 1-3 drops
-            let rollCount = 1 + Math.floor(Math.random() * 3); // 1-3
-            if (saveData.eventItems && saveData.eventItems.extra_roll > 0) {
-                rollCount++;
-                saveData.eventItems.extra_roll--;
-            }
-
-            const drops = [];
-            for (let i = 0; i < rollCount; i++) {
-                const drop = rollBossDrop(i, currentBossIndex);
-                drops.push(drop);
+            // Roll drops
+            let drops = [];
+            if (boss.id === 'adamsmasher') {
+                // Adam Smasher: always 5k coins + 1-2 RNG exclusive drops
+                drops.push({ type: 'money', amount: 5000, name: '5,000 COINS', icon: '💰', rarity: 'EPIC', color: '#ffd700' });
+                let rngCount = 1 + Math.floor(Math.random() * 2); // 1-2
+                if (saveData.eventItems && saveData.eventItems.extra_roll > 0) {
+                    rngCount++;
+                    saveData.eventItems.extra_roll--;
+                }
+                for (let i = 0; i < rngCount; i++) {
+                    drops.push(rollAdamSmasherDrop());
+                }
+            } else {
+                let rollCount = 1 + Math.floor(Math.random() * 3); // 1-3
+                if (saveData.eventItems && saveData.eventItems.extra_roll > 0) {
+                    rollCount++;
+                    saveData.eventItems.extra_roll--;
+                }
+                for (let i = 0; i < rollCount; i++) {
+                    drops.push(rollBossDrop(i, currentBossIndex));
+                }
             }
 
             const dropsTitle = document.createElement('div');
@@ -13324,6 +13515,20 @@
             }
         }
 
+        // Adam Smasher exclusive drop table
+        function rollAdamSmasherDrop() {
+            const roll = Math.random() * 100;
+            // 50% armor, 35% moveset, 15% bonus money
+            if (roll < 50) {
+                return { type: 'cyberware', id: 'smasher_armor', name: 'SMASHER ARMOR', icon: '🛡️', rarity: 'LEGENDARY', color: '#ffd700' };
+            } else if (roll < 85) {
+                return { type: 'smasher_moveset', name: 'SMASHER MOVESET', icon: '🤖', rarity: 'LEGENDARY', color: '#ff4500' };
+            } else {
+                const bonus = 1000 + Math.floor(Math.random() * 4000);
+                return { type: 'money', amount: bonus, name: bonus + ' BONUS COINS', icon: '💰', rarity: 'RARE', color: '#00bfff' };
+            }
+        }
+
         function applyDrop(drop) {
             switch (drop.type) {
                 case 'money':
@@ -13332,6 +13537,9 @@
                 case 'cyberware':
                     if (!saveData.ownedCyber) saveData.ownedCyber = [];
                     if (!saveData.ownedCyber.includes(drop.id)) saveData.ownedCyber.push(drop.id);
+                    // Also add to cyberware inventory for equipping
+                    if (!saveData.cyberware) saveData.cyberware = [];
+                    if (!saveData.cyberware.includes(drop.id)) saveData.cyberware.push(drop.id);
                     break;
                 case 'character':
                     if (!saveData.unlocks.includes(drop.id)) {
@@ -13342,6 +13550,10 @@
                 case 'nts':
                     saveData.ntsUnlocked = true;
                     showNotification('🎭 LEGENDARY DROP!', 'NEVER THE SAME UNLOCKED!');
+                    break;
+                case 'smasher_moveset':
+                    saveData.smasherMoveset = true;
+                    showNotification('🤖 LEGENDARY DROP!', 'ADAM SMASHER MOVESET UNLOCKED!');
                     break;
             }
         }
@@ -13354,6 +13566,19 @@
                 case 'character':
                     const idx = saveData.unlocks.indexOf(drop.id);
                     if (idx >= 0) saveData.unlocks.splice(idx, 1);
+                    break;
+                case 'cyberware':
+                    if (saveData.ownedCyber) {
+                        const ci = saveData.ownedCyber.indexOf(drop.id);
+                        if (ci >= 0) saveData.ownedCyber.splice(ci, 1);
+                    }
+                    if (saveData.cyberware) {
+                        const ci2 = saveData.cyberware.indexOf(drop.id);
+                        if (ci2 >= 0) saveData.cyberware.splice(ci2, 1);
+                    }
+                    break;
+                case 'smasher_moveset':
+                    saveData.smasherMoveset = false;
                     break;
                 case 'nts':
                     // Don't undo NTS, too rare
@@ -13434,9 +13659,12 @@
                 }
             });
 
-            // Also add boss moves if boss was defeated
+            // Also add boss moves if boss was defeated (Adam Smasher requires moveset drop)
             BOSS_DATA.forEach(b => {
-                if (saveData.bossDefeated[b.id] && b.moves[slot]) {
+                const hasBossMoves = b.id === 'adamsmasher'
+                    ? (saveData.smasherMoveset && saveData.bossDefeated[b.id])
+                    : saveData.bossDefeated[b.id];
+                if (hasBossMoves && b.moves[slot]) {
                     const opt = document.createElement('div');
                     opt.className = 'nts-move-option';
                     opt.style.borderColor = '#ff4500';
