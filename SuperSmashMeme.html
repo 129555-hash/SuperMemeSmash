@@ -157,6 +157,8 @@
             position: relative;
             overflow: hidden;
             animation: eventPulse 2s infinite;
+            min-width: 200px;
+            padding: 10px 28px;
         }
         .menu-btn.event-btn:hover {
             background: #ff4500;
@@ -3580,6 +3582,19 @@
                         });
                     }
                     particles.push({ x: this.x + this.w/2, y: this.y - 30, text: "🎤 NEVER GONNA GIVE YOU UP!", life: 80, vy: -0.5, color: '#FF6347' });
+                // ====== NEVER THE SAME ULT: Delegate to source character's ult ======
+                } else if (this.stats.id === 'nts') {
+                    const build = this.ntsBuild;
+                    if (build && build.ult && build.ult.charId) {
+                        const origId = this.stats.id;
+                        this.stats.id = build.ult.charId;
+                        this.ult = 100; // Refill so the recursive call passes the safety check
+                        this.fireUlt();
+                        this.stats.id = origId;
+                    } else {
+                        // Fallback: generic ult
+                        t.hit(20 * (this.x < t.x ? 1 : -1), -20, 40);
+                    }
                 } else t.hit(20 * (this.x < t.x ? 1 : -1), -20, 40);
             }
             atk(u, d, l, r) {
@@ -3622,6 +3637,26 @@
                         f: 5
                     };
                     return;
+                }
+                // ====== NEVER THE SAME: Delegate to source character's moves ======
+                if (s.id === 'nts' && !this._ntsAttacking) {
+                    const build = this.ntsBuild;
+                    if (build) {
+                        let srcId = null;
+                        if (l || r) srcId = build.side ? build.side.charId : null;
+                        else if (u) srcId = build.up ? build.up.charId : null;
+                        else if (d) srcId = build.down ? build.down.charId : null;
+                        else srcId = build.side ? build.side.charId : null;
+                        if (srcId) {
+                            this._ntsAttacking = true;
+                            const origId = s.id;
+                            s.id = srcId;
+                            this.atk(u, d, l, r);
+                            s.id = origId;
+                            this._ntsAttacking = false;
+                            return;
+                        }
+                    }
                 }
                 if (s.id === 'yellowdude') {
                     const core = saveData.cyberSlots ? saveData.cyberSlots.core : null;
@@ -11200,6 +11235,18 @@
                 }
             }
 
+            // ====== Store NTS build on NTS fighters ======
+            players.forEach(p => {
+                if (p.stats.id === 'nts') {
+                    const activeBuild = (ntsCurrentBuild && ntsCurrentBuild.side && ntsCurrentBuild.up && ntsCurrentBuild.down && ntsCurrentBuild.ult)
+                        ? ntsCurrentBuild
+                        : (saveData.ntsBuilds && saveData.ntsBuilds.find(b => b && b.side && b.up && b.down && b.ult));
+                    p.ntsBuild = activeBuild || null;
+                    // Spread-copy stats so we can safely swap id during delegation
+                    p.stats = { ...p.stats };
+                }
+            });
+
             // Ensure mastery flags reflect latest toggles
             try {
                 players[0].masteryActive = (isCharMastered(p1Char.id) && useMasteryP1);
@@ -13032,6 +13079,11 @@
             p2Char = bossChar;
             p2IsCpu = true;
 
+            // Generate boss sprite if not already cached
+            if (boss.spriteData && !characterSprites['boss_' + boss.id]) {
+                characterSprites['boss_' + boss.id] = generateSprite(boss.spriteData, boss.colors);
+            }
+
             // Select arena map
             selectedMap = MAPS.find(m => m.id === 'flat') || MAPS[0];
 
@@ -13505,6 +13557,12 @@
                 // Add to unlocks
                 if (!saveData.unlocks.includes('nts')) {
                     saveData.unlocks.push('nts');
+                }
+
+                // Generate NTS sprite if not cached
+                const ntsEntry = CHARACTERS.find(c => c.id === 'nts');
+                if (ntsEntry && ntsEntry.spriteData && !characterSprites['nts']) {
+                    characterSprites['nts'] = generateSprite(ntsEntry.spriteData, ntsEntry.colors);
                 }
             }
         }
