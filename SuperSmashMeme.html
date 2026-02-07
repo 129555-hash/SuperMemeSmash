@@ -1506,12 +1506,12 @@
         .apoc-stat { text-align: center; }
         .apoc-stat-val { color: #ff6600; font-size: 1.2em; font-weight: bold; }
         .apoc-stat-lbl { color: #666; font-size: 0.6em; }
-        #apoc-hud { position: fixed; top: 0; left: 0; width: 100%; pointer-events: none; z-index: 50; }
-        .apoc-hp-bar { position: absolute; top: 10px; left: 10px; width: 200px; height: 20px; background: #333; border: 2px solid #555; border-radius: 3px; }
-        .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ff4400); border-radius: 2px; transition: width 0.2s; }
-        .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 11px; line-height: 20px; text-shadow: 1px 1px 2px black; }
-        .apoc-coins { position: absolute; top: 10px; right: 10px; color: #FFD700; font-size: 14px; }
-        .apoc-quest-tracker { position: absolute; top: 40px; right: 10px; max-width: 250px; background: rgba(0,0,0,0.7); border: 1px solid #ff6600; border-radius: 5px; padding: 8px; font-size: 10px; }
+        #apoc-hud { position: fixed; top: 0; left: 0; width: 100%; pointer-events: none; z-index: 50; font-family: 'Press Start 2P', monospace; }
+        .apoc-hp-bar { position: absolute; top: 15px; left: 15px; width: 260px; height: 26px; background: #1a1a1a; border: 2px solid #555; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #cc0000, #ff4400, #ff2200); border-radius: 3px; transition: width 0.2s; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); }
+        .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 11px; line-height: 26px; text-shadow: 1px 1px 3px black; font-family: 'Press Start 2P', monospace; }
+        .apoc-coins { position: absolute; top: 15px; right: 15px; color: #FFD700; font-size: 16px; background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 5px; border: 1px solid #555; text-shadow: 0 0 6px rgba(255,215,0,0.4); }
+        .apoc-quest-tracker { position: absolute; top: 55px; right: 15px; max-width: 280px; background: rgba(0,0,0,0.75); border: 1px solid #ff6600; border-radius: 6px; padding: 10px; font-size: 10px; box-shadow: 0 0 15px rgba(255,102,0,0.15); }
         .apoc-quest-title { color: #ff6600; font-weight: bold; margin-bottom: 4px; }
         .apoc-quest-obj { color: #ccc; }
         .apoc-dialogue-box {
@@ -1527,8 +1527,8 @@
         .apoc-reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.95); border: 2px solid #FFD700; border-radius: 15px; padding: 30px; z-index: 110; text-align: center; min-width: 300px; }
         .apoc-reward-title { color: #FFD700; font-size: 1.5em; margin-bottom: 15px; }
         .apoc-reward-item { color: #ccc; font-size: 1em; margin: 5px 0; }
-        .apoc-inventory { position: absolute; top: 35px; left: 10px; display: flex; gap: 8px; font-size: 11px; }
-        .apoc-inv-item { color: #aaa; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 3px; border: 1px solid #444; }
+        .apoc-inventory { position: absolute; top: 50px; left: 15px; display: flex; gap: 10px; font-size: 13px; }
+        .apoc-inv-item { color: #ccc; background: rgba(0,0,0,0.65); padding: 4px 10px; border-radius: 4px; border: 1px solid #555; font-family: 'Press Start 2P', monospace; font-size: 10px; }
     </style>
 </head>
 
@@ -13284,6 +13284,10 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             ctx.imageSmoothingEnabled = !1;
+            // Rebuild apocalypse areas with new canvas dimensions
+            if (typeof buildApocAreas === 'function') {
+                APOC_AREAS = buildApocAreas();
+            }
         }
         window.addEventListener('resize', resize);
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
@@ -14397,132 +14401,141 @@
 
         // ====== ENEMY TYPE DEFINITIONS ======
         const APOC_ENEMY_TYPES = {
-            glitchling: { name:'Glitchling', icon:'👾', hp:25, dmg:5, speed:2, kb:3, w:30, h:35, color:'#00ff44', aggroRange:180, atkRange:40, atkCd:50, drops:[{item:'coin',chance:0.6},{item:'scrap',chance:0.2}], xp:10 },
-            corrupt_doge: { name:'Corrupt Doge', icon:'🐕', hp:50, dmg:10, speed:1.3, kb:5, w:40, h:40, color:'#8B4513', aggroRange:220, atkRange:50, atkCd:70, drops:[{item:'coin',chance:0.7},{item:'scrap',chance:0.3},{item:'medkit',chance:0.1}], xp:25 },
-            sus_shade: { name:'Sus Shade', icon:'👤', hp:40, dmg:12, speed:1.8, kb:4, w:35, h:45, color:'#4a0080', aggroRange:250, atkRange:45, atkCd:60, drops:[{item:'coin',chance:0.5},{item:'ammo',chance:0.3}], xp:30 },
-            troll_spawn: { name:'Troll Spawn', icon:'👹', hp:100, dmg:18, speed:0.7, kb:8, w:50, h:55, color:'#666', aggroRange:200, atkRange:60, atkCd:100, drops:[{item:'coin',chance:0.8},{item:'scrap',chance:0.5},{item:'medkit',chance:0.2}], xp:50 },
-            pixel_wraith: { name:'Pixel Wraith', icon:'👻', hp:35, dmg:8, speed:1.2, kb:2, w:35, h:40, color:'#00ccff', aggroRange:300, atkRange:200, atkCd:90, drops:[{item:'ammo',chance:0.5},{item:'coin',chance:0.4}], xp:35, ranged:true },
-            virus_beast: { name:'Virus Beast', icon:'🦠', hp:200, dmg:22, speed:0.9, kb:10, w:60, h:55, color:'#00ff00', aggroRange:250, atkRange:55, atkCd:80, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.6},{item:'medkit',chance:0.3},{item:'cyberware',chance:0.2}], xp:100, boss:true },
-            data_sentinel: { name:'Data Sentinel', icon:'🤖', hp:250, dmg:28, speed:0.8, kb:12, w:55, h:60, color:'#0066ff', aggroRange:300, atkRange:60, atkCd:70, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.8},{item:'cyberware',chance:0.3}], xp:150, boss:true },
-            echo_boss: { name:'Echo', icon:'🤠', hp:300, dmg:15, speed:1.5, kb:6, w:45, h:50, color:'#C4A55A', aggroRange:400, atkRange:55, atkCd:40, drops:[{item:'coin',chance:1,count:20}], xp:200, boss:true },
-            meme_god: { name:'MEME GOD', icon:'👑', hp:800, dmg:35, speed:1.0, kb:15, w:70, h:70, color:'#FFD700', aggroRange:500, atkRange:70, atkCd:50, drops:[{item:'coin',chance:1,count:50},{item:'cyberware',chance:1}], xp:500, boss:true, final:true }
+            glitchling: { name:'Glitchling', icon:'👾', hp:25, dmg:5, speed:2, kb:3, w:40, h:44, color:'#00ff44', aggroRange:250, atkRange:50, atkCd:50, drops:[{item:'coin',chance:0.6},{item:'scrap',chance:0.2}], xp:10 },
+            corrupt_doge: { name:'Corrupt Doge', icon:'🐕', hp:50, dmg:10, speed:1.3, kb:5, w:48, h:50, color:'#8B4513', aggroRange:280, atkRange:60, atkCd:70, drops:[{item:'coin',chance:0.7},{item:'scrap',chance:0.3},{item:'medkit',chance:0.1}], xp:25 },
+            sus_shade: { name:'Sus Shade', icon:'👤', hp:40, dmg:12, speed:1.8, kb:4, w:44, h:52, color:'#4a0080', aggroRange:300, atkRange:55, atkCd:60, drops:[{item:'coin',chance:0.5},{item:'ammo',chance:0.3}], xp:30 },
+            troll_spawn: { name:'Troll Spawn', icon:'👹', hp:100, dmg:18, speed:0.7, kb:8, w:60, h:64, color:'#666', aggroRange:250, atkRange:70, atkCd:100, drops:[{item:'coin',chance:0.8},{item:'scrap',chance:0.5},{item:'medkit',chance:0.2}], xp:50 },
+            pixel_wraith: { name:'Pixel Wraith', icon:'👻', hp:35, dmg:8, speed:1.2, kb:2, w:44, h:50, color:'#00ccff', aggroRange:350, atkRange:250, atkCd:90, drops:[{item:'ammo',chance:0.5},{item:'coin',chance:0.4}], xp:35, ranged:true },
+            virus_beast: { name:'Virus Beast', icon:'🦠', hp:200, dmg:22, speed:0.9, kb:10, w:70, h:68, color:'#00ff00', aggroRange:300, atkRange:65, atkCd:80, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.6},{item:'medkit',chance:0.3},{item:'cyberware',chance:0.2}], xp:100, boss:true },
+            data_sentinel: { name:'Data Sentinel', icon:'🤖', hp:250, dmg:28, speed:0.8, kb:12, w:65, h:70, color:'#0066ff', aggroRange:350, atkRange:70, atkCd:70, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.8},{item:'cyberware',chance:0.3}], xp:150, boss:true },
+            echo_boss: { name:'Echo', icon:'🤠', hp:300, dmg:15, speed:1.5, kb:6, w:50, h:60, color:'#C4A55A', aggroRange:400, atkRange:65, atkCd:40, drops:[{item:'coin',chance:1,count:20}], xp:200, boss:true },
+            meme_god: { name:'MEME GOD', icon:'👑', hp:800, dmg:35, speed:1.0, kb:15, w:80, h:80, color:'#FFD700', aggroRange:500, atkRange:80, atkCd:50, drops:[{item:'coin',chance:1,count:50},{item:'cyberware',chance:1}], xp:500, boss:true, final:true }
         };
 
-        // ====== AREA DEFINITIONS ======
-        const APOC_AREAS = [
-            { // 0: SCORCHED FLATS
-                id:'scorched_flats', name:'SCORCHED FLATS', subtitle:'Survivor Camp', icon:'🏜️', width:3000, groundY:420,
-                bgColors:['#1a0a00','#3a1a00'], skyColors:['#2d1f10','#8B4513'],
-                platforms:[
-                    {x:0,y:420,w:3000,h:100},
-                    {x:350,y:370,w:120,h:50},{x:800,y:350,w:100,h:70},{x:1300,y:330,w:150,h:90},
-                    {x:1800,y:360,w:100,h:20},{x:2200,y:320,w:120,h:20},{x:2600,y:370,w:150,h:50}
-                ],
-                decos:['🏚️,100,390,40','🔥,200,395,30','🏜️,1500,385,40','🌵,2000,385,40','🏚️,2400,365,40'],
-                npcs:[
-                    {id:'survivor_doge',name:'Survivor Doge',icon:'🐕',x:200,y:370,quests:['mq1','sq1','sq2']},
-                    {id:'old_pepe',name:'Old Pepe',icon:'🐸',x:500,y:370,quests:['sq3']},
-                    {id:'echo_npc',name:'Echo',icon:'🤠',x:2700,y:370,quests:['mq2']}
-                ],
-                enemies:[
-                    {type:'glitchling',x:600,ct:2,spread:100},{type:'glitchling',x:1100,ct:3,spread:150},
-                    {type:'glitchling',x:1600,ct:2,spread:100},{type:'glitchling',x:2100,ct:2,spread:120}
-                ],
-                loot:[{t:'coin',x:450,y:340},{t:'scrap',x:900,y:320},{t:'medkit',x:1400,y:300},{t:'coin',x:1850,y:330},{t:'ammo',x:2250,y:290}],
-                exitR:1,exitL:null
-            },
-            { // 1: DOOMSCROLL DEPTHS
-                id:'doomscroll_depths', name:'DOOMSCROLL DEPTHS', subtitle:'Underground Ruins', icon:'🕳️', width:3500, groundY:430,
-                bgColors:['#050510','#101025'], skyColors:['#080818','#0a0a30'],
-                platforms:[
-                    {x:0,y:430,w:3500,h:90},
-                    {x:200,y:380,w:100,h:50},{x:500,y:350,w:80,h:20},{x:750,y:310,w:100,h:20},
-                    {x:1000,y:370,w:150,h:60},{x:1400,y:340,w:120,h:20},{x:1700,y:300,w:100,h:20},
-                    {x:2000,y:360,w:200,h:70},{x:2400,y:330,w:100,h:20},{x:2700,y:290,w:120,h:20},
-                    {x:3000,y:360,w:200,h:70}
-                ],
-                decos:['💀,300,400,30','🕯️,600,320,25','💎,1200,390,20','🕯️,1800,270,25','🪨,2500,400,35','💀,3100,400,30'],
-                npcs:[
-                    {id:'hermit',name:'The Hermit',icon:'🧙',x:2800,y:370,quests:['sq6']},
-                    {id:'data_doge',name:'Data Doge',icon:'🐕‍🦺',x:800,y:370,quests:['sq4','sq5']}
-                ],
-                enemies:[
-                    {type:'corrupt_doge',x:400,ct:2,spread:100},{type:'sus_shade',x:900,ct:2,spread:80},
-                    {type:'corrupt_doge',x:1500,ct:3,spread:150},{type:'sus_shade',x:2200,ct:2,spread:100},
-                    {type:'virus_beast',x:3200,ct:1,spread:0}
-                ],
-                loot:[{t:'coin',x:250,y:350},{t:'ammo',x:550,y:320},{t:'scrap',x:1050,y:340},{t:'medkit',x:1750,y:270},{t:'cyberware',x:2450,y:300},{t:'coin',x:3050,y:330}],
-                exitR:2,exitL:0
-            },
-            { // 2: VIRAL WASTELAND
-                id:'viral_wasteland', name:'VIRAL WASTELAND', subtitle:'Toxic Desert', icon:'☣️', width:3500, groundY:420,
-                bgColors:['#0a1a00','#1a2a00'], skyColors:['#2a3a00','#4a5a10'],
-                platforms:[
-                    {x:0,y:420,w:3500,h:100},
-                    {x:300,y:370,w:150,h:50},{x:600,y:340,w:100,h:20},{x:900,y:380,w:80,h:40},
-                    {x:1200,y:330,w:130,h:20},{x:1600,y:360,w:100,h:60},{x:1900,y:310,w:120,h:20},
-                    {x:2200,y:370,w:150,h:50},{x:2600,y:340,w:100,h:20},{x:3000,y:370,w:180,h:50}
-                ],
-                decos:['☢️,150,390,30','🧪,700,310,25','🏗️,1100,360,40','☢️,1800,280,30','🧪,2400,390,25','🏗️,3200,360,40'],
-                npcs:[
-                    {id:'wasteland_trader',name:'Wasteland Trader',icon:'🦊',x:400,y:370,quests:['sq7']},
-                    {id:'courier_cat',name:'Courier Cat',icon:'🐱',x:2300,y:370,quests:['sq8','sq9']}
-                ],
-                enemies:[
-                    {type:'corrupt_doge',x:500,ct:2,spread:100},{type:'troll_spawn',x:1000,ct:1,spread:0},
-                    {type:'sus_shade',x:1500,ct:3,spread:120},{type:'corrupt_doge',x:2000,ct:2,spread:100},
-                    {type:'troll_spawn',x:2700,ct:2,spread:150}
-                ],
-                loot:[{t:'scrap',x:350,y:340},{t:'coin',x:650,y:310},{t:'medkit',x:950,y:350},{t:'ammo',x:1250,y:300},{t:'scrap',x:1950,y:280},{t:'cyberware',x:2650,y:310},{t:'coin',x:3050,y:340}],
-                exitR:3,exitL:1
-            },
-            { // 3: THE ALGORITHM
-                id:'the_algorithm', name:'THE ALGORITHM', subtitle:'Digital Zone', icon:'💻', width:3500, groundY:430,
-                bgColors:['#000a10','#001020'], skyColors:['#000520','#001040'],
-                platforms:[
-                    {x:0,y:430,w:3500,h:90},
-                    {x:250,y:370,w:100,h:20},{x:450,y:320,w:80,h:20},{x:700,y:280,w:120,h:20},
-                    {x:1000,y:370,w:150,h:60},{x:1300,y:330,w:100,h:20},{x:1550,y:280,w:80,h:20},
-                    {x:1800,y:360,w:180,h:70},{x:2100,y:310,w:100,h:20},{x:2400,y:270,w:120,h:20},
-                    {x:2700,y:340,w:150,h:20},{x:3000,y:370,w:200,h:60}
-                ],
-                decos:['💿,300,340,25','📡,800,250,30','🖥️,1100,360,35','💿,1600,250,25','📡,2200,280,30','🖥️,2800,310,35','💿,3100,360,25'],
-                npcs:[
-                    {id:'program_npc',name:'Program',icon:'🤖',x:1050,y:370,quests:['sq10','sq11']},
-                    {id:'hacker_frog',name:'Hacker Frog',icon:'🐸',x:2750,y:370,quests:['sq12']}
-                ],
-                enemies:[
-                    {type:'pixel_wraith',x:400,ct:2,spread:100},{type:'sus_shade',x:900,ct:2,spread:80},
-                    {type:'pixel_wraith',x:1400,ct:2,spread:100},{type:'corrupt_doge',x:1900,ct:2,spread:80},
-                    {type:'pixel_wraith',x:2500,ct:3,spread:120},{type:'data_sentinel',x:3200,ct:1,spread:0}
-                ],
-                loot:[{t:'ammo',x:300,y:340},{t:'coin',x:500,y:290},{t:'scrap',x:1050,y:340},{t:'medkit',x:1350,y:300},{t:'ammo',x:1850,y:330},{t:'cyberware',x:2150,y:280},{t:'coin',x:2750,y:310}],
-                exitR:4,exitL:2
-            },
-            { // 4: MEME NEXUS
-                id:'meme_nexus', name:'MEME NEXUS', subtitle:'Source of the Apocalypse', icon:'🌀', width:4000, groundY:420,
-                bgColors:['#100010','#200020'], skyColors:['#0a000a','#1a0030'],
-                platforms:[
-                    {x:0,y:420,w:4000,h:100},
-                    {x:300,y:370,w:120,h:50},{x:600,y:330,w:100,h:20},{x:900,y:290,w:80,h:20},
-                    {x:1200,y:360,w:150,h:60},{x:1500,y:310,w:120,h:20},{x:1800,y:270,w:100,h:20},
-                    {x:2100,y:350,w:180,h:70},{x:2500,y:300,w:100,h:20},{x:2800,y:260,w:120,h:20},
-                    {x:3100,y:330,w:150,h:20},{x:3500,y:370,w:300,h:50}
-                ],
-                decos:['🌀,200,340,30','⚡,700,300,25','🌀,1300,330,30','⚡,1600,280,25','🌀,2200,320,30','⚡,2600,270,25','👑,3600,340,50'],
-                npcs:[
-                    {id:'last_survivor',name:'Last Survivor',icon:'💀',x:200,y:370,quests:['sq13','sq14','sq15']}
-                ],
-                enemies:[
-                    {type:'pixel_wraith',x:500,ct:3,spread:120},{type:'troll_spawn',x:1000,ct:2,spread:100},
-                    {type:'sus_shade',x:1500,ct:3,spread:100},{type:'pixel_wraith',x:2000,ct:2,spread:80},
-                    {type:'troll_spawn',x:2500,ct:2,spread:100},{type:'corrupt_doge',x:3000,ct:3,spread:120},
-                    {type:'meme_god',x:3700,ct:1,spread:0}
-                ],
-                loot:[{t:'medkit',x:350,y:340},{t:'ammo',x:650,y:300},{t:'coin',x:950,y:260},{t:'scrap',x:1250,y:330},{t:'medkit',x:1550,y:280},{t:'cyberware',x:2150,y:320},{t:'ammo',x:2550,y:270},{t:'medkit',x:3150,y:300}],
-                exitR:null,exitL:3
-            }
-        ];
+        // Helper: get ground Y based on canvas height (ground at 80% of screen)
+        function apocGroundY() { return Math.round(canvas.height * 0.82); }
+
+        // ====== AREA DEFINITIONS (positions are RELATIVE offsets from ground) ======
+        // Ground is always at apocGroundY(). Platforms use negative offsets from ground.
+        function buildApocAreas() {
+            const gY = apocGroundY();
+            return [
+                { // 0: SCORCHED FLATS
+                    id:'scorched_flats', name:'SCORCHED FLATS', subtitle:'Survivor Camp', icon:'🏜️', width:4000, groundY:gY,
+                    bgColors:['#2a1200','#4a2200'], skyColors:['#1a0800','#5a3018'],
+                    platforms:[
+                        {x:0,y:gY,w:4000,h:canvas.height-gY+10},
+                        {x:450,y:gY-60,w:160,h:22},{x:900,y:gY-100,w:140,h:22},{x:1500,y:gY-80,w:180,h:22},
+                        {x:2100,y:gY-120,w:140,h:22},{x:2600,y:gY-60,w:160,h:22},{x:3200,y:gY-90,w:180,h:22}
+                    ],
+                    decos:['🏚️,120,'+gY+',50','🔥,280,'+(gY-5)+',35','🏜️,1800,'+(gY-10)+',50','🌵,2500,'+(gY-10)+',50','🏚️,3000,'+(gY-5)+',50'],
+                    npcs:[
+                        {id:'survivor_doge',name:'Survivor Doge',icon:'🐕',x:250,y:gY-60,quests:['mq1','sq1','sq2']},
+                        {id:'old_pepe',name:'Old Pepe',icon:'🐸',x:650,y:gY-60,quests:['sq3']},
+                        {id:'echo_npc',name:'Echo',icon:'🤠',x:3600,y:gY-60,quests:['mq2']}
+                    ],
+                    enemies:[
+                        {type:'glitchling',x:750,ct:2,spread:150},{type:'glitchling',x:1300,ct:3,spread:180},
+                        {type:'glitchling',x:2000,ct:2,spread:150},{type:'glitchling',x:2800,ct:2,spread:150}
+                    ],
+                    loot:[{t:'coin',x:500,y:gY-80},{t:'scrap',x:1000,y:gY-120},{t:'medkit',x:1600,y:gY-100},{t:'coin',x:2200,y:gY-140},{t:'ammo',x:2700,y:gY-80}],
+                    exitR:1,exitL:null
+                },
+                { // 1: DOOMSCROLL DEPTHS
+                    id:'doomscroll_depths', name:'DOOMSCROLL DEPTHS', subtitle:'Underground Ruins', icon:'🕳️', width:4500, groundY:gY,
+                    bgColors:['#0a0a20','#161630'], skyColors:['#050510','#0a0a25'],
+                    platforms:[
+                        {x:0,y:gY,w:4500,h:canvas.height-gY+10},
+                        {x:250,y:gY-70,w:130,h:22},{x:600,y:gY-120,w:110,h:22},{x:950,y:gY-160,w:130,h:22},
+                        {x:1300,y:gY-80,w:180,h:22},{x:1700,y:gY-130,w:140,h:22},{x:2100,y:gY-170,w:120,h:22},
+                        {x:2500,y:gY-90,w:200,h:22},{x:2900,y:gY-130,w:130,h:22},{x:3300,y:gY-160,w:140,h:22},
+                        {x:3700,y:gY-80,w:220,h:22}
+                    ],
+                    decos:['💀,380,'+(gY-5)+',35','🕯️,750,'+(gY-140)+',30','💎,1500,'+(gY-5)+',25','🕯️,2200,'+(gY-190)+',30','🪨,3100,'+(gY-5)+',40','💀,3900,'+(gY-5)+',35'],
+                    npcs:[
+                        {id:'hermit',name:'The Hermit',icon:'🧙',x:3500,y:gY-60,quests:['sq6']},
+                        {id:'data_doge',name:'Data Doge',icon:'🐕‍🦺',x:1000,y:gY-60,quests:['sq4','sq5']}
+                    ],
+                    enemies:[
+                        {type:'corrupt_doge',x:500,ct:2,spread:130},{type:'sus_shade',x:1100,ct:2,spread:100},
+                        {type:'corrupt_doge',x:1900,ct:3,spread:180},{type:'sus_shade',x:2800,ct:2,spread:130},
+                        {type:'virus_beast',x:4100,ct:1,spread:0}
+                    ],
+                    loot:[{t:'coin',x:300,y:gY-90},{t:'ammo',x:700,y:gY-140},{t:'scrap',x:1350,y:gY-100},{t:'medkit',x:2150,y:gY-190},{t:'cyberware',x:2950,y:gY-150},{t:'coin',x:3750,y:gY-100}],
+                    exitR:2,exitL:0
+                },
+                { // 2: VIRAL WASTELAND
+                    id:'viral_wasteland', name:'VIRAL WASTELAND', subtitle:'Toxic Desert', icon:'☣️', width:4500, groundY:gY,
+                    bgColors:['#1a2a00','#2a3a08'], skyColors:['#0a1500','#3a4a10'],
+                    platforms:[
+                        {x:0,y:gY,w:4500,h:canvas.height-gY+10},
+                        {x:350,y:gY-70,w:170,h:22},{x:750,y:gY-120,w:120,h:22},{x:1100,y:gY-60,w:100,h:22},
+                        {x:1500,y:gY-130,w:160,h:22},{x:1950,y:gY-80,w:120,h:22},{x:2350,y:gY-150,w:140,h:22},
+                        {x:2750,y:gY-70,w:170,h:22},{x:3200,y:gY-110,w:120,h:22},{x:3700,y:gY-70,w:200,h:22}
+                    ],
+                    decos:['☢️,200,'+(gY-5)+',40','🧪,850,'+(gY-140)+',30','🏗️,1400,'+(gY-10)+',50','☢️,2200,'+(gY-170)+',40','🧪,3000,'+(gY-5)+',30','🏗️,4000,'+(gY-10)+',50'],
+                    npcs:[
+                        {id:'wasteland_trader',name:'Wasteland Trader',icon:'🦊',x:500,y:gY-60,quests:['sq7']},
+                        {id:'courier_cat',name:'Courier Cat',icon:'🐱',x:2900,y:gY-60,quests:['sq8','sq9']}
+                    ],
+                    enemies:[
+                        {type:'corrupt_doge',x:650,ct:2,spread:130},{type:'troll_spawn',x:1250,ct:1,spread:0},
+                        {type:'sus_shade',x:1850,ct:3,spread:150},{type:'corrupt_doge',x:2500,ct:2,spread:130},
+                        {type:'troll_spawn',x:3400,ct:2,spread:180}
+                    ],
+                    loot:[{t:'scrap',x:400,y:gY-90},{t:'coin',x:800,y:gY-140},{t:'medkit',x:1150,y:gY-80},{t:'ammo',x:1550,y:gY-150},{t:'scrap',x:2400,y:gY-170},{t:'cyberware',x:3250,y:gY-130},{t:'coin',x:3750,y:gY-90}],
+                    exitR:3,exitL:1
+                },
+                { // 3: THE ALGORITHM
+                    id:'the_algorithm', name:'THE ALGORITHM', subtitle:'Digital Zone', icon:'💻', width:4500, groundY:gY,
+                    bgColors:['#001020','#002040'], skyColors:['#000510','#001030'],
+                    platforms:[
+                        {x:0,y:gY,w:4500,h:canvas.height-gY+10},
+                        {x:300,y:gY-70,w:120,h:22},{x:550,y:gY-130,w:100,h:22},{x:850,y:gY-180,w:140,h:22},
+                        {x:1200,y:gY-80,w:170,h:22},{x:1550,y:gY-140,w:120,h:22},{x:1850,y:gY-190,w:100,h:22},
+                        {x:2200,y:gY-90,w:200,h:22},{x:2550,y:gY-150,w:120,h:22},{x:2900,y:gY-200,w:140,h:22},
+                        {x:3250,y:gY-100,w:170,h:22},{x:3600,y:gY-80,w:220,h:22}
+                    ],
+                    decos:['💿,350,'+(gY-90)+',30','📡,950,'+(gY-200)+',35','🖥️,1300,'+(gY-10)+',45','💿,1950,'+(gY-210)+',30','📡,2650,'+(gY-170)+',35','🖥️,3350,'+(gY-10)+',45','💿,3800,'+(gY-100)+',30'],
+                    npcs:[
+                        {id:'program_npc',name:'Program',icon:'🤖',x:1300,y:gY-60,quests:['sq10','sq11']},
+                        {id:'hacker_frog',name:'Hacker Frog',icon:'🐸',x:3400,y:gY-60,quests:['sq12']}
+                    ],
+                    enemies:[
+                        {type:'pixel_wraith',x:500,ct:2,spread:130},{type:'sus_shade',x:1100,ct:2,spread:100},
+                        {type:'pixel_wraith',x:1700,ct:2,spread:130},{type:'corrupt_doge',x:2400,ct:2,spread:100},
+                        {type:'pixel_wraith',x:3100,ct:3,spread:150},{type:'data_sentinel',x:4100,ct:1,spread:0}
+                    ],
+                    loot:[{t:'ammo',x:350,y:gY-90},{t:'coin',x:600,y:gY-150},{t:'scrap',x:1250,y:gY-100},{t:'medkit',x:1600,y:gY-160},{t:'ammo',x:2250,y:gY-110},{t:'cyberware',x:2600,y:gY-170},{t:'coin',x:3300,y:gY-120}],
+                    exitR:4,exitL:2
+                },
+                { // 4: MEME NEXUS
+                    id:'meme_nexus', name:'MEME NEXUS', subtitle:'Source of the Apocalypse', icon:'🌀', width:5000, groundY:gY,
+                    bgColors:['#180018','#280028'], skyColors:['#080008','#150020'],
+                    platforms:[
+                        {x:0,y:gY,w:5000,h:canvas.height-gY+10},
+                        {x:350,y:gY-70,w:140,h:22},{x:700,y:gY-130,w:120,h:22},{x:1050,y:gY-190,w:100,h:22},
+                        {x:1400,y:gY-80,w:170,h:22},{x:1800,y:gY-140,w:140,h:22},{x:2200,y:gY-200,w:120,h:22},
+                        {x:2600,y:gY-90,w:200,h:22},{x:3000,y:gY-150,w:120,h:22},{x:3400,y:gY-210,w:140,h:22},
+                        {x:3800,y:gY-100,w:170,h:22},{x:4300,y:gY-70,w:350,h:22}
+                    ],
+                    decos:['🌀,250,'+(gY-5)+',40','⚡,850,'+(gY-150)+',30','🌀,1600,'+(gY-5)+',40','⚡,2000,'+(gY-160)+',30','🌀,2800,'+(gY-5)+',40','⚡,3200,'+(gY-170)+',30','👑,4450,'+(gY-90)+',60'],
+                    npcs:[
+                        {id:'last_survivor',name:'Last Survivor',icon:'💀',x:250,y:gY-60,quests:['sq13','sq14','sq15']}
+                    ],
+                    enemies:[
+                        {type:'pixel_wraith',x:600,ct:3,spread:150},{type:'troll_spawn',x:1250,ct:2,spread:130},
+                        {type:'sus_shade',x:1900,ct:3,spread:130},{type:'pixel_wraith',x:2500,ct:2,spread:100},
+                        {type:'troll_spawn',x:3100,ct:2,spread:130},{type:'corrupt_doge',x:3700,ct:3,spread:150},
+                        {type:'meme_god',x:4500,ct:1,spread:0}
+                    ],
+                    loot:[{t:'medkit',x:400,y:gY-90},{t:'ammo',x:750,y:gY-150},{t:'coin',x:1100,y:gY-210},{t:'scrap',x:1450,y:gY-100},{t:'medkit',x:1850,y:gY-160},{t:'cyberware',x:2650,y:gY-110},{t:'ammo',x:3050,y:gY-170},{t:'medkit',x:3850,y:gY-120}],
+                    exitR:null,exitL:3
+                }
+            ];
+        }
+        // Build areas initially (will rebuild on resize)
+        let APOC_AREAS = buildApocAreas();
 
         // ====== QUEST DEFINITIONS ======
         const APOC_QUESTS = [
@@ -14674,7 +14687,7 @@
         // ====== INITIALIZE APOCALYPSE STATE ======
         function initApocState() {
             return {
-                area: 0, cameraX: 0, playerX: 100, playerY: 370, playerVX: 0, playerVY: 0,
+                area: 0, cameraX: 0, playerX: 100, playerY: apocGroundY() - 60, playerVX: 0, playerVY: 0,
                 playerHP: 100, playerMaxHP: 100, playerGrounded: false, playerDir: true,
                 playerAttacking: false, playerAttackTimer: 0, playerInv: 0, playerCd: 0,
                 coins: 0, scrap: 0, ammo: 30, medkits: 3,
@@ -14815,7 +14828,7 @@
             isSurvival = false; isMemeBall = false; isTraining = false; isBossEvent = false;
             const area = APOC_AREAS[areaIdx];
             apoc.playerX = 100;
-            apoc.playerY = area.groundY - 50;
+            apoc.playerY = area.groundY - 60;
             apoc.playerVX = 0;
             apoc.playerVY = 0;
             apoc.playerGrounded = false;
@@ -14877,13 +14890,13 @@
             if (keys['j'] || keys['k'] || keys['z'] || keys['x']) {
                 if (!apoc.playerAttacking && apoc.playerCd <= 0) {
                     apoc.playerAttacking = true;
-                    apoc.playerAttackTimer = 12;
-                    apoc.playerCd = 20;
+                    apoc.playerAttackTimer = 14;
+                    apoc.playerCd = 18;
                     const dir = apoc.playerDir ? 1 : -1;
                     apoc.hitbox = {
-                        x: apoc.playerX + (apoc.playerDir ? 40 : -55),
-                        y: apoc.playerY - 10,
-                        w: 55, h: 45, dmg: 12, kb: dir * 6, life: 8
+                        x: apoc.playerX + (apoc.playerDir ? 30 : -65),
+                        y: apoc.playerY - 15,
+                        w: 65, h: 55, dmg: 14, kb: dir * 7, life: 10
                     };
                     // Attack particle
                     apoc.worldParticles.push({
@@ -14914,12 +14927,13 @@
 
             // Platform collision (player)
             apoc.playerGrounded = false;
+            const playerH = 60;
             area.platforms.forEach(p => {
                 // Check if player is above platform and falling
                 if (apoc.playerVY >= 0 &&
                     apoc.playerX + 15 > p.x && apoc.playerX - 15 < p.x + p.w &&
-                    apoc.playerY + 50 > p.y && apoc.playerY + 50 - apoc.playerVY <= p.y + 5) {
-                    apoc.playerY = p.y - 50;
+                    apoc.playerY + playerH > p.y && apoc.playerY + playerH - apoc.playerVY <= p.y + 5) {
+                    apoc.playerY = p.y - playerH;
                     apoc.playerVY = 0;
                     apoc.playerGrounded = true;
                 }
@@ -15156,94 +15170,206 @@
             const area = APOC_AREAS[apoc.area];
             if (!area) return;
             const cam = Math.round(apoc.cameraX);
+            const gY = area.groundY;
+            const t = apoc.timer;
 
             ctx.save();
-            // Camera shake
             if (apoc.shakeCam > 0) {
-                ctx.translate((Math.random()-0.5)*apoc.shakeCam*2, (Math.random()-0.5)*apoc.shakeCam*2);
+                ctx.translate((Math.random()-0.5)*apoc.shakeCam*3, (Math.random()-0.5)*apoc.shakeCam*3);
             }
 
-            // Sky gradient
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            // ── SKY ──
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, gY);
             skyGrad.addColorStop(0, area.skyColors[0]);
-            skyGrad.addColorStop(1, area.skyColors[1]);
+            skyGrad.addColorStop(0.6, area.skyColors[1]);
+            skyGrad.addColorStop(1, area.bgColors[1]);
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Parallax background layer (simple)
-            ctx.fillStyle = area.bgColors[0];
-            for (let bx = -cam * 0.3 % 200; bx < canvas.width; bx += 200) {
-                const bh = 30 + Math.sin(bx * 0.01) * 20;
-                ctx.fillRect(bx, area.groundY - bh - 30, 80, bh + 30);
-            }
-            ctx.fillStyle = area.bgColors[1];
-            for (let bx = -cam * 0.5 % 150 + 50; bx < canvas.width; bx += 150) {
-                const bh = 20 + Math.cos(bx * 0.015) * 15;
-                ctx.fillRect(bx, area.groundY - bh - 10, 60, bh + 10);
+            // ── STARS / atmosphere dots (only in dark areas) ──
+            const areaId = apoc.area;
+            if (areaId === 1 || areaId === 3 || areaId === 4) {
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                for (let i = 0; i < 50; i++) {
+                    const sx = (i * 137 + 31) % canvas.width;
+                    const sy = (i * 89 + 17) % (gY * 0.5);
+                    const flk = Math.sin(t * 0.03 + i) * 0.3 + 0.7;
+                    ctx.globalAlpha = flk * 0.4;
+                    ctx.fillRect(sx, sy, 2, 2);
+                }
+                ctx.globalAlpha = 1;
             }
 
-            // Decorations
+            // ── PARALLAX MOUNTAINS (far) ──
+            ctx.fillStyle = area.bgColors[0];
+            ctx.beginPath();
+            ctx.moveTo(0, gY);
+            for (let bx = 0; bx <= canvas.width + 80; bx += 80) {
+                const wx = bx + cam * 0.15;
+                const mh = 60 + Math.sin(wx * 0.005) * 40 + Math.cos(wx * 0.003) * 25;
+                ctx.lineTo(bx, gY - mh);
+            }
+            ctx.lineTo(canvas.width, gY);
+            ctx.closePath();
+            ctx.fill();
+
+            // ── PARALLAX HILLS (mid) ──
+            ctx.fillStyle = area.bgColors[1];
+            ctx.beginPath();
+            ctx.moveTo(0, gY);
+            for (let bx = 0; bx <= canvas.width + 60; bx += 60) {
+                const wx = bx + cam * 0.35;
+                const mh = 35 + Math.sin(wx * 0.008) * 25 + Math.cos(wx * 0.012) * 15;
+                ctx.lineTo(bx, gY - mh);
+            }
+            ctx.lineTo(canvas.width, gY);
+            ctx.closePath();
+            ctx.fill();
+
+            // ── FOG / HAZE layer ──
+            const fogAlpha = (areaId === 1 ? 0.12 : areaId === 2 ? 0.15 : areaId === 4 ? 0.18 : 0.06);
+            const fogColor = (areaId === 2 ? '80,120,0' : areaId === 4 ? '120,0,160' : areaId === 1 ? '20,20,80' : '80,60,30');
+            for (let fy = gY - 100; fy < gY; fy += 20) {
+                const fogOfs = Math.sin(t * 0.005 + fy * 0.02) * 30;
+                ctx.fillStyle = `rgba(${fogColor},${fogAlpha * (1 - (gY - fy) / 120)})`;
+                ctx.fillRect(-10 + fogOfs, fy, canvas.width + 20, 22);
+            }
+
+            // ── DECORATIONS (behind platforms) ──
             if (area.decos) {
                 area.decos.forEach(d => {
                     const parts = d.split(',');
                     const dx = parseInt(parts[1]) - cam;
                     const dy = parseInt(parts[2]);
                     const sz = parseInt(parts[3]);
-                    if (dx > -100 && dx < canvas.width + 100) {
+                    if (dx > -120 && dx < canvas.width + 120) {
                         ctx.font = sz + 'px Arial';
+                        ctx.textAlign = 'center';
+                        // Shadow underneath
+                        ctx.globalAlpha = 0.3;
+                        ctx.fillStyle = '#000';
+                        ctx.beginPath();
+                        ctx.ellipse(dx, dy + sz * 0.1, sz * 0.4, 6, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = 1;
                         ctx.fillText(parts[0], dx, dy);
                     }
                 });
             }
 
-            // Platforms
+            // ── PLATFORMS ──
+            const grassColors = ['#4a7a20','#5a8a30','#3a6a15'];
+            const platTheme = areaId === 1 ? ['#2a2a40','#3a3a55','#4a4a65'] :
+                              areaId === 2 ? ['#3a4a20','#4a5a28','#2a3a18'] :
+                              areaId === 3 ? ['#1a2a40','#2a3a55','#0a1a30'] :
+                              areaId === 4 ? ['#3a1a40','#4a2a55','#2a0a30'] :
+                                             ['#4a3a1a','#5a4a28','#3a2a10'];
             area.platforms.forEach(p => {
                 const px = p.x - cam;
                 if (px + p.w < -50 || px > canvas.width + 50) return;
-                // Ground
-                if (p.y >= area.groundY) {
-                    ctx.fillStyle = '#3a2a1a';
+                if (p.y >= gY) {
+                    // ── GROUND FILL ──
+                    // Top soil layer
+                    const groundGrad = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
+                    groundGrad.addColorStop(0, platTheme[1]);
+                    groundGrad.addColorStop(0.15, platTheme[0]);
+                    groundGrad.addColorStop(1, '#1a1008');
+                    ctx.fillStyle = groundGrad;
                     ctx.fillRect(px, p.y, p.w, p.h);
-                    ctx.fillStyle = '#5a4a2a';
-                    ctx.fillRect(px, p.y, p.w, 3);
+                    // Grass edge on top
+                    ctx.fillStyle = grassColors[areaId % 3];
+                    ctx.fillRect(px, p.y - 3, p.w, 6);
+                    // Grass tufts
+                    ctx.fillStyle = grassColors[(areaId + 1) % 3];
+                    for (let gx = px; gx < px + p.w; gx += 18 + (gx * 7 % 10)) {
+                        const gh = 4 + (gx * 3 % 5);
+                        ctx.fillRect(gx, p.y - gh, 3, gh);
+                    }
+                    // Ground texture lines
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    for (let ty = p.y + 15; ty < p.y + p.h; ty += 12) {
+                        ctx.beginPath();
+                        ctx.moveTo(px, ty);
+                        for (let tx = px; tx < px + p.w; tx += 20) {
+                            ctx.lineTo(tx + 10, ty + Math.sin(tx * 0.1) * 3);
+                        }
+                        ctx.stroke();
+                    }
                 } else {
-                    // Elevated platform
-                    ctx.fillStyle = '#4a3a2a';
+                    // ── ELEVATED PLATFORM ──
+                    // 3D effect with side
+                    const sideH = 8;
+                    ctx.fillStyle = platTheme[2];
+                    ctx.fillRect(px + 3, p.y + p.h, p.w - 6, sideH);
+                    // Main body with gradient
+                    const platGrad = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
+                    platGrad.addColorStop(0, platTheme[1]);
+                    platGrad.addColorStop(1, platTheme[0]);
+                    ctx.fillStyle = platGrad;
                     ctx.fillRect(px, p.y, p.w, p.h);
-                    ctx.fillStyle = '#6a5a3a';
-                    ctx.fillRect(px, p.y, p.w, 4);
-                    // Shadow
-                    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                    ctx.fillRect(px + 5, p.y + p.h, p.w - 10, 5);
+                    // Top highlight
+                    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                    ctx.fillRect(px, p.y, p.w, 3);
+                    // Left/right edges
+                    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                    ctx.fillRect(px, p.y, 2, p.h);
+                    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                    ctx.fillRect(px + p.w - 2, p.y, 2, p.h);
+                    // Grass tufts on platforms
+                    ctx.fillStyle = grassColors[(areaId + 2) % 3];
+                    for (let gx = px + 5; gx < px + p.w - 5; gx += 14) {
+                        ctx.fillRect(gx, p.y - 3, 2, 4);
+                    }
+                    // Shadow below
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    for (let s = 0; s < 6; s++) {
+                        ctx.globalAlpha = 0.04;
+                        ctx.fillRect(px + 4 + s, p.y + p.h + sideH + s, p.w - 8 - s*2, 2);
+                    }
+                    ctx.globalAlpha = 1;
                 }
             });
 
-            // Loot
+            // ── LOOT ──
             apoc.worldLoot.forEach(l => {
                 const lx = l.x - cam;
                 if (lx < -50 || lx > canvas.width + 50) return;
-                const bob = Math.sin(l.bobTimer) * 4;
-                ctx.font = '18px Arial';
+                const bob = Math.sin(l.bobTimer) * 5;
+                // Glow ring
+                ctx.save();
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 12 + Math.sin(t * 0.08) * 4;
+                ctx.font = '24px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(l.icon, lx, l.y + bob);
-                // Glow
-                ctx.fillStyle = 'rgba(255,215,0,0.15)';
+                ctx.restore();
+                // Ground glow
+                ctx.fillStyle = 'rgba(255,215,0,0.2)';
                 ctx.beginPath();
-                ctx.arc(lx, l.y + bob - 5, 12, 0, Math.PI * 2);
+                ctx.ellipse(lx, l.y + 12, 14, 4, 0, 0, Math.PI * 2);
                 ctx.fill();
             });
 
-            // NPCs
+            // ── NPCs ──
             if (area.npcs) {
                 area.npcs.forEach(npc => {
                     const nx = npc.x - cam;
-                    if (nx < -50 || nx > canvas.width + 50) return;
-                    // NPC body
-                    ctx.font = '32px Arial';
+                    if (nx < -60 || nx > canvas.width + 60) return;
+                    // Shadow
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.beginPath();
+                    ctx.ellipse(nx, npc.y + 20, 18, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.font = '42px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(npc.icon, nx, npc.y);
-                    // Name
-                    ctx.font = "10px 'Press Start 2P', monospace";
+                    ctx.fillText(npc.icon, nx, npc.y + 10);
+                    // Name plate
+                    ctx.font = "bold 11px 'Press Start 2P', monospace";
+                    const nameW = ctx.measureText(npc.name).width;
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(nx - nameW/2 - 4, npc.y - 42, nameW + 8, 16);
                     ctx.fillStyle = '#FFD700';
                     ctx.fillText(npc.name, nx, npc.y - 30);
                     // Quest indicator
@@ -15259,118 +15385,258 @@
                         return true;
                     });
                     if (hasQuest) {
-                        ctx.font = '18px Arial';
-                        ctx.fillStyle = '#FFD700';
                         const isReturn = npc.quests.some(qid => {
                             if (!apoc.activeQuests.includes(qid)) return false;
                             const q = APOC_QUESTS.find(x => x.id === qid);
                             return q && q.objectives.every(o => o.have >= o.need);
                         });
-                        ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 42);
+                        const bounce = Math.sin(t * 0.08) * 4;
+                        ctx.font = '24px Arial';
+                        ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 50 + bounce);
                     }
                     // Interact prompt
                     if (apoc.interactTarget && apoc.interactTarget.id === npc.id) {
-                        ctx.font = "10px 'Press Start 2P', monospace";
+                        ctx.font = "bold 12px 'Press Start 2P', monospace";
                         ctx.fillStyle = '#FFD700';
-                        ctx.globalAlpha = 0.5 + Math.sin(apoc.timer * 0.1) * 0.5;
-                        ctx.fillText('[F] TALK', nx, npc.y + 20);
+                        ctx.globalAlpha = 0.5 + Math.sin(t * 0.1) * 0.5;
+                        ctx.fillText('[F] TALK', nx, npc.y + 36);
                         ctx.globalAlpha = 1;
                     }
                 });
             }
 
-            // Enemies
+            // ── ENEMIES ──
             apoc.enemiesAlive.forEach(e => {
                 const et = APOC_ENEMY_TYPES[e.type];
                 if (!et) return;
                 const ex = e.x - cam;
-                if (ex < -100 || ex > canvas.width + 100) return;
-                // Flash when hurt
+                if (ex < -120 || ex > canvas.width + 120) return;
                 if (e.hurtTimer > 0 && e.hurtTimer % 4 < 2) return;
-                // Body
-                ctx.font = (et.w) + 'px Arial';
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(ex, e.y + et.h + 2, et.w * 0.4, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Colored body shape
+                ctx.save();
+                const hurtFlash = e.hurtTimer > 0;
+                ctx.fillStyle = hurtFlash ? '#fff' : et.color;
+                ctx.globalAlpha = hurtFlash ? 0.9 : 0.4;
+                // Body rectangle with rounded feel
+                const bx = ex - et.w/2, by = e.y + 4;
+                ctx.beginPath();
+                ctx.moveTo(bx + 6, by);
+                ctx.lineTo(bx + et.w - 6, by);
+                ctx.quadraticCurveTo(bx + et.w, by, bx + et.w, by + 6);
+                ctx.lineTo(bx + et.w, by + et.h - 8);
+                ctx.quadraticCurveTo(bx + et.w, by + et.h - 2, bx + et.w - 6, by + et.h - 2);
+                ctx.lineTo(bx + 6, by + et.h - 2);
+                ctx.quadraticCurveTo(bx, by + et.h - 2, bx, by + et.h - 8);
+                ctx.lineTo(bx, by + 6);
+                ctx.quadraticCurveTo(bx, by, bx + 6, by);
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                // Outline glow for bosses
+                if (et.boss) {
+                    ctx.strokeStyle = et.color;
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = et.color;
+                    ctx.shadowBlur = 10 + Math.sin(t * 0.05) * 5;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+                ctx.restore();
+                // Emoji on top
+                ctx.font = Math.round(et.w * 0.8) + 'px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(et.icon, ex, e.y + et.h);
-                // HP bar
+                ctx.fillText(et.icon, ex, e.y + et.h - 4);
+                // HP bar (wider, clearer)
                 if (e.hp < e.maxHp) {
-                    const barW = et.w + 10;
-                    const barH = 4;
+                    const barW = et.w + 16;
+                    const barH = 6;
                     const barX = ex - barW/2;
-                    const barY = e.y - 8;
+                    const barY = e.y - 10;
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
                     ctx.fillStyle = '#333';
                     ctx.fillRect(barX, barY, barW, barH);
-                    ctx.fillStyle = e.hp > e.maxHp * 0.3 ? '#0f0' : '#f00';
-                    ctx.fillRect(barX, barY, barW * (e.hp / e.maxHp), barH);
-                    // Boss name
+                    const hpRatio = e.hp / e.maxHp;
+                    const hpColor = hpRatio > 0.5 ? '#0f0' : hpRatio > 0.25 ? '#ff0' : '#f00';
+                    ctx.fillStyle = hpColor;
+                    ctx.fillRect(barX, barY, barW * hpRatio, barH);
+                    // Boss name above bar
                     if (et.boss) {
-                        ctx.font = "8px 'Press Start 2P', monospace";
-                        ctx.fillStyle = '#f00';
-                        ctx.fillText(et.name, ex, barY - 4);
+                        ctx.font = "bold 10px 'Press Start 2P', monospace";
+                        ctx.fillStyle = et.color;
+                        ctx.textAlign = 'center';
+                        ctx.fillText(et.name, ex, barY - 6);
                     }
                 }
             });
 
-            // Player
+            // ── PLAYER ──
             const px = Math.round(apoc.playerX - cam);
             const py = Math.round(apoc.playerY);
-            // Invincibility flash
-            if (apoc.playerInv > 0 && apoc.playerInv % 4 < 2) {
-                // skip draw (flash)
-            } else {
+            const pH = 60; // player visual height
+            if (!(apoc.playerInv > 0 && apoc.playerInv % 4 < 2)) {
                 ctx.save();
-                ctx.translate(px, py);
+                ctx.translate(px, py + pH);
                 if (!apoc.playerDir) ctx.scale(-1, 1);
-                // Simple player sprite (colored rect + face)
-                ctx.fillStyle = '#C4A55A'; // skin
-                ctx.fillRect(-12, -40, 24, 40);
-                ctx.fillStyle = '#8B6914'; // hat
-                ctx.fillRect(-14, -48, 28, 10);
-                ctx.fillStyle = '#553311'; // coat
-                ctx.fillRect(-15, -20, 30, 25);
-                ctx.fillStyle = '#FF2200'; // scarf
-                ctx.fillRect(-8, -25, 16, 6);
-                // Eyes
+
+                // Shadow on ground
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(0, 2, 16, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Boots
+                ctx.fillStyle = '#3a2010';
+                ctx.fillRect(-12, -12, 10, 12);
+                ctx.fillRect(4, -12, 10, 12);
+
+                // Pants
+                ctx.fillStyle = '#4a3520';
+                ctx.fillRect(-12, -28, 10, 18);
+                ctx.fillRect(4, -28, 10, 18);
+
+                // Coat / torso
+                ctx.fillStyle = '#553311';
+                ctx.fillRect(-16, -50, 34, 24);
+                // Coat lapel
+                ctx.fillStyle = '#664422';
+                ctx.fillRect(-14, -50, 12, 8);
+                ctx.fillRect(4, -50, 12, 8);
+                // Belt
+                ctx.fillStyle = '#222';
+                ctx.fillRect(-15, -28, 32, 3);
+                ctx.fillStyle = '#C4A55A';
+                ctx.fillRect(-2, -29, 6, 5); // buckle
+
+                // Scarf
+                ctx.fillStyle = '#CC2200';
+                ctx.fillRect(-10, -53, 22, 5);
+                // Scarf tail (animated)
+                const scarfWave = Math.sin(t * 0.1) * 3;
+                ctx.fillStyle = '#BB1100';
+                ctx.fillRect(-12, -50, 6, 10 + scarfWave);
+
+                // Head (skin)
+                ctx.fillStyle = '#D4B56A';
+                ctx.fillRect(-9, -66, 20, 16);
+
+                // Hat (cowboy)
+                ctx.fillStyle = '#8B6914';
+                ctx.fillRect(-16, -72, 34, 4); // brim
+                ctx.fillStyle = '#7a5a0a';
+                ctx.fillRect(-8, -80, 18, 10); // crown
+                ctx.fillStyle = '#6a4a00';
+                ctx.fillRect(-6, -77, 14, 2); // band
+
+                // Face
                 ctx.fillStyle = '#000';
-                ctx.fillRect(2, -38, 4, 4);
-                ctx.fillRect(-6, -38, 4, 4);
-                // Attack slash
+                ctx.fillRect(3, -62, 3, 3); // right eye
+                ctx.fillRect(-4, -62, 3, 3); // left eye
+                // Smirk
+                ctx.fillStyle = '#8a5a2a';
+                ctx.fillRect(-2, -56, 8, 2);
+
+                // Arms
+                ctx.fillStyle = '#553311';
+                // Back arm
+                ctx.fillRect(-18, -48, 6, 20);
+                // Front arm (slash position if attacking)
                 if (apoc.playerAttacking) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                    ctx.fillRect(20, -30, 35, 5);
-                    ctx.fillRect(25, -20, 30, 4);
-                    ctx.fillRect(20, -10, 35, 5);
+                    ctx.save();
+                    ctx.translate(16, -42);
+                    ctx.rotate(-0.5 + Math.sin(t * 0.5) * 0.3);
+                    ctx.fillRect(0, 0, 6, 22);
+                    // Knife
+                    ctx.fillStyle = '#ccc';
+                    ctx.fillRect(1, 20, 4, 14);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(2, 32, 2, 4);
+                    ctx.restore();
+                    // Slash arc effect
+                    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(22, -36, 28, -0.8, 0.6);
+                    ctx.stroke();
+                    ctx.strokeStyle = 'rgba(255,200,100,0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(22, -36, 22, -0.6, 0.4);
+                    ctx.stroke();
+                } else {
+                    ctx.fillRect(14, -48, 6, 20);
+                    // Holstered gun hint
+                    ctx.fillStyle = '#444';
+                    ctx.fillRect(16, -30, 4, 8);
                 }
+
                 ctx.restore();
             }
 
-            // Projectiles
+            // ── PROJECTILES ──
             apoc.worldProjectiles.forEach(p => {
                 const ppx = p.x - cam;
                 if (ppx < -50 || ppx > canvas.width + 50) return;
+                ctx.save();
+                ctx.shadowColor = p.owner === 'enemy' ? '#ff0044' : '#FFD700';
+                ctx.shadowBlur = 8;
                 ctx.fillStyle = p.owner === 'enemy' ? '#ff0044' : '#FFD700';
                 ctx.beginPath();
-                ctx.arc(ppx, p.y, 4, 0, Math.PI * 2);
+                ctx.arc(ppx, p.y, 5, 0, Math.PI * 2);
                 ctx.fill();
+                // Trail
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.arc(ppx - p.vx * 2, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
             });
 
-            // Player hitbox (debug visualization - subtle)
+            // ── PLAYER HITBOX (subtle) ──
             if (apoc.hitbox) {
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
                 ctx.fillRect(apoc.hitbox.x - cam, apoc.hitbox.y, apoc.hitbox.w, apoc.hitbox.h);
             }
 
-            // World particles
+            // ── AMBIENT PARTICLES ──
+            // Spawn new ambient particles periodically
+            if (t % 6 === 0) {
+                const pType = areaId === 0 ? 'ember' : areaId === 1 ? 'drip' : areaId === 2 ? 'spore' : areaId === 3 ? 'data' : 'void';
+                const px2 = cam + Math.random() * canvas.width;
+                const py2 = gY - 30 - Math.random() * (gY * 0.6);
+                const colors = { ember:'#ff6622', drip:'#2244aa', spore:'#88cc00', data:'#00aaff', void:'#aa00ff' };
+                apoc.worldParticles.push({
+                    x: px2, y: py2,
+                    vx: (Math.random()-0.5) * 0.8,
+                    vy: pType === 'drip' ? 1.5 : (pType === 'ember' ? -0.8 : (Math.random()-0.5) * 0.5),
+                    life: 60 + Math.random() * 40,
+                    color: colors[pType],
+                    size: 1.5 + Math.random() * 2,
+                    ambient: true
+                });
+            }
+
+            // ── WORLD PARTICLES ──
             ctx.textAlign = 'center';
             apoc.worldParticles.forEach(p => {
                 if (p.text) {
-                    ctx.font = (p.size || 12) + "px 'Press Start 2P', monospace";
+                    ctx.font = "bold " + (p.size || 14) + "px 'Press Start 2P', monospace";
                     ctx.fillStyle = p.color || '#fff';
                     ctx.globalAlpha = Math.min(1, p.life / 15);
+                    // Text outline for readability
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.strokeText(p.text, p.x - cam, p.y);
                     ctx.fillText(p.text, p.x - cam, p.y);
                     ctx.globalAlpha = 1;
                 } else {
                     ctx.fillStyle = p.color || '#fff';
-                    ctx.globalAlpha = Math.min(1, p.life / 10);
+                    ctx.globalAlpha = Math.min(1, p.life / 12);
                     ctx.beginPath();
                     ctx.arc(p.x - cam, p.y, p.size || 2, 0, Math.PI * 2);
                     ctx.fill();
@@ -15378,7 +15644,15 @@
                 }
             });
 
-            // Dialogue box
+            // ── VIGNETTE overlay ──
+            const vigGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height*0.3,
+                                                      canvas.width/2, canvas.height/2, canvas.height*0.85);
+            vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            vigGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
+            ctx.fillStyle = vigGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // ── DIALOGUE BOX ──
             if (apoc.dialogueActive) {
                 const dlgEl = document.getElementById('apoc-dialogue');
                 dlgEl.classList.remove('hidden');
@@ -15390,24 +15664,37 @@
 
             ctx.restore();
 
-            // HUD overlay (drawn without camera transform)
+            // ── HUD ──
             drawApocHUD();
 
-            // Area name display (first 3 seconds)
+            // ── AREA NAME INTRO ──
             if (apoc.timer < 180) {
                 ctx.save();
                 ctx.textAlign = 'center';
-                ctx.globalAlpha = Math.min(1, (180 - apoc.timer) / 60);
-                ctx.font = "24px 'Press Start 2P', monospace";
+                const introAlpha = Math.min(1, (180 - apoc.timer) / 60);
+                ctx.globalAlpha = introAlpha;
+                // Dark backdrop
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(canvas.width/2 - 220, canvas.height/2 - 50, 440, 80);
+                // Area icon
+                ctx.font = '36px Arial';
+                ctx.fillText(area.icon, canvas.width/2, canvas.height/2 - 10);
+                // Area name
+                ctx.font = "bold 28px 'Press Start 2P', monospace";
                 ctx.fillStyle = '#ff6600';
-                ctx.fillText(area.name, canvas.width/2, canvas.height/2 - 20);
-                ctx.font = "12px 'Press Start 2P', monospace";
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.strokeText(area.name, canvas.width/2, canvas.height/2 + 5);
+                ctx.fillText(area.name, canvas.width/2, canvas.height/2 + 5);
+                // Subtitle
+                ctx.font = "14px 'Press Start 2P', monospace";
                 ctx.fillStyle = '#ff9944';
-                ctx.fillText(area.subtitle, canvas.width/2, canvas.height/2 + 10);
+                ctx.fillText(area.subtitle, canvas.width/2, canvas.height/2 + 28);
+                ctx.globalAlpha = 1;
                 ctx.restore();
             }
 
-            // Minimap
+            // ── MINIMAP ──
             drawApocMinimap(area, cam);
         }
 
@@ -15441,45 +15728,63 @@
 
         // ====== MINIMAP ======
         function drawApocMinimap(area, cam) {
-            const mmW = 150, mmH = 30;
-            const mmX = canvas.width - mmW - 10, mmY = canvas.height - mmH - 10;
+            const mmW = 200, mmH = 40;
+            const mmX = canvas.width - mmW - 15, mmY = canvas.height - mmH - 15;
             const scale = mmW / area.width;
 
             ctx.save();
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.fillRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
-            ctx.strokeStyle = '#555';
-            ctx.strokeRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
+            // Background
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(mmX - 3, mmY - 3, mmW + 6, mmH + 6);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(mmX - 3, mmY - 3, mmW + 6, mmH + 6);
+
+            // Ground line
+            const gLine = mmY + mmH * 0.75;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(mmX, gLine, mmW, mmH - mmH * 0.75);
 
             // Platforms
-            ctx.fillStyle = '#444';
+            ctx.fillStyle = '#555';
             area.platforms.forEach(p => {
-                ctx.fillRect(mmX + p.x * scale, mmY + (p.y / canvas.height) * mmH, Math.max(1, p.w * scale), 2);
+                if (p.y >= area.groundY) return; // skip ground platform
+                const py = mmY + (p.y / canvas.height) * mmH;
+                ctx.fillRect(mmX + p.x * scale, py, Math.max(2, p.w * scale), 2);
             });
 
             // Enemies (red dots)
-            ctx.fillStyle = '#f00';
+            ctx.fillStyle = '#f44';
             apoc.enemiesAlive.forEach(e => {
-                ctx.fillRect(mmX + e.x * scale - 1, mmY + mmH * 0.6, 2, 2);
+                ctx.fillRect(mmX + e.x * scale - 1, gLine - 2, 3, 3);
             });
 
             // NPCs (yellow dots)
             ctx.fillStyle = '#FFD700';
             if (area.npcs) {
                 area.npcs.forEach(npc => {
-                    ctx.fillRect(mmX + npc.x * scale - 1, mmY + mmH * 0.5, 3, 3);
+                    ctx.fillRect(mmX + npc.x * scale - 1, gLine - 3, 4, 4);
                 });
             }
 
-            // Player (green dot)
+            // Player (bright green)
             ctx.fillStyle = '#0f0';
-            ctx.fillRect(mmX + apoc.playerX * scale - 2, mmY + mmH * 0.5, 4, 4);
+            ctx.fillRect(mmX + apoc.playerX * scale - 2, gLine - 3, 5, 5);
 
             // Viewport indicator
-            ctx.strokeStyle = '#0f0';
-            ctx.globalAlpha = 0.4;
+            ctx.strokeStyle = 'rgba(0,255,0,0.35)';
+            ctx.lineWidth = 1;
             ctx.strokeRect(mmX + cam * scale, mmY, canvas.width * scale, mmH);
-            ctx.globalAlpha = 1;
+
+            // Area exits
+            if (area.exitL !== null) {
+                ctx.fillStyle = '#66f';
+                ctx.fillRect(mmX, mmY, 3, mmH);
+            }
+            if (area.exitR !== null) {
+                ctx.fillStyle = '#66f';
+                ctx.fillRect(mmX + mmW - 3, mmY, 3, mmH);
+            }
 
             ctx.restore();
         }
