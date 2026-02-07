@@ -1510,6 +1510,9 @@
         .apoc-hp-bar { position: absolute; top: 15px; left: 15px; width: 260px; height: 26px; background: #1a1a1a; border: 2px solid #555; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #cc0000, #ff4400, #ff2200); border-radius: 3px; transition: width 0.2s; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); }
         .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 11px; line-height: 26px; text-shadow: 1px 1px 3px black; font-family: 'Press Start 2P', monospace; }
+        .apoc-shield-bar { position: absolute; top: 44px; left: 15px; width: 180px; height: 14px; background: #1a1a2a; border: 1px solid #446; border-radius: 3px; }
+        .apoc-shield-fill { height: 100%; background: linear-gradient(90deg, #2266cc, #44aaff, #66ccff); border-radius: 2px; transition: width 0.2s; box-shadow: inset 0 1px 3px rgba(255,255,255,0.3); }
+        .apoc-shield-text { position: absolute; top: 0; left: 4px; color: #aaccff; font-size: 9px; line-height: 14px; text-shadow: 1px 1px 2px black; }
         .apoc-coins { position: absolute; top: 15px; right: 15px; color: #FFD700; font-size: 16px; background: rgba(0,0,0,0.6); padding: 6px 12px; border-radius: 5px; border: 1px solid #555; text-shadow: 0 0 6px rgba(255,215,0,0.4); }
         .apoc-quest-tracker { position: absolute; top: 55px; right: 15px; max-width: 280px; background: rgba(0,0,0,0.75); border: 1px solid #ff6600; border-radius: 6px; padding: 10px; font-size: 10px; box-shadow: 0 0 15px rgba(255,102,0,0.15); }
         .apoc-quest-title { color: #ff6600; font-weight: bold; margin-bottom: 4px; }
@@ -1527,7 +1530,7 @@
         .apoc-reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.95); border: 2px solid #FFD700; border-radius: 15px; padding: 30px; z-index: 110; text-align: center; min-width: 300px; }
         .apoc-reward-title { color: #FFD700; font-size: 1.5em; margin-bottom: 15px; }
         .apoc-reward-item { color: #ccc; font-size: 1em; margin: 5px 0; }
-        .apoc-inventory { position: absolute; top: 50px; left: 15px; display: flex; gap: 10px; font-size: 13px; }
+        .apoc-inventory { position: absolute; top: 64px; left: 15px; display: flex; gap: 10px; font-size: 13px; }
         .apoc-inv-item { color: #ccc; background: rgba(0,0,0,0.65); padding: 4px 10px; border-radius: 4px; border: 1px solid #555; font-family: 'Press Start 2P', monospace; font-size: 10px; }
     </style>
 </head>
@@ -2149,6 +2152,7 @@
     </div>
     <div id="apoc-hud" class="hidden">
         <div class="apoc-hp-bar"><div class="apoc-hp-fill" id="apoc-hp-fill" style="width:100%"></div><div class="apoc-hp-text" id="apoc-hp-text">100/100</div></div>
+        <div class="apoc-shield-bar"><div class="apoc-shield-fill" id="apoc-shield-fill" style="width:100%"></div><div class="apoc-shield-text">🛡️</div></div>
         <div class="apoc-inventory" id="apoc-inventory"></div>
         <div class="apoc-coins" id="apoc-coins-hud">🪙 0</div>
         <div class="apoc-quest-tracker" id="apoc-quest-tracker" style="display:none"></div>
@@ -14690,6 +14694,7 @@
                 area: 0, cameraX: 0, playerX: 100, playerY: apocGroundY() - 60, playerVX: 0, playerVY: 0,
                 playerHP: 100, playerMaxHP: 100, playerGrounded: false, playerDir: true,
                 playerAttacking: false, playerAttackTimer: 0, playerInv: 0, playerCd: 0,
+                playerShielding: false, shieldHP: 100, shieldMaxHP: 100, shieldCooldown: 0, shieldBreakTimer: 0,
                 coins: 0, scrap: 0, ammo: 30, medkits: 3,
                 inventory: [], // cyberware equipped
                 questItems: {}, // { itemId: count }
@@ -14776,6 +14781,8 @@
         function exitApocalypseHub() {
             document.getElementById('apocalypse-screen').classList.add('hidden');
             document.getElementById('title-screen').classList.remove('hidden');
+            const cd = document.getElementById('coin-display');
+            if (cd) cd.style.display = '';
             gameState = 'TITLE';
         }
 
@@ -14841,6 +14848,7 @@
             loadApocArea(areaIdx);
             document.getElementById('apocalypse-screen').classList.add('hidden');
             document.getElementById('apoc-hud').classList.remove('hidden');
+            document.getElementById('coin-display').style.display = 'none';
             canvas.style.display = 'block';
             gameState = 'GAME';
             music.play('BATTLE');
@@ -14874,6 +14882,25 @@
             if (apoc.playerInv > 0) apoc.playerInv--;
             if (apoc.playerCd > 0) apoc.playerCd--;
             if (apoc.shakeCam > 0) apoc.shakeCam--;
+            if (apoc.shieldCooldown > 0) apoc.shieldCooldown--;
+            if (apoc.shieldBreakTimer > 0) apoc.shieldBreakTimer--;
+
+            // Shield regen when not shielding
+            if (!apoc.playerShielding && apoc.shieldHP < apoc.shieldMaxHP && apoc.shieldBreakTimer <= 0) {
+                apoc.shieldHP = Math.min(apoc.shieldMaxHP, apoc.shieldHP + 0.15);
+            }
+
+            // Shield input (L, Shift, or S when stationary)
+            const wantShield = keys['l'] || keys['shift'] || keys['s'];
+            if (wantShield && !apoc.playerAttacking && apoc.shieldCooldown <= 0 && apoc.shieldHP > 0 && apoc.shieldBreakTimer <= 0) {
+                apoc.playerShielding = true;
+            } else {
+                apoc.playerShielding = false;
+            }
+            // Slow movement while shielding
+            if (apoc.playerShielding) {
+                apoc.playerVX *= 0.3;
+            }
 
             // Movement
             if (keys['a'] || keys['arrowleft']) { apoc.playerVX = -moveSpeed; apoc.playerDir = false; }
@@ -14973,12 +15000,32 @@
                         e.atkCd = et.atkCd;
                         // Enemy attack - check if in range
                         if (dist < et.atkRange + 20 && apoc.playerInv <= 0) {
-                            apoc.playerHP -= et.dmg;
-                            apoc.playerVX += (dx < 0 ? 1 : -1) * et.kb;
-                            apoc.playerVY = -3;
+                            let dmg = et.dmg;
+                            let kbMult = 1;
+                            if (apoc.playerShielding && apoc.shieldHP > 0) {
+                                // Shield absorbs 75% damage
+                                const absorbed = Math.round(dmg * 0.75);
+                                dmg = dmg - absorbed;
+                                apoc.shieldHP -= absorbed * 1.5;
+                                kbMult = 0.3;
+                                apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 20, text: '🛡️ BLOCKED', vx: 0, vy: -1.5, life: 25, color: '#4488ff', size: 11 });
+                                if (apoc.shieldHP <= 0) {
+                                    apoc.shieldHP = 0;
+                                    apoc.shieldBreakTimer = 180;
+                                    apoc.playerShielding = false;
+                                    apoc.shakeCam = 12;
+                                    apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 35, text: '💥 SHIELD BREAK!', vx: 0, vy: -1, life: 40, color: '#ff4444', size: 12 });
+                                    for (let sp = 0; sp < 8; sp++) {
+                                        apoc.worldParticles.push({ x: apoc.playerX + (Math.random()-0.5)*30, y: apoc.playerY + (Math.random()-0.5)*30, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 20, color: '#4488ff', size: 3 });
+                                    }
+                                }
+                            }
+                            apoc.playerHP -= dmg;
+                            apoc.playerVX += (dx < 0 ? 1 : -1) * et.kb * kbMult;
+                            apoc.playerVY = -3 * kbMult;
                             apoc.playerInv = 30;
-                            apoc.shakeCam = 8;
-                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${et.dmg}`, vx: 0, vy: -2, life: 30, color: '#ff0000', size: 14 });
+                            apoc.shakeCam = apoc.playerShielding ? 3 : 8;
+                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${dmg}`, vx: 0, vy: -2, life: 30, color: apoc.playerShielding ? '#4488ff' : '#ff0000', size: 14 });
                             if (apoc.playerHP <= 0) {
                                 apoc.playerHP = 0;
                                 handleApocDeath();
@@ -15095,10 +15142,25 @@
                 // Hit player
                 if (p.owner === 'enemy' && apoc.playerInv <= 0) {
                     if (Math.abs(p.x - apoc.playerX) < 25 && Math.abs(p.y - apoc.playerY) < 30) {
-                        apoc.playerHP -= p.dmg;
-                        apoc.playerInv = 20;
                         p.life = 0;
-                        apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${Math.round(p.dmg)}`, vx: 0, vy: -2, life: 25, color: '#f00' });
+                        if (apoc.playerShielding && apoc.shieldHP > 0) {
+                            const blocked = p.dmg * 0.75;
+                            const through = p.dmg - blocked;
+                            apoc.playerHP -= through;
+                            apoc.shieldHP -= blocked * 1.5;
+                            apoc.playerInv = 10;
+                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 20, text: '🛡️', vx: 0, vy: -2, life: 20, color: '#44aaff' });
+                            if (apoc.shieldHP <= 0) {
+                                apoc.shieldHP = 0;
+                                apoc.shieldBreakTimer = 180;
+                                apoc.playerShielding = false;
+                                apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 30, text: '💥 BREAK!', vx: 0, vy: -1.5, life: 40, color: '#ff4444' });
+                            }
+                        } else {
+                            apoc.playerHP -= p.dmg;
+                            apoc.playerInv = 20;
+                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${Math.round(p.dmg)}`, vx: 0, vy: -2, life: 25, color: '#f00' });
+                        }
                         if (apoc.playerHP <= 0) { apoc.playerHP = 0; handleApocDeath(); }
                     }
                 }
@@ -15163,6 +15225,344 @@
             const targetCamX = apoc.playerX - canvas.width / 2;
             apoc.cameraX += (targetCamX - apoc.cameraX) * 0.1;
             apoc.cameraX = Math.max(0, Math.min(area.width - canvas.width, apoc.cameraX));
+        }
+
+        // ====== NPC PIXEL SPRITE HELPER ======
+        function drawPixelNPC(ctx, npcId, nx, ny, t) {
+            ctx.save();
+            ctx.translate(nx, ny);
+            const bob = Math.sin(t * 0.04 + nx * 0.01) * 1.5;
+            ctx.translate(0, bob);
+
+            if (npcId === 'survivor_doge' || npcId === 'data_doge') {
+                const isData = npcId === 'data_doge';
+                // Feet
+                ctx.fillStyle = '#5a3a1a';
+                ctx.fillRect(-10, 6, 7, 6);
+                ctx.fillRect(3, 6, 7, 6);
+                // Legs
+                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
+                ctx.fillRect(-9, -4, 7, 12);
+                ctx.fillRect(2, -4, 7, 12);
+                // Body
+                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
+                ctx.fillRect(-12, -24, 24, 22);
+                if (isData) {
+                    // Tech vest
+                    ctx.fillStyle = '#1a3a5a';
+                    ctx.fillRect(-12, -24, 24, 12);
+                    ctx.fillStyle = '#00ccff';
+                    ctx.fillRect(-4, -20, 2, 2);
+                    ctx.fillRect(2, -20, 2, 2);
+                } else {
+                    // Bandana
+                    ctx.fillStyle = '#cc4400';
+                    ctx.fillRect(-12, -26, 24, 4);
+                }
+                // Head
+                ctx.fillStyle = isData ? '#DAA520' : '#D4A84A';
+                ctx.fillRect(-11, -42, 22, 20);
+                // Ears (triangles)
+                ctx.beginPath();
+                ctx.moveTo(-10, -42); ctx.lineTo(-6, -52); ctx.lineTo(-2, -42);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(2, -42); ctx.lineTo(6, -52); ctx.lineTo(10, -42);
+                ctx.fill();
+                // Inner ears
+                ctx.fillStyle = '#D48A6A';
+                ctx.beginPath();
+                ctx.moveTo(-8, -42); ctx.lineTo(-6, -48); ctx.lineTo(-4, -42);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(4, -42); ctx.lineTo(6, -48); ctx.lineTo(8, -42);
+                ctx.fill();
+                // Muzzle
+                ctx.fillStyle = '#F0D8A8';
+                ctx.fillRect(-6, -32, 12, 8);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-8, -38, 4, 4);
+                ctx.fillRect(4, -38, 4, 4);
+                // Eye shine
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-7, -37, 2, 2);
+                ctx.fillRect(5, -37, 2, 2);
+                // Nose
+                ctx.fillStyle = '#333';
+                ctx.fillRect(-2, -30, 4, 3);
+                // Arms
+                ctx.fillStyle = isData ? '#B8860B' : '#C4943A';
+                ctx.fillRect(-15, -22, 5, 14);
+                ctx.fillRect(10, -22, 5, 14);
+            } else if (npcId === 'old_pepe') {
+                // Feet
+                ctx.fillStyle = '#3a5a20';
+                ctx.fillRect(-10, 6, 8, 6);
+                ctx.fillRect(2, 6, 8, 6);
+                // Legs
+                ctx.fillStyle = '#4a7a30';
+                ctx.fillRect(-9, -4, 7, 12);
+                ctx.fillRect(2, -4, 7, 12);
+                // Body
+                ctx.fillStyle = '#55883a';
+                ctx.fillRect(-13, -24, 26, 22);
+                // Head (wide frog head)
+                ctx.fillStyle = '#6aa84f';
+                ctx.fillRect(-15, -46, 30, 24);
+                // Big eyes (bulging, classic Pepe)
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-14, -50, 12, 10);
+                ctx.fillRect(2, -50, 12, 10);
+                ctx.fillStyle = '#222';
+                ctx.fillRect(-9, -48, 5, 7);
+                ctx.fillRect(5, -48, 5, 7);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-8, -47, 2, 2);
+                ctx.fillRect(6, -47, 2, 2);
+                // Wide mouth
+                ctx.fillStyle = '#3a6a25';
+                ctx.fillRect(-12, -26, 24, 3);
+                // Sad frown line
+                ctx.strokeStyle = '#2a4a15';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-10, -25);
+                ctx.quadraticCurveTo(0, -20, 10, -25);
+                ctx.stroke();
+                // Old Pepe hat
+                ctx.fillStyle = '#553a22';
+                ctx.fillRect(-17, -54, 34, 4);
+                ctx.fillRect(-10, -64, 20, 12);
+                ctx.fillStyle = '#443018';
+                ctx.fillRect(-8, -56, 16, 2);
+                // Arms
+                ctx.fillStyle = '#55883a';
+                ctx.fillRect(-16, -22, 5, 14);
+                ctx.fillRect(11, -22, 5, 14);
+            } else if (npcId === 'echo_npc') {
+                // Cowboy NPC - tan/gold themed
+                // Boots
+                ctx.fillStyle = '#3a2010';
+                ctx.fillRect(-10, 4, 8, 8);
+                ctx.fillRect(2, 4, 8, 8);
+                // Pants
+                ctx.fillStyle = '#4a3520';
+                ctx.fillRect(-9, -10, 7, 16);
+                ctx.fillRect(2, -10, 7, 16);
+                // Belt
+                ctx.fillStyle = '#222';
+                ctx.fillRect(-12, -12, 24, 3);
+                ctx.fillStyle = '#C4A55A';
+                ctx.fillRect(-2, -13, 4, 5);
+                // Coat
+                ctx.fillStyle = '#6a5020';
+                ctx.fillRect(-13, -32, 26, 22);
+                ctx.fillStyle = '#7a6030';
+                ctx.fillRect(-11, -32, 10, 8);
+                ctx.fillRect(1, -32, 10, 8);
+                // Scarf
+                ctx.fillStyle = '#C4A55A';
+                ctx.fillRect(-8, -36, 16, 5);
+                const sw = Math.sin(t * 0.08) * 2;
+                ctx.fillRect(-10, -32, 5, 8 + sw);
+                // Head
+                ctx.fillStyle = '#D4B56A';
+                ctx.fillRect(-8, -48, 16, 14);
+                // Hat
+                ctx.fillStyle = '#C4A55A';
+                ctx.fillRect(-14, -54, 28, 4);
+                ctx.fillStyle = '#B49A4A';
+                ctx.fillRect(-6, -62, 12, 10);
+                ctx.fillStyle = '#A48A3A';
+                ctx.fillRect(-5, -55, 10, 2);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-5, -44, 3, 3);
+                ctx.fillRect(2, -44, 3, 3);
+                // Mouth
+                ctx.fillStyle = '#9a6a3a';
+                ctx.fillRect(-3, -38, 6, 2);
+                // Arms
+                ctx.fillStyle = '#6a5020';
+                ctx.fillRect(-16, -30, 5, 16);
+                ctx.fillRect(11, -30, 5, 16);
+            } else if (npcId === 'hermit') {
+                // Wizard hermit
+                // Robe bottom / feet hidden
+                ctx.fillStyle = '#3a1a5a';
+                ctx.fillRect(-12, -2, 24, 14);
+                // Body robe
+                ctx.fillStyle = '#4a2a6a';
+                ctx.fillRect(-13, -30, 26, 30);
+                // Robe details
+                ctx.fillStyle = '#5a3a7a';
+                ctx.fillRect(-6, -28, 2, 26);
+                ctx.fillRect(4, -28, 2, 26);
+                // Head
+                ctx.fillStyle = '#D4B56A';
+                ctx.fillRect(-8, -44, 16, 16);
+                // Beard
+                ctx.fillStyle = '#ccc';
+                ctx.fillRect(-6, -30, 12, 8);
+                ctx.fillRect(-4, -22, 8, 5);
+                ctx.fillRect(-2, -17, 4, 3);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-5, -40, 3, 3);
+                ctx.fillRect(2, -40, 3, 3);
+                // Hat brim
+                ctx.fillStyle = '#3a1a5a';
+                ctx.fillRect(-12, -48, 24, 4);
+                // Wizard hat (pointy)
+                ctx.fillStyle = '#4a2a6a';
+                ctx.beginPath();
+                ctx.moveTo(-8, -48);
+                ctx.lineTo(0, -72);
+                ctx.lineTo(8, -48);
+                ctx.closePath();
+                ctx.fill();
+                // Star on hat
+                ctx.fillStyle = '#FFD700';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('✦', 0, -56);
+                // Staff
+                ctx.fillStyle = '#6a4a2a';
+                ctx.fillRect(16, -50, 3, 54);
+                // Staff orb
+                ctx.fillStyle = '#aa44ff';
+                ctx.shadowColor = '#aa44ff';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(17, -52, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // Arms (hidden in robe, just sleeves)
+                ctx.fillStyle = '#4a2a6a';
+                ctx.fillRect(-16, -26, 5, 12);
+                ctx.fillRect(11, -26, 5, 12);
+            } else {
+                // Fallback: generic NPC body
+                ctx.fillStyle = '#888';
+                ctx.fillRect(-10, 4, 7, 8);
+                ctx.fillRect(3, 4, 7, 8);
+                ctx.fillRect(-12, -24, 24, 30);
+                ctx.fillStyle = '#aaa';
+                ctx.fillRect(-9, -40, 18, 18);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-5, -36, 3, 3);
+                ctx.fillRect(2, -36, 3, 3);
+            }
+
+            ctx.restore();
+        }
+
+        // ====== ENEMY PIXEL SPRITE HELPER ======
+        function drawPixelEnemy(ctx, e, et, ex, t) {
+            const hurtFlash = e.hurtTimer > 0;
+            const bc = hurtFlash ? '#fff' : et.color;
+            const w = et.w;
+            const h = et.h;
+            const hw = w * 0.5;
+
+            ctx.save();
+            ctx.translate(ex, e.y + h);
+
+            // Walking bob
+            const walkBob = Math.sin(t * 0.08 + e.x * 0.05) * 1.5;
+
+            // Legs
+            ctx.fillStyle = hurtFlash ? '#ddd' : '#222';
+            const legW = Math.max(5, hw * 0.35);
+            const legH = Math.max(6, h * 0.22);
+            const legSpread = hw * 0.15;
+            ctx.fillRect(-legSpread - legW, -legH + walkBob, legW, legH);
+            ctx.fillRect(legSpread, -legH - walkBob, legW, legH);
+
+            // Body/torso
+            ctx.fillStyle = bc;
+            ctx.globalAlpha = hurtFlash ? 0.9 : 0.85;
+            const bodyW = hw * 1.2;
+            const bodyH = h * 0.45;
+            const bodyY = -(legH + bodyH);
+            ctx.fillRect(-bodyW * 0.5, bodyY, bodyW, bodyH);
+            // Body shading
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(-bodyW * 0.5, bodyY, bodyW * 0.15, bodyH);
+            ctx.fillRect(bodyW * 0.35, bodyY, bodyW * 0.15, bodyH);
+
+            // Arms
+            ctx.fillStyle = bc;
+            ctx.globalAlpha = hurtFlash ? 0.85 : 0.75;
+            const armW = Math.max(4, hw * 0.22);
+            const armH = Math.max(8, h * 0.3);
+            const armSwing = Math.sin(t * 0.06 + e.x) * 2;
+            ctx.fillRect(-bodyW * 0.5 - armW - 1, bodyY + 2 + armSwing, armW, armH);
+            ctx.fillRect(bodyW * 0.5 + 1, bodyY + 2 - armSwing, armW, armH);
+
+            // Head
+            ctx.globalAlpha = hurtFlash ? 0.95 : 0.9;
+            ctx.fillStyle = bc;
+            const headW = hw * 0.9;
+            const headH = h * 0.28;
+            const headY = bodyY - headH + 2;
+            ctx.fillRect(-headW * 0.5, headY, headW, headH);
+
+            // Eyes (menacing)
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#000';
+            const eyeW = Math.max(3, headW * 0.18);
+            const eyeH = Math.max(3, headH * 0.3);
+            const eyeY = headY + headH * 0.3;
+            ctx.fillRect(-headW * 0.3, eyeY, eyeW, eyeH);
+            ctx.fillRect(headW * 0.12, eyeY, eyeW, eyeH);
+            // Eye color (glowing)
+            const eyeColor = et.boss ? '#ff0' : (et.color === '#00ff44' ? '#ff0' : '#f44');
+            ctx.fillStyle = eyeColor;
+            const pupilW = Math.max(2, eyeW * 0.6);
+            const pupilH = Math.max(2, eyeH * 0.6);
+            ctx.fillRect(-headW * 0.3 + 1, eyeY + 1, pupilW, pupilH);
+            ctx.fillRect(headW * 0.12 + 1, eyeY + 1, pupilW, pupilH);
+
+            // Mouth (angry line)
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-headW * 0.25, headY + headH - 4, headW * 0.5, 2);
+
+            // Boss crown/glow
+            if (et.boss) {
+                ctx.shadowColor = et.color;
+                ctx.shadowBlur = 10 + Math.sin(t * 0.05) * 5;
+                ctx.strokeStyle = et.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-bodyW * 0.5 - 2, bodyY - 2, bodyW + 4, bodyH + legH + 4);
+                // Crown for bosses
+                ctx.fillStyle = '#FFD700';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 8;
+                const crownY = headY - 8;
+                ctx.fillRect(-headW * 0.4, crownY, headW * 0.8, 6);
+                // Crown points
+                ctx.beginPath();
+                ctx.moveTo(-headW * 0.35, crownY);
+                ctx.lineTo(-headW * 0.25, crownY - 6);
+                ctx.lineTo(-headW * 0.15, crownY);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-headW * 0.05, crownY);
+                ctx.lineTo(0, crownY - 8);
+                ctx.lineTo(headW * 0.05, crownY);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(headW * 0.15, crownY);
+                ctx.lineTo(headW * 0.25, crownY - 6);
+                ctx.lineTo(headW * 0.35, crownY);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            ctx.globalAlpha = 1;
+            ctx.restore();
         }
 
         // ====== DRAW ======
@@ -15279,11 +15679,16 @@
                     // Grass edge on top
                     ctx.fillStyle = grassColors[areaId % 3];
                     ctx.fillRect(px, p.y - 3, p.w, 6);
-                    // Grass tufts
-                    ctx.fillStyle = grassColors[(areaId + 1) % 3];
-                    for (let gx = px; gx < px + p.w; gx += 18 + (gx * 7 % 10)) {
-                        const gh = 4 + (gx * 3 % 5);
-                        ctx.fillRect(gx, p.y - gh, 3, gh);
+                    // Grass tufts (triangular blades)
+                    for (let gx = px; gx < px + p.w; gx += 10 + (gx * 7 % 8)) {
+                        const gh = 3 + (gx * 3 % 4);
+                        const lean = Math.sin(gx * 0.3 + t * 0.03) * 1.5;
+                        ctx.fillStyle = grassColors[((gx * 3) >> 0) % 3];
+                        ctx.beginPath();
+                        ctx.moveTo(gx, p.y);
+                        ctx.lineTo(gx + lean + 1, p.y - gh);
+                        ctx.lineTo(gx + 2, p.y);
+                        ctx.fill();
                     }
                     // Ground texture lines
                     ctx.strokeStyle = 'rgba(0,0,0,0.15)';
@@ -15316,10 +15721,15 @@
                     ctx.fillRect(px, p.y, 2, p.h);
                     ctx.fillStyle = 'rgba(0,0,0,0.15)';
                     ctx.fillRect(px + p.w - 2, p.y, 2, p.h);
-                    // Grass tufts on platforms
-                    ctx.fillStyle = grassColors[(areaId + 2) % 3];
-                    for (let gx = px + 5; gx < px + p.w - 5; gx += 14) {
-                        ctx.fillRect(gx, p.y - 3, 2, 4);
+                    // Grass tufts on platforms (small triangles)
+                    for (let gx = px + 4; gx < px + p.w - 4; gx += 8 + (gx * 5 % 6)) {
+                        const gh = 2 + (gx * 2 % 3);
+                        ctx.fillStyle = grassColors[((gx * 2) >> 0) % 3];
+                        ctx.beginPath();
+                        ctx.moveTo(gx, p.y);
+                        ctx.lineTo(gx + 1, p.y - gh);
+                        ctx.lineTo(gx + 2, p.y);
+                        ctx.fill();
                     }
                     // Shadow below
                     ctx.fillStyle = 'rgba(0,0,0,0.25)';
@@ -15361,17 +15771,16 @@
                     ctx.beginPath();
                     ctx.ellipse(nx, npc.y + 20, 18, 5, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Body
-                    ctx.font = '42px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(npc.icon, nx, npc.y + 10);
+                    // Pixel body
+                    drawPixelNPC(ctx, npc.id, nx, npc.y, t);
                     // Name plate
                     ctx.font = "bold 11px 'Press Start 2P', monospace";
+                    ctx.textAlign = 'center';
                     const nameW = ctx.measureText(npc.name).width;
                     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                    ctx.fillRect(nx - nameW/2 - 4, npc.y - 42, nameW + 8, 16);
+                    ctx.fillRect(nx - nameW/2 - 4, npc.y - 62, nameW + 8, 16);
                     ctx.fillStyle = '#FFD700';
-                    ctx.fillText(npc.name, nx, npc.y - 30);
+                    ctx.fillText(npc.name, nx, npc.y - 50);
                     // Quest indicator
                     const hasQuest = npc.quests && npc.quests.some(qid => {
                         if (apoc.completedQuests.has(qid)) return false;
@@ -15392,7 +15801,7 @@
                         });
                         const bounce = Math.sin(t * 0.08) * 4;
                         ctx.font = '24px Arial';
-                        ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 50 + bounce);
+                        ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 70 + bounce);
                     }
                     // Interact prompt
                     if (apoc.interactTarget && apoc.interactTarget.id === npc.id) {
@@ -15417,40 +15826,8 @@
                 ctx.beginPath();
                 ctx.ellipse(ex, e.y + et.h + 2, et.w * 0.4, 5, 0, 0, Math.PI * 2);
                 ctx.fill();
-                // Colored body shape
-                ctx.save();
-                const hurtFlash = e.hurtTimer > 0;
-                ctx.fillStyle = hurtFlash ? '#fff' : et.color;
-                ctx.globalAlpha = hurtFlash ? 0.9 : 0.4;
-                // Body rectangle with rounded feel
-                const bx = ex - et.w/2, by = e.y + 4;
-                ctx.beginPath();
-                ctx.moveTo(bx + 6, by);
-                ctx.lineTo(bx + et.w - 6, by);
-                ctx.quadraticCurveTo(bx + et.w, by, bx + et.w, by + 6);
-                ctx.lineTo(bx + et.w, by + et.h - 8);
-                ctx.quadraticCurveTo(bx + et.w, by + et.h - 2, bx + et.w - 6, by + et.h - 2);
-                ctx.lineTo(bx + 6, by + et.h - 2);
-                ctx.quadraticCurveTo(bx, by + et.h - 2, bx, by + et.h - 8);
-                ctx.lineTo(bx, by + 6);
-                ctx.quadraticCurveTo(bx, by, bx + 6, by);
-                ctx.closePath();
-                ctx.fill();
-                ctx.globalAlpha = 1;
-                // Outline glow for bosses
-                if (et.boss) {
-                    ctx.strokeStyle = et.color;
-                    ctx.lineWidth = 2;
-                    ctx.shadowColor = et.color;
-                    ctx.shadowBlur = 10 + Math.sin(t * 0.05) * 5;
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
-                }
-                ctx.restore();
-                // Emoji on top
-                ctx.font = Math.round(et.w * 0.8) + 'px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(et.icon, ex, e.y + et.h - 4);
+                // Pixel body
+                drawPixelEnemy(ctx, e, et, ex, t);
                 // HP bar (wider, clearer)
                 if (e.hp < e.maxHp) {
                     const barW = et.w + 16;
@@ -15575,6 +15952,44 @@
                     ctx.fillRect(16, -30, 4, 8);
                 }
 
+                ctx.restore();
+            }
+
+            // ── SHIELD VISUAL ──
+            if (apoc.playerShielding || apoc.shieldBreakTimer > 160) {
+                ctx.save();
+                const shieldR = 38;
+                const shieldRatio = apoc.shieldHP / apoc.shieldMaxHP;
+                const shieldAlpha = apoc.shieldBreakTimer > 0 ? 0.2 : (0.2 + Math.sin(t * 0.15) * 0.08);
+                const shieldColor = apoc.shieldHP < 30 ? (t % 8 < 4 ? '#ff4444' : '#ff8844') : '#44aaff';
+                // Outer glow ring
+                ctx.shadowColor = shieldColor;
+                ctx.shadowBlur = 12 + Math.sin(t * 0.1) * 4;
+                ctx.strokeStyle = shieldColor;
+                ctx.lineWidth = 2.5;
+                ctx.globalAlpha = shieldAlpha + 0.25;
+                ctx.beginPath();
+                ctx.ellipse(px, py + 30, shieldR, shieldR + 5, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                // Inner fill
+                ctx.fillStyle = shieldColor;
+                ctx.globalAlpha = shieldAlpha * 0.4;
+                ctx.beginPath();
+                ctx.ellipse(px, py + 30, shieldR - 4, shieldR + 1, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Hex pattern
+                ctx.globalAlpha = shieldAlpha * 0.25;
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 0.8;
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI * 2 / 6) * i + t * 0.02;
+                    ctx.beginPath();
+                    ctx.moveTo(px, py + 30);
+                    ctx.lineTo(px + Math.cos(angle) * (shieldR - 4), py + 30 + Math.sin(angle) * (shieldR + 1));
+                    ctx.stroke();
+                }
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
                 ctx.restore();
             }
 
@@ -15707,6 +16122,19 @@
             const invHud = document.getElementById('apoc-inventory');
             if (hpFill) hpFill.style.width = (apoc.playerHP / apoc.playerMaxHP * 100) + '%';
             if (hpText) hpText.innerText = Math.round(apoc.playerHP) + '/' + apoc.playerMaxHP;
+            // Shield bar
+            const shFill = document.getElementById('apoc-shield-fill');
+            if (shFill) {
+                const shPct = (apoc.shieldHP / apoc.shieldMaxHP * 100);
+                shFill.style.width = shPct + '%';
+                if (apoc.shieldBreakTimer > 0) {
+                    shFill.style.background = '#882222';
+                } else if (apoc.shieldHP < 30) {
+                    shFill.style.background = 'linear-gradient(90deg, #cc4400, #ff6622)';
+                } else {
+                    shFill.style.background = 'linear-gradient(90deg, #2266cc, #44aaff, #66ccff)';
+                }
+            }
             if (coinsHud) coinsHud.innerText = '🪙 ' + apoc.coins;
             if (invHud) invHud.innerHTML = `<span class="apoc-inv-item">🩹 ${apoc.medkits}</span><span class="apoc-inv-item">🔫 ${apoc.ammo}</span><span class="apoc-inv-item">⚙️ ${apoc.scrap}</span>`;
 
@@ -15992,6 +16420,8 @@
             isMemeApocalypse = false;
             document.getElementById('apoc-hud').classList.add('hidden');
             document.getElementById('title-screen').classList.remove('hidden');
+            const cd = document.getElementById('coin-display');
+            if (cd) cd.style.display = '';
             // Grand victory popup
             const popup = document.createElement('div');
             popup.className = 'apoc-reward-popup';
@@ -16011,6 +16441,8 @@
             isMemeApocalypse = false;
             document.getElementById('apoc-hud').classList.add('hidden');
             document.getElementById('apocalypse-screen').classList.remove('hidden');
+            const cd = document.getElementById('coin-display');
+            if (cd) cd.style.display = '';
             renderApocHub();
         }
 
