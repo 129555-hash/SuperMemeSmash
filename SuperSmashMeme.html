@@ -1484,6 +1484,51 @@
             font-size: 10px;
             margin: 6px 0;
         }
+
+        /* ====== MEME APOCALYPSE STYLES ====== */
+        .apoc-btn { border-color: #ff6600 !important; color: #ff6600 !important; text-shadow: 0 0 10px rgba(255,102,0,0.5); }
+        .apoc-btn:hover { background: #ff6600 !important; color: #000 !important; }
+        #apocalypse-screen { background: linear-gradient(180deg, #0a0000 0%, #1a0500 50%, #2a0a00 100%); }
+        #apocalypse-screen h2 { color: #ff6600; text-shadow: 0 0 20px #ff3300, 0 0 40px #ff0000; font-size: 2.5em; margin-bottom: 5px; }
+        .apoc-subtitle { color: #ff9944; font-size: 0.9em; margin-bottom: 20px; letter-spacing: 3px; }
+        .apoc-area-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; max-width: 800px; margin: 15px auto; }
+        .apoc-area-card {
+            width: 140px; padding: 15px 10px; border: 2px solid #333; border-radius: 10px;
+            background: rgba(30,10,0,0.8); cursor: pointer; transition: all 0.3s; text-align: center;
+        }
+        .apoc-area-card:hover { border-color: #ff6600; transform: scale(1.05); box-shadow: 0 0 20px rgba(255,102,0,0.3); }
+        .apoc-area-card.locked { opacity: 0.4; cursor: not-allowed; border-color: #222; }
+        .apoc-area-card.locked:hover { transform: none; box-shadow: none; border-color: #222; }
+        .apoc-area-icon { font-size: 2.5em; margin-bottom: 8px; }
+        .apoc-area-name { color: #ff9944; font-size: 0.85em; font-weight: bold; }
+        .apoc-area-desc { color: #888; font-size: 0.65em; margin-top: 5px; }
+        .apoc-stats-bar { display: flex; gap: 20px; justify-content: center; margin: 10px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid #333; }
+        .apoc-stat { text-align: center; }
+        .apoc-stat-val { color: #ff6600; font-size: 1.2em; font-weight: bold; }
+        .apoc-stat-lbl { color: #666; font-size: 0.6em; }
+        #apoc-hud { position: fixed; top: 0; left: 0; width: 100%; pointer-events: none; z-index: 50; }
+        .apoc-hp-bar { position: absolute; top: 10px; left: 10px; width: 200px; height: 20px; background: #333; border: 2px solid #555; border-radius: 3px; }
+        .apoc-hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ff4400); border-radius: 2px; transition: width 0.2s; }
+        .apoc-hp-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; font-size: 11px; line-height: 20px; text-shadow: 1px 1px 2px black; }
+        .apoc-coins { position: absolute; top: 10px; right: 10px; color: #FFD700; font-size: 14px; }
+        .apoc-quest-tracker { position: absolute; top: 40px; right: 10px; max-width: 250px; background: rgba(0,0,0,0.7); border: 1px solid #ff6600; border-radius: 5px; padding: 8px; font-size: 10px; }
+        .apoc-quest-title { color: #ff6600; font-weight: bold; margin-bottom: 4px; }
+        .apoc-quest-obj { color: #ccc; }
+        .apoc-dialogue-box {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 600px; max-width: 90vw; background: rgba(0,0,0,0.9); border: 2px solid #ff6600;
+            border-radius: 10px; padding: 20px; z-index: 100; pointer-events: auto;
+        }
+        .apoc-dialogue-name { color: #ff6600; font-weight: bold; font-size: 1.1em; margin-bottom: 8px; }
+        .apoc-dialogue-text { color: #ddd; font-size: 0.9em; line-height: 1.5; min-height: 40px; }
+        .apoc-dialogue-prompt { color: #888; font-size: 0.7em; margin-top: 10px; text-align: right; }
+        .apoc-interact-prompt { position: absolute; color: #FFD700; font-size: 12px; text-align: center; text-shadow: 0 0 5px rgba(255,215,0,0.5); animation: apocPulse 1s infinite; }
+        @keyframes apocPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .apoc-reward-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.95); border: 2px solid #FFD700; border-radius: 15px; padding: 30px; z-index: 110; text-align: center; min-width: 300px; }
+        .apoc-reward-title { color: #FFD700; font-size: 1.5em; margin-bottom: 15px; }
+        .apoc-reward-item { color: #ccc; font-size: 1em; margin: 5px 0; }
+        .apoc-inventory { position: absolute; top: 35px; left: 10px; display: flex; gap: 8px; font-size: 11px; }
+        .apoc-inv-item { color: #aaa; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 3px; border: 1px solid #444; }
     </style>
 </head>
 
@@ -1532,6 +1577,7 @@
             onclick="openCyberware()">CYBERWARE</button>
         <button id="story-btn" class="menu-btn" style="border-color:#ff003c;color:#ff003c;display:none"
             onclick="openStory()">STORY MODE</button>
+        <button id="apocalypse-btn" class="menu-btn apoc-btn" onclick="openApocalypseHub()">MEME APOCALYPSE 🔥</button>
         <button class="menu-btn" style="border-color: #ff00ff; color: #ff00ff;" onclick="openGacha()"
             onmouseover="this.style.background='#ff00ff';this.style.color='white';"
             onmouseout="this.style.background='transparent';this.style.color='#ff00ff';">GACHA 🎰</button>
@@ -2087,6 +2133,34 @@
             </div>
         </div>
     </div>
+    <!-- ====== MEME APOCALYPSE SCREENS ====== -->
+    <div id="apocalypse-screen" class="screen hidden">
+        <h2>MEME APOCALYPSE</h2>
+        <div class="apoc-subtitle">THE END OF ALL MEMES</div>
+        <div class="apoc-stats-bar" id="apoc-stats-bar">
+            <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-hp">100</div><div class="apoc-stat-lbl">HP</div></div>
+            <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-coins">0</div><div class="apoc-stat-lbl">COINS</div></div>
+            <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-kills">0</div><div class="apoc-stat-lbl">KILLS</div></div>
+            <div class="apoc-stat"><div class="apoc-stat-val" id="apoc-stat-quests">0/20</div><div class="apoc-stat-lbl">QUESTS</div></div>
+        </div>
+        <div class="apoc-area-grid" id="apoc-area-grid"></div>
+        <div id="apoc-quest-list" style="max-width:700px;margin:15px auto;text-align:left"></div>
+        <button class="menu-btn" onclick="exitApocalypseHub()">BACK</button>
+    </div>
+    <div id="apoc-hud" class="hidden">
+        <div class="apoc-hp-bar"><div class="apoc-hp-fill" id="apoc-hp-fill" style="width:100%"></div><div class="apoc-hp-text" id="apoc-hp-text">100/100</div></div>
+        <div class="apoc-inventory" id="apoc-inventory"></div>
+        <div class="apoc-coins" id="apoc-coins-hud">🪙 0</div>
+        <div class="apoc-quest-tracker" id="apoc-quest-tracker" style="display:none"></div>
+    </div>
+    <div id="apoc-dialogue" class="hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:99;">
+        <div class="apoc-dialogue-box">
+            <div class="apoc-dialogue-name" id="apoc-dlg-name">???</div>
+            <div class="apoc-dialogue-text" id="apoc-dlg-text"></div>
+            <div class="apoc-dialogue-prompt">[SPACE / CLICK to continue]</div>
+        </div>
+    </div>
+    <!-- END MEME APOCALYPSE SCREENS -->
     <div id="char-select" class="screen hidden">
         <h2>SELECT FIGHTER</h2>
         <h3 id="select-instruction">P1 CHOOSE</h3>
@@ -9698,6 +9772,7 @@
             isTraining = !1;
             isMemeBall = !1;
             isBossEvent = false;
+            isMemeApocalypse = false;
             p1Char = null;
             p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
@@ -9712,7 +9787,7 @@
             music.init();
             audioFiles.init();
             sfx.init();
-            isSurvival = !1; isTraining = !1; isMemeBall = !1; isOnline = true; isHost = false; netPeerReady = false;
+            isSurvival = !1; isTraining = !1; isMemeBall = !1; isMemeApocalypse = false; isOnline = true; isHost = false; netPeerReady = false;
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('online-screen').classList.remove('hidden');
             document.getElementById('online-status').textContent = '';
@@ -10148,6 +10223,7 @@
             isTraining = !1;
             isMemeBall = !1;
             isBossEvent = false;
+            isMemeApocalypse = false;
             p1Char = null;
             p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
@@ -10164,6 +10240,7 @@
             isSurvival = !1;
             isMemeBall = !1;
             isBossEvent = false;
+            isMemeApocalypse = false;
             p1Char = null;
             p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
@@ -10179,6 +10256,7 @@
             isTraining = !1;
             isSurvival = !1;
             isMemeBall = !1;
+            isMemeApocalypse = false;
 
             // Auto-select two random unlocked characters
             const unlocked = CHARACTERS.filter(c => saveData.unlocks.includes(c.id));
@@ -10219,6 +10297,7 @@
             isSurvival = !1;
             isTraining = !1;
             isBossEvent = false;
+            isMemeApocalypse = false;
             p1Char = null;
             p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
@@ -11887,6 +11966,7 @@
             });
         }
         function loop() {
+            if (isMemeApocalypse) return; // Apocalypse has its own loop
             if (gameState === 'SHOP') {
                 drawShop();
                 requestAnimationFrame(loop);
@@ -14307,6 +14387,1355 @@
                 registerNTSCharacter();
             }
         }
+
+        // ======================================================================
+        // ====== MEME APOCALYPSE MODE - COMPLETE ENGINE ======
+        // ======================================================================
+
+        let isMemeApocalypse = false;
+        let apoc = null; // apocalypse state
+
+        // ====== ENEMY TYPE DEFINITIONS ======
+        const APOC_ENEMY_TYPES = {
+            glitchling: { name:'Glitchling', icon:'👾', hp:25, dmg:5, speed:2, kb:3, w:30, h:35, color:'#00ff44', aggroRange:180, atkRange:40, atkCd:50, drops:[{item:'coin',chance:0.6},{item:'scrap',chance:0.2}], xp:10 },
+            corrupt_doge: { name:'Corrupt Doge', icon:'🐕', hp:50, dmg:10, speed:1.3, kb:5, w:40, h:40, color:'#8B4513', aggroRange:220, atkRange:50, atkCd:70, drops:[{item:'coin',chance:0.7},{item:'scrap',chance:0.3},{item:'medkit',chance:0.1}], xp:25 },
+            sus_shade: { name:'Sus Shade', icon:'👤', hp:40, dmg:12, speed:1.8, kb:4, w:35, h:45, color:'#4a0080', aggroRange:250, atkRange:45, atkCd:60, drops:[{item:'coin',chance:0.5},{item:'ammo',chance:0.3}], xp:30 },
+            troll_spawn: { name:'Troll Spawn', icon:'👹', hp:100, dmg:18, speed:0.7, kb:8, w:50, h:55, color:'#666', aggroRange:200, atkRange:60, atkCd:100, drops:[{item:'coin',chance:0.8},{item:'scrap',chance:0.5},{item:'medkit',chance:0.2}], xp:50 },
+            pixel_wraith: { name:'Pixel Wraith', icon:'👻', hp:35, dmg:8, speed:1.2, kb:2, w:35, h:40, color:'#00ccff', aggroRange:300, atkRange:200, atkCd:90, drops:[{item:'ammo',chance:0.5},{item:'coin',chance:0.4}], xp:35, ranged:true },
+            virus_beast: { name:'Virus Beast', icon:'🦠', hp:200, dmg:22, speed:0.9, kb:10, w:60, h:55, color:'#00ff00', aggroRange:250, atkRange:55, atkCd:80, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.6},{item:'medkit',chance:0.3},{item:'cyberware',chance:0.2}], xp:100, boss:true },
+            data_sentinel: { name:'Data Sentinel', icon:'🤖', hp:250, dmg:28, speed:0.8, kb:12, w:55, h:60, color:'#0066ff', aggroRange:300, atkRange:60, atkCd:70, drops:[{item:'coin',chance:1},{item:'scrap',chance:0.8},{item:'cyberware',chance:0.3}], xp:150, boss:true },
+            echo_boss: { name:'Echo', icon:'🤠', hp:300, dmg:15, speed:1.5, kb:6, w:45, h:50, color:'#C4A55A', aggroRange:400, atkRange:55, atkCd:40, drops:[{item:'coin',chance:1,count:20}], xp:200, boss:true },
+            meme_god: { name:'MEME GOD', icon:'👑', hp:800, dmg:35, speed:1.0, kb:15, w:70, h:70, color:'#FFD700', aggroRange:500, atkRange:70, atkCd:50, drops:[{item:'coin',chance:1,count:50},{item:'cyberware',chance:1}], xp:500, boss:true, final:true }
+        };
+
+        // ====== AREA DEFINITIONS ======
+        const APOC_AREAS = [
+            { // 0: SCORCHED FLATS
+                id:'scorched_flats', name:'SCORCHED FLATS', subtitle:'Survivor Camp', icon:'🏜️', width:3000, groundY:420,
+                bgColors:['#1a0a00','#3a1a00'], skyColors:['#2d1f10','#8B4513'],
+                platforms:[
+                    {x:0,y:420,w:3000,h:100},
+                    {x:350,y:370,w:120,h:50},{x:800,y:350,w:100,h:70},{x:1300,y:330,w:150,h:90},
+                    {x:1800,y:360,w:100,h:20},{x:2200,y:320,w:120,h:20},{x:2600,y:370,w:150,h:50}
+                ],
+                decos:['🏚️,100,390,40','🔥,200,395,30','🏜️,1500,385,40','🌵,2000,385,40','🏚️,2400,365,40'],
+                npcs:[
+                    {id:'survivor_doge',name:'Survivor Doge',icon:'🐕',x:200,y:370,quests:['mq1','sq1','sq2']},
+                    {id:'old_pepe',name:'Old Pepe',icon:'🐸',x:500,y:370,quests:['sq3']},
+                    {id:'echo_npc',name:'Echo',icon:'🤠',x:2700,y:370,quests:['mq2']}
+                ],
+                enemies:[
+                    {type:'glitchling',x:600,ct:2,spread:100},{type:'glitchling',x:1100,ct:3,spread:150},
+                    {type:'glitchling',x:1600,ct:2,spread:100},{type:'glitchling',x:2100,ct:2,spread:120}
+                ],
+                loot:[{t:'coin',x:450,y:340},{t:'scrap',x:900,y:320},{t:'medkit',x:1400,y:300},{t:'coin',x:1850,y:330},{t:'ammo',x:2250,y:290}],
+                exitR:1,exitL:null
+            },
+            { // 1: DOOMSCROLL DEPTHS
+                id:'doomscroll_depths', name:'DOOMSCROLL DEPTHS', subtitle:'Underground Ruins', icon:'🕳️', width:3500, groundY:430,
+                bgColors:['#050510','#101025'], skyColors:['#080818','#0a0a30'],
+                platforms:[
+                    {x:0,y:430,w:3500,h:90},
+                    {x:200,y:380,w:100,h:50},{x:500,y:350,w:80,h:20},{x:750,y:310,w:100,h:20},
+                    {x:1000,y:370,w:150,h:60},{x:1400,y:340,w:120,h:20},{x:1700,y:300,w:100,h:20},
+                    {x:2000,y:360,w:200,h:70},{x:2400,y:330,w:100,h:20},{x:2700,y:290,w:120,h:20},
+                    {x:3000,y:360,w:200,h:70}
+                ],
+                decos:['💀,300,400,30','🕯️,600,320,25','💎,1200,390,20','🕯️,1800,270,25','🪨,2500,400,35','💀,3100,400,30'],
+                npcs:[
+                    {id:'hermit',name:'The Hermit',icon:'🧙',x:2800,y:370,quests:['sq6']},
+                    {id:'data_doge',name:'Data Doge',icon:'🐕‍🦺',x:800,y:370,quests:['sq4','sq5']}
+                ],
+                enemies:[
+                    {type:'corrupt_doge',x:400,ct:2,spread:100},{type:'sus_shade',x:900,ct:2,spread:80},
+                    {type:'corrupt_doge',x:1500,ct:3,spread:150},{type:'sus_shade',x:2200,ct:2,spread:100},
+                    {type:'virus_beast',x:3200,ct:1,spread:0}
+                ],
+                loot:[{t:'coin',x:250,y:350},{t:'ammo',x:550,y:320},{t:'scrap',x:1050,y:340},{t:'medkit',x:1750,y:270},{t:'cyberware',x:2450,y:300},{t:'coin',x:3050,y:330}],
+                exitR:2,exitL:0
+            },
+            { // 2: VIRAL WASTELAND
+                id:'viral_wasteland', name:'VIRAL WASTELAND', subtitle:'Toxic Desert', icon:'☣️', width:3500, groundY:420,
+                bgColors:['#0a1a00','#1a2a00'], skyColors:['#2a3a00','#4a5a10'],
+                platforms:[
+                    {x:0,y:420,w:3500,h:100},
+                    {x:300,y:370,w:150,h:50},{x:600,y:340,w:100,h:20},{x:900,y:380,w:80,h:40},
+                    {x:1200,y:330,w:130,h:20},{x:1600,y:360,w:100,h:60},{x:1900,y:310,w:120,h:20},
+                    {x:2200,y:370,w:150,h:50},{x:2600,y:340,w:100,h:20},{x:3000,y:370,w:180,h:50}
+                ],
+                decos:['☢️,150,390,30','🧪,700,310,25','🏗️,1100,360,40','☢️,1800,280,30','🧪,2400,390,25','🏗️,3200,360,40'],
+                npcs:[
+                    {id:'wasteland_trader',name:'Wasteland Trader',icon:'🦊',x:400,y:370,quests:['sq7']},
+                    {id:'courier_cat',name:'Courier Cat',icon:'🐱',x:2300,y:370,quests:['sq8','sq9']}
+                ],
+                enemies:[
+                    {type:'corrupt_doge',x:500,ct:2,spread:100},{type:'troll_spawn',x:1000,ct:1,spread:0},
+                    {type:'sus_shade',x:1500,ct:3,spread:120},{type:'corrupt_doge',x:2000,ct:2,spread:100},
+                    {type:'troll_spawn',x:2700,ct:2,spread:150}
+                ],
+                loot:[{t:'scrap',x:350,y:340},{t:'coin',x:650,y:310},{t:'medkit',x:950,y:350},{t:'ammo',x:1250,y:300},{t:'scrap',x:1950,y:280},{t:'cyberware',x:2650,y:310},{t:'coin',x:3050,y:340}],
+                exitR:3,exitL:1
+            },
+            { // 3: THE ALGORITHM
+                id:'the_algorithm', name:'THE ALGORITHM', subtitle:'Digital Zone', icon:'💻', width:3500, groundY:430,
+                bgColors:['#000a10','#001020'], skyColors:['#000520','#001040'],
+                platforms:[
+                    {x:0,y:430,w:3500,h:90},
+                    {x:250,y:370,w:100,h:20},{x:450,y:320,w:80,h:20},{x:700,y:280,w:120,h:20},
+                    {x:1000,y:370,w:150,h:60},{x:1300,y:330,w:100,h:20},{x:1550,y:280,w:80,h:20},
+                    {x:1800,y:360,w:180,h:70},{x:2100,y:310,w:100,h:20},{x:2400,y:270,w:120,h:20},
+                    {x:2700,y:340,w:150,h:20},{x:3000,y:370,w:200,h:60}
+                ],
+                decos:['💿,300,340,25','📡,800,250,30','🖥️,1100,360,35','💿,1600,250,25','📡,2200,280,30','🖥️,2800,310,35','💿,3100,360,25'],
+                npcs:[
+                    {id:'program_npc',name:'Program',icon:'🤖',x:1050,y:370,quests:['sq10','sq11']},
+                    {id:'hacker_frog',name:'Hacker Frog',icon:'🐸',x:2750,y:370,quests:['sq12']}
+                ],
+                enemies:[
+                    {type:'pixel_wraith',x:400,ct:2,spread:100},{type:'sus_shade',x:900,ct:2,spread:80},
+                    {type:'pixel_wraith',x:1400,ct:2,spread:100},{type:'corrupt_doge',x:1900,ct:2,spread:80},
+                    {type:'pixel_wraith',x:2500,ct:3,spread:120},{type:'data_sentinel',x:3200,ct:1,spread:0}
+                ],
+                loot:[{t:'ammo',x:300,y:340},{t:'coin',x:500,y:290},{t:'scrap',x:1050,y:340},{t:'medkit',x:1350,y:300},{t:'ammo',x:1850,y:330},{t:'cyberware',x:2150,y:280},{t:'coin',x:2750,y:310}],
+                exitR:4,exitL:2
+            },
+            { // 4: MEME NEXUS
+                id:'meme_nexus', name:'MEME NEXUS', subtitle:'Source of the Apocalypse', icon:'🌀', width:4000, groundY:420,
+                bgColors:['#100010','#200020'], skyColors:['#0a000a','#1a0030'],
+                platforms:[
+                    {x:0,y:420,w:4000,h:100},
+                    {x:300,y:370,w:120,h:50},{x:600,y:330,w:100,h:20},{x:900,y:290,w:80,h:20},
+                    {x:1200,y:360,w:150,h:60},{x:1500,y:310,w:120,h:20},{x:1800,y:270,w:100,h:20},
+                    {x:2100,y:350,w:180,h:70},{x:2500,y:300,w:100,h:20},{x:2800,y:260,w:120,h:20},
+                    {x:3100,y:330,w:150,h:20},{x:3500,y:370,w:300,h:50}
+                ],
+                decos:['🌀,200,340,30','⚡,700,300,25','🌀,1300,330,30','⚡,1600,280,25','🌀,2200,320,30','⚡,2600,270,25','👑,3600,340,50'],
+                npcs:[
+                    {id:'last_survivor',name:'Last Survivor',icon:'💀',x:200,y:370,quests:['sq13','sq14','sq15']}
+                ],
+                enemies:[
+                    {type:'pixel_wraith',x:500,ct:3,spread:120},{type:'troll_spawn',x:1000,ct:2,spread:100},
+                    {type:'sus_shade',x:1500,ct:3,spread:100},{type:'pixel_wraith',x:2000,ct:2,spread:80},
+                    {type:'troll_spawn',x:2500,ct:2,spread:100},{type:'corrupt_doge',x:3000,ct:3,spread:120},
+                    {type:'meme_god',x:3700,ct:1,spread:0}
+                ],
+                loot:[{t:'medkit',x:350,y:340},{t:'ammo',x:650,y:300},{t:'coin',x:950,y:260},{t:'scrap',x:1250,y:330},{t:'medkit',x:1550,y:280},{t:'cyberware',x:2150,y:320},{t:'ammo',x:2550,y:270},{t:'medkit',x:3150,y:300}],
+                exitR:null,exitL:3
+            }
+        ];
+
+        // ====== QUEST DEFINITIONS ======
+        const APOC_QUESTS = [
+            // ---- MAIN QUESTS ----
+            {id:'mq1',type:'main',num:1,title:'Welcome to the End',area:0,giver:'survivor_doge',
+                desc:'Clear the Glitchlings threatening the survivor camp.',
+                objectives:[{type:'kill',target:'glitchling',need:3,have:0,desc:'Kill 3 Glitchlings'}],
+                rewards:{coins:100,scrap:5,items:['medkit','medkit']},
+                dlgStart:['Welcome to what\'s left of the world...','Those Glitchlings are getting bolder every day.','Clear out 3 of them near the camp, would ya?'],
+                dlgEnd:['You\'re tougher than you look!','There\'s a gunslinger east of here. Name\'s Echo.','Might be worth talking to him.'],
+                unlocks:['mq2']},
+            {id:'mq2',type:'main',num:2,title:'The Gunslinger\'s Test',area:0,giver:'echo_npc',
+                desc:'Prove yourself to Echo in combat.',
+                objectives:[{type:'boss',target:'echo_boss',need:1,have:0,desc:'Defeat Echo in combat'}],
+                rewards:{coins:200,scrap:10,special:'echo_join'},
+                dlgStart:['Name\'s Echo. Bounty hunter.','You want my help? Show me what you\'re made of.','Draw.'],
+                dlgEnd:['Not bad... not bad at all.','Alright, you\'ve earned it. I\'m with you.','Let\'s see what\'s down in those depths.'],
+                unlocks:['mq3'],prereqs:['mq1']},
+            {id:'mq3',type:'main',num:3,title:'Into the Depths',area:1,giver:'data_doge',
+                desc:'Descend into the Doomscroll Depths and find the source of corruption.',
+                objectives:[{type:'boss',target:'virus_beast',need:1,have:0,desc:'Defeat the Virus Beast'}],
+                rewards:{coins:300,scrap:15,items:['cyberware'],special:'unlock_area_2'},
+                dlgStart:['The corruption comes from deep below...','Something big lurks down there.','Find it. Destroy it.'],
+                dlgEnd:['The corruption is weakening!','There\'s more out there. The Viral Wasteland awaits.','Be careful... it\'s toxic out there.'],
+                unlocks:['mq4'],prereqs:['mq2']},
+            {id:'mq4',type:'main',num:4,title:'Decoding the Algorithm',area:3,giver:'program_npc',
+                desc:'Reach the Algorithm and defeat the Data Sentinel.',
+                objectives:[{type:'boss',target:'data_sentinel',need:1,have:0,desc:'Defeat the Data Sentinel'}],
+                rewards:{coins:400,scrap:20,items:['cyberware','cyberware'],special:'unlock_area_4'},
+                dlgStart:['SYSTEM::ALERT - Entity detected.','The Algorithm processes all data. The Sentinel guards it.','Override required. Eliminate the Sentinel.'],
+                dlgEnd:['SYSTEM::SUCCESS - Sentinel neutralized.','The path to the Nexus is open.','Warning: MEME GOD detected at coordinates [REDACTED].'],
+                unlocks:['mq5'],prereqs:['mq3']},
+            {id:'mq5',type:'main',num:5,title:'Meme God\'s Throne',area:4,giver:'last_survivor',
+                desc:'Reach the heart of the Meme Nexus and defeat the Meme God.',
+                objectives:[{type:'boss',target:'meme_god',need:1,have:0,desc:'Defeat the MEME GOD'}],
+                rewards:{coins:1000,scrap:50,special:'apocalypse_complete'},
+                dlgStart:['This is it... the source of everything.','The Meme God created this apocalypse.','End it. End ALL of it.'],
+                dlgEnd:['It\'s... it\'s over.','The apocalypse is ending. The memes are healing.','You did it. You actually did it. Legend.'],
+                prereqs:['mq4']},
+            // ---- SIDE QUESTS: SCORCHED FLATS ----
+            {id:'sq1',type:'side',title:'Supply Run',area:0,giver:'survivor_doge',
+                desc:'Collect scrap for the camp.',
+                objectives:[{type:'collect',target:'scrap',need:5,have:0,desc:'Collect 5 Scrap'}],
+                rewards:{coins:50,items:['medkit','medkit','medkit'],rewardName:'Medkit Cache'},
+                dlgStart:['We\'re running low on supplies.','Scavenge 5 pieces of scrap from the flats.'],
+                dlgEnd:['Perfect! This will keep us going.','Here, take these medkits.']},
+            {id:'sq2',type:'side',title:'Pest Control',area:0,giver:'survivor_doge',
+                desc:'The Glitchlings are multiplying.',
+                objectives:[{type:'kill',target:'glitchling',need:8,have:0,desc:'Kill 8 Glitchlings'}],
+                rewards:{coins:80,items:['cyberware'],rewardName:'Scrap Armor'},
+                dlgStart:['Those Glitchlings... there\'s more every day.','Thin the herd. Kill 8 of them.'],
+                dlgEnd:['That oughta keep em quiet for a while.','Found this in their nest. It\'s yours.']},
+            {id:'sq3',type:'side',title:'Lost Signal',area:0,giver:'old_pepe',
+                desc:'Old Pepe lost his radio somewhere in the ruins.',
+                objectives:[{type:'collect',target:'quest_radio',need:1,have:0,desc:'Find Pepe\'s Radio'}],
+                rewards:{coins:60,items:['ammo','ammo'],rewardName:'Signal Booster'},
+                dlgStart:['*ribbit* Lost my radio in the ruins east of here...','Feels bad man. Can you find it?'],
+                dlgEnd:['*ribbit* My radio! You found it!','Take this ammo. It\'s dangerous out there.'],
+                spawnItem:{t:'quest_radio',x:1350,y:300,icon:'📻'}},
+            // ---- SIDE QUESTS: DOOMSCROLL DEPTHS ----
+            {id:'sq4',type:'side',title:'Deep Scavenge',area:1,giver:'data_doge',
+                desc:'Collect data fragments from the depths.',
+                objectives:[{type:'collect',target:'data_fragment',need:3,have:0,desc:'Collect 3 Data Fragments'}],
+                rewards:{coins:100,items:['cyberware'],rewardName:'Data Miner'},
+                dlgStart:['There are data fragments scattered through these tunnels.','Bring me 3 and I\'ll make it worth your while.'],
+                dlgEnd:['Excellent data! Here\'s your reward.'],
+                spawnItems:[{t:'data_fragment',x:700,y:280,icon:'💾'},{t:'data_fragment',x:1500,y:310,icon:'💾'},{t:'data_fragment',x:2500,y:300,icon:'💾'}]},
+            {id:'sq5',type:'side',title:'Tunnel Rat',area:1,giver:'data_doge',
+                desc:'Clear the Corrupt Doges from the tunnels.',
+                objectives:[{type:'kill',target:'corrupt_doge',need:5,have:0,desc:'Kill 5 Corrupt Doges'}],
+                rewards:{coins:120,items:['cyberware'],rewardName:'Night Vision'},
+                dlgStart:['Corrupt Doges are blocking the deep tunnels.','Take out 5 of them so we can explore safely.'],
+                dlgEnd:['The path is clear now! Take this.']},
+            {id:'sq6',type:'side',title:'The Hermit\'s Blade',area:1,giver:'hermit',
+                desc:'The Hermit will give you his blade if you prove worthy.',
+                objectives:[{type:'kill',target:'sus_shade',need:4,have:0,desc:'Kill 4 Sus Shades'}],
+                rewards:{coins:150,items:['cyberware'],rewardName:'Hermit\'s Blade'},
+                dlgStart:['You seek my blade? Many have tried...','Prove yourself. Destroy 4 Sus Shades.'],
+                dlgEnd:['Impressive... The blade is yours.','Use it well.']},
+            // ---- SIDE QUESTS: VIRAL WASTELAND ----
+            {id:'sq7',type:'side',title:'Toxic Cleanup',area:2,giver:'wasteland_trader',
+                desc:'Destroy Troll Spawn nests in the wasteland.',
+                objectives:[{type:'kill',target:'troll_spawn',need:3,have:0,desc:'Kill 3 Troll Spawns'}],
+                rewards:{coins:150,items:['cyberware'],rewardName:'Hazmat Plating'},
+                dlgStart:['Those Troll Spawns are poisoning everything.','Smash 3 of their nests. I\'ll pay well.'],
+                dlgEnd:['The air already smells better! Here.']},
+            {id:'sq8',type:'side',title:'Wasteland Courier',area:2,giver:'courier_cat',
+                desc:'Deliver a package deeper into the wasteland.',
+                objectives:[{type:'collect',target:'package',need:1,have:0,desc:'Deliver the Package'}],
+                rewards:{coins:100,items:['cyberware'],rewardName:'Speed Boots'},
+                dlgStart:['Meow... got a delivery that needs making.','Package is at the end of this zone. Bring it back.'],
+                dlgEnd:['*purrs* Good delivery! Take these boots.'],
+                spawnItem:{t:'package',x:3100,y:340,icon:'📦'}},
+            {id:'sq9',type:'side',title:'Echo\'s Past',area:2,giver:'courier_cat',
+                desc:'Find Echo\'s old hideout in the wasteland.',
+                objectives:[{type:'collect',target:'echo_locket',need:1,have:0,desc:'Find Echo\'s Locket'}],
+                rewards:{coins:200,items:['cyberware'],rewardName:'Echo\'s Revolver'},
+                dlgStart:['Heard the gunslinger had a place out here once...','There might be something valuable in it. Meow.'],
+                dlgEnd:['A locket? This is worth more than gold.','Echo would want you to have this.'],
+                spawnItem:{t:'echo_locket',x:2050,y:280,icon:'💍'}},
+            // ---- SIDE QUESTS: THE ALGORITHM ----
+            {id:'sq10',type:'side',title:'Firewall Breach',area:3,giver:'program_npc',
+                desc:'Hack 3 data terminals.',
+                objectives:[{type:'collect',target:'terminal_data',need:3,have:0,desc:'Hack 3 Terminals'}],
+                rewards:{coins:150,items:['cyberware'],rewardName:'Firewall'},
+                dlgStart:['SYSTEM::OBJECTIVE - Terminals require override.','Access 3 terminals in this zone.'],
+                dlgEnd:['SYSTEM::COMPLETE - Firewall protocol obtained.'],
+                spawnItems:[{t:'terminal_data',x:500,y:290,icon:'🖥️'},{t:'terminal_data',x:1600,y:250,icon:'🖥️'},{t:'terminal_data',x:2800,y:310,icon:'🖥️'}]},
+            {id:'sq11',type:'side',title:'Rogue Process',area:3,giver:'program_npc',
+                desc:'Eliminate rogue Pixel Wraiths.',
+                objectives:[{type:'kill',target:'pixel_wraith',need:6,have:0,desc:'Kill 6 Pixel Wraiths'}],
+                rewards:{coins:200,items:['cyberware'],rewardName:'Process Override'},
+                dlgStart:['SYSTEM::ERROR - Rogue processes detected.','Terminate 6 Pixel Wraiths.'],
+                dlgEnd:['SYSTEM::SUCCESS - Processes terminated.']},
+            {id:'sq12',type:'side',title:'Data Heist',area:3,giver:'hacker_frog',
+                desc:'Steal data from hidden caches in the Algorithm.',
+                objectives:[{type:'collect',target:'data_cache',need:3,have:0,desc:'Loot 3 Data Caches'}],
+                rewards:{coins:500,rewardName:'2000 Coins'},
+                dlgStart:['*ribbit* See those data caches?','Nobody\'ll miss em. Grab 3 for me.'],
+                dlgEnd:['*ribbit* Beautiful data! Here\'s your cut.'],
+                spawnItems:[{t:'data_cache',x:900,y:350,icon:'💰'},{t:'data_cache',x:1900,y:330,icon:'💰'},{t:'data_cache',x:2900,y:340,icon:'💰'}]},
+            // ---- SIDE QUESTS: MEME NEXUS ----
+            {id:'sq13',type:'side',title:'Power Source',area:4,giver:'last_survivor',
+                desc:'Find power cells to fuel the final push.',
+                objectives:[{type:'collect',target:'power_cell',need:3,have:0,desc:'Find 3 Power Cells'}],
+                rewards:{coins:200,items:['cyberware'],rewardName:'Nexus Core'},
+                dlgStart:['We need power cells for the push.','There should be 3 scattered in this zone.'],
+                dlgEnd:['With this power, we stand a chance!'],
+                spawnItems:[{t:'power_cell',x:700,y:300,icon:'🔋'},{t:'power_cell',x:1700,y:240,icon:'🔋'},{t:'power_cell',x:2900,y:230,icon:'🔋'}]},
+            {id:'sq14',type:'side',title:'Meme Archive',area:4,giver:'last_survivor',
+                desc:'Access the ancient meme archive.',
+                objectives:[{type:'collect',target:'meme_archive',need:1,have:0,desc:'Access the Meme Archive'}],
+                rewards:{coins:300,rewardName:'Ancient Knowledge'},
+                dlgStart:['There\'s an archive deep in the Nexus...','It contains the oldest memes. History itself.'],
+                dlgEnd:['You\'ve preserved our history. Thank you.'],
+                spawnItem:{t:'meme_archive',x:2500,y:270,icon:'📜'}},
+            {id:'sq15',type:'side',title:'Last Stand Prep',area:4,giver:'last_survivor',
+                desc:'Clear enemies to prepare for the final battle.',
+                objectives:[{type:'kill',target:'troll_spawn',need:4,have:0,desc:'Kill 4 Troll Spawns'},{type:'kill',target:'pixel_wraith',need:4,have:0,desc:'Kill 4 Pixel Wraiths'}],
+                rewards:{coins:250,items:['cyberware','medkit','medkit','medkit'],rewardName:'Fortified Armor'},
+                dlgStart:['This is our last stand.','Clear the path to the Meme God.','Kill the Trolls and Wraiths blocking the way.'],
+                dlgEnd:['The path is clear. Now go. End this.']}
+        ];
+
+        // ====== LOOT ICONS ======
+        const APOC_LOOT_ICONS = { coin:'🪙', scrap:'⚙️', medkit:'🩹', ammo:'🔫', cyberware:'💿', quest_radio:'📻',
+            data_fragment:'💾', package:'📦', echo_locket:'💍', terminal_data:'🖥️', data_cache:'💰', power_cell:'🔋', meme_archive:'📜' };
+
+        // ====== INITIALIZE APOCALYPSE STATE ======
+        function initApocState() {
+            return {
+                area: 0, cameraX: 0, playerX: 100, playerY: 370, playerVX: 0, playerVY: 0,
+                playerHP: 100, playerMaxHP: 100, playerGrounded: false, playerDir: true,
+                playerAttacking: false, playerAttackTimer: 0, playerInv: 0, playerCd: 0,
+                coins: 0, scrap: 0, ammo: 30, medkits: 3,
+                inventory: [], // cyberware equipped
+                questItems: {}, // { itemId: count }
+                completedQuests: new Set(),
+                activeQuests: [], // quest ids
+                unlockedAreas: [true, false, false, false, false],
+                echoJoined: false, echoUnlocked: false,
+                totalKills: 0, killsByType: {},
+                enemiesAlive: [], // {type,x,y,hp,maxHp,vx,vy,dir,state,timer,atkCd,grounded}
+                worldLoot: [], // {t,x,y,icon,bobTimer}
+                worldProjectiles: [], // {x,y,vx,vy,dmg,owner,life}
+                worldParticles: [], // {x,y,vx,vy,life,color,size,text}
+                dialogueActive: false, dialogueLines: [], dialogueIdx: 0, dialogueSpeaker: '',
+                dialogueCallback: null, interactTarget: null,
+                hitbox: null, // {x,y,w,h,dmg,kb,life} player's attack hitbox
+                bossesDefeated: new Set(),
+                timer: 0, shakeCam: 0,
+                echoFightActive: false,
+                questItemSpawned: {} // track spawned quest items per quest
+            };
+        }
+
+        // ====== LOAD AREA ======
+        function loadApocArea(areaIdx) {
+            const area = APOC_AREAS[areaIdx];
+            if (!area) return;
+            apoc.area = areaIdx;
+            apoc.enemiesAlive = [];
+            apoc.worldLoot = [];
+            apoc.worldProjectiles = [];
+            apoc.worldParticles = [];
+            apoc.hitbox = null;
+            // Spawn enemies
+            area.enemies.forEach(spawn => {
+                const et = APOC_ENEMY_TYPES[spawn.type];
+                if (!et) return;
+                for (let i = 0; i < spawn.ct; i++) {
+                    const ex = spawn.x + (i - spawn.ct/2) * spawn.spread;
+                    apoc.enemiesAlive.push({
+                        type: spawn.type, x: ex, y: area.groundY - et.h,
+                        hp: et.hp, maxHp: et.hp,
+                        vx: 0, vy: 0, dir: Math.random() > 0.5,
+                        state: 'idle', timer: Math.floor(Math.random()*120),
+                        atkCd: 0, grounded: true, hurtTimer: 0
+                    });
+                }
+            });
+            // Spawn static loot
+            area.loot.forEach(l => {
+                apoc.worldLoot.push({ t: l.t, x: l.x, y: l.y, icon: APOC_LOOT_ICONS[l.t] || '❓', bobTimer: Math.random()*100 });
+            });
+            // Spawn quest-specific items
+            apoc.activeQuests.forEach(qid => {
+                const q = APOC_QUESTS.find(x => x.id === qid);
+                if (!q || q.area !== areaIdx) return;
+                if (apoc.questItemSpawned[qid]) return;
+                if (q.spawnItem) {
+                    apoc.worldLoot.push({ t: q.spawnItem.t, x: q.spawnItem.x, y: q.spawnItem.y, icon: q.spawnItem.icon, questItem: true, bobTimer: 0 });
+                    apoc.questItemSpawned[qid] = true;
+                }
+                if (q.spawnItems) {
+                    q.spawnItems.forEach(si => {
+                        apoc.worldLoot.push({ t: si.t, x: si.x, y: si.y, icon: si.icon, questItem: true, bobTimer: Math.random()*100 });
+                    });
+                    apoc.questItemSpawned[qid] = true;
+                }
+            });
+            // Position player
+            if (apoc.playerX < 50 || apoc.playerX > area.width - 50) {
+                apoc.playerX = areaIdx > apoc.area ? 80 : area.width - 80;
+            }
+            apoc.cameraX = Math.max(0, Math.min(apoc.playerX - canvas.width/2, area.width - canvas.width));
+        }
+
+        // ====== OPEN APOCALYPSE HUB ======
+        function openApocalypseHub() {
+            if (!apoc) apoc = initApocState();
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('apocalypse-screen').classList.remove('hidden');
+            gameState = 'APOCALYPSE';
+            renderApocHub();
+        }
+
+        function exitApocalypseHub() {
+            document.getElementById('apocalypse-screen').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            gameState = 'TITLE';
+        }
+
+        function renderApocHub() {
+            // Update stats
+            document.getElementById('apoc-stat-hp').innerText = apoc.playerHP;
+            document.getElementById('apoc-stat-coins').innerText = apoc.coins;
+            document.getElementById('apoc-stat-kills').innerText = apoc.totalKills;
+            document.getElementById('apoc-stat-quests').innerText = apoc.completedQuests.size + '/20';
+            // Render area grid
+            const grid = document.getElementById('apoc-area-grid');
+            grid.innerHTML = '';
+            APOC_AREAS.forEach((area, i) => {
+                const unlocked = apoc.unlockedAreas[i];
+                const card = document.createElement('div');
+                card.className = 'apoc-area-card' + (unlocked ? '' : ' locked');
+                card.innerHTML = `<div class="apoc-area-icon">${unlocked ? area.icon : '🔒'}</div>
+                    <div class="apoc-area-name">${unlocked ? area.name : '???'}</div>
+                    <div class="apoc-area-desc">${unlocked ? area.subtitle : 'LOCKED'}</div>`;
+                if (unlocked) card.onclick = () => enterApocArea(i);
+                grid.appendChild(card);
+            });
+            // Render quest list
+            const qList = document.getElementById('apoc-quest-list');
+            let qHTML = '<h3 style="color:#ff6600;margin-bottom:10px">ACTIVE QUESTS</h3>';
+            if (apoc.activeQuests.length === 0) {
+                qHTML += '<div style="color:#666">No active quests. Enter an area and talk to NPCs!</div>';
+            }
+            apoc.activeQuests.forEach(qid => {
+                const q = APOC_QUESTS.find(x => x.id === qid);
+                if (!q) return;
+                const allDone = q.objectives.every(o => o.have >= o.need);
+                qHTML += `<div style="background:rgba(255,102,0,0.1);border:1px solid #333;border-radius:5px;padding:10px;margin:5px 0">
+                    <div style="color:${q.type==='main'?'#ff6600':'#aaa'};font-weight:bold">${q.type==='main'?'★ ':''}${q.title}${allDone?' ✅':''}</div>
+                    <div style="color:#888;font-size:0.8em;margin-top:4px">${q.desc}</div>
+                    <div style="color:#ccc;font-size:0.75em;margin-top:4px">${q.objectives.map(o=>`${o.desc}: ${o.have}/${o.need}`).join(' | ')}</div>
+                </div>`;
+            });
+            // Show completed quest count
+            if (apoc.completedQuests.size > 0) {
+                qHTML += `<div style="color:#666;margin-top:10px">✅ ${apoc.completedQuests.size} quest(s) completed</div>`;
+            }
+            qList.innerHTML = qHTML;
+        }
+
+        // ====== ENTER AREA (START GAMEPLAY) ======
+        function enterApocArea(areaIdx) {
+            if (!apoc.unlockedAreas[areaIdx]) return;
+            isMemeApocalypse = true;
+            isSurvival = false; isMemeBall = false; isTraining = false; isBossEvent = false;
+            const area = APOC_AREAS[areaIdx];
+            apoc.playerX = 100;
+            apoc.playerY = area.groundY - 50;
+            apoc.playerVX = 0;
+            apoc.playerVY = 0;
+            apoc.playerGrounded = false;
+            apoc.playerDir = true;
+            apoc.playerAttacking = false;
+            apoc.playerAttackTimer = 0;
+            apoc.playerCd = 0;
+            apoc.shakeCam = 0;
+            apoc.timer = 0;
+            loadApocArea(areaIdx);
+            document.getElementById('apocalypse-screen').classList.add('hidden');
+            document.getElementById('apoc-hud').classList.remove('hidden');
+            canvas.style.display = 'block';
+            gameState = 'GAME';
+            music.play('BATTLE');
+            apocLoop();
+        }
+
+        // ====== APOCALYPSE GAME LOOP ======
+        function apocLoop() {
+            if (!isMemeApocalypse || gameState !== 'GAME') return;
+            apocUpdate();
+            apocDraw();
+            requestAnimationFrame(apocLoop);
+        }
+
+        // ====== UPDATE ======
+        function apocUpdate() {
+            apoc.timer++;
+            const area = APOC_AREAS[apoc.area];
+            if (!area) return;
+
+            // Player input
+            const keys = window._apocKeys || {};
+            const moveSpeed = 4;
+            const jumpForce = -12;
+            const gravity = 0.6;
+            const maxFall = 12;
+
+            if (apoc.dialogueActive) return; // freeze during dialogue
+
+            // Player invincibility timer
+            if (apoc.playerInv > 0) apoc.playerInv--;
+            if (apoc.playerCd > 0) apoc.playerCd--;
+            if (apoc.shakeCam > 0) apoc.shakeCam--;
+
+            // Movement
+            if (keys['a'] || keys['arrowleft']) { apoc.playerVX = -moveSpeed; apoc.playerDir = false; }
+            else if (keys['d'] || keys['arrowright']) { apoc.playerVX = moveSpeed; apoc.playerDir = true; }
+            else { apoc.playerVX *= 0.7; if (Math.abs(apoc.playerVX) < 0.3) apoc.playerVX = 0; }
+
+            // Jump
+            if ((keys['w'] || keys['arrowup'] || keys[' ']) && apoc.playerGrounded) {
+                apoc.playerVY = jumpForce;
+                apoc.playerGrounded = false;
+            }
+
+            // Attack
+            if (keys['j'] || keys['k'] || keys['z'] || keys['x']) {
+                if (!apoc.playerAttacking && apoc.playerCd <= 0) {
+                    apoc.playerAttacking = true;
+                    apoc.playerAttackTimer = 12;
+                    apoc.playerCd = 20;
+                    const dir = apoc.playerDir ? 1 : -1;
+                    apoc.hitbox = {
+                        x: apoc.playerX + (apoc.playerDir ? 40 : -55),
+                        y: apoc.playerY - 10,
+                        w: 55, h: 45, dmg: 12, kb: dir * 6, life: 8
+                    };
+                    // Attack particle
+                    apoc.worldParticles.push({
+                        x: apoc.playerX + dir * 40, y: apoc.playerY,
+                        vx: dir * 3, vy: 0, life: 8, color: '#fff', size: 3
+                    });
+                }
+            }
+
+            // Use medkit (E key)
+            if (keys['e'] && apoc.medkits > 0 && apoc.playerHP < apoc.playerMaxHP) {
+                apoc.medkits--;
+                apoc.playerHP = Math.min(apoc.playerHP + 30, apoc.playerMaxHP);
+                apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 30, text: '🩹 +30HP', vx: 0, vy: -1, life: 40, color: '#0f0' });
+                keys['e'] = false; // prevent repeat
+            }
+
+            // Gravity
+            apoc.playerVY += gravity;
+            if (apoc.playerVY > maxFall) apoc.playerVY = maxFall;
+
+            // Move player
+            apoc.playerX += apoc.playerVX;
+            apoc.playerY += apoc.playerVY;
+
+            // Clamp to area bounds
+            apoc.playerX = Math.max(20, Math.min(area.width - 20, apoc.playerX));
+
+            // Platform collision (player)
+            apoc.playerGrounded = false;
+            area.platforms.forEach(p => {
+                // Check if player is above platform and falling
+                if (apoc.playerVY >= 0 &&
+                    apoc.playerX + 15 > p.x && apoc.playerX - 15 < p.x + p.w &&
+                    apoc.playerY + 50 > p.y && apoc.playerY + 50 - apoc.playerVY <= p.y + 5) {
+                    apoc.playerY = p.y - 50;
+                    apoc.playerVY = 0;
+                    apoc.playerGrounded = true;
+                }
+            });
+
+            // Attack hitbox update
+            if (apoc.hitbox) {
+                apoc.hitbox.life--;
+                if (apoc.hitbox.life <= 0) {
+                    apoc.hitbox = null;
+                    apoc.playerAttacking = false;
+                }
+            }
+            if (apoc.playerAttackTimer > 0) {
+                apoc.playerAttackTimer--;
+                if (apoc.playerAttackTimer <= 0) apoc.playerAttacking = false;
+            }
+
+            // Update enemies
+            apoc.enemiesAlive.forEach((e, idx) => {
+                const et = APOC_ENEMY_TYPES[e.type];
+                if (!et || e.hp <= 0) return;
+
+                // Hurt stun
+                if (e.hurtTimer > 0) { e.hurtTimer--; e.vx *= 0.85; e.x += e.vx; return; }
+
+                // AI
+                const dx = apoc.playerX - e.x;
+                const dist = Math.abs(dx);
+                e.timer++;
+
+                if (dist < et.aggroRange) {
+                    e.state = 'chase';
+                    e.dir = dx > 0;
+                    if (dist < et.atkRange && e.atkCd <= 0) {
+                        e.state = 'attack';
+                        e.atkCd = et.atkCd;
+                        // Enemy attack - check if in range
+                        if (dist < et.atkRange + 20 && apoc.playerInv <= 0) {
+                            apoc.playerHP -= et.dmg;
+                            apoc.playerVX += (dx < 0 ? 1 : -1) * et.kb;
+                            apoc.playerVY = -3;
+                            apoc.playerInv = 30;
+                            apoc.shakeCam = 8;
+                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${et.dmg}`, vx: 0, vy: -2, life: 30, color: '#ff0000', size: 14 });
+                            if (apoc.playerHP <= 0) {
+                                apoc.playerHP = 0;
+                                handleApocDeath();
+                                return;
+                            }
+                        }
+                        // Ranged enemy shoots projectile
+                        if (et.ranged) {
+                            const dir = dx > 0 ? 1 : -1;
+                            apoc.worldProjectiles.push({
+                                x: e.x, y: e.y + et.h/2 - 5,
+                                vx: dir * 6, vy: 0,
+                                dmg: et.dmg * 0.6, owner: 'enemy', life: 60
+                            });
+                        }
+                    } else {
+                        // Chase player
+                        e.vx = (dx > 0 ? 1 : -1) * et.speed;
+                    }
+                } else {
+                    // Patrol
+                    e.state = 'idle';
+                    if (e.timer % 120 < 60) e.vx = et.speed * 0.5;
+                    else e.vx = -et.speed * 0.5;
+                    e.dir = e.vx > 0;
+                }
+
+                if (e.atkCd > 0) e.atkCd--;
+                e.x += e.vx;
+                e.x = Math.max(20, Math.min(area.width - 20, e.x));
+
+                // Gravity for enemies
+                e.vy = (e.vy || 0) + gravity;
+                if (e.vy > maxFall) e.vy = maxFall;
+                e.y += e.vy;
+                e.grounded = false;
+                area.platforms.forEach(p => {
+                    if (e.vy >= 0 && e.x + et.w/2 > p.x && e.x - et.w/2 < p.x + p.w &&
+                        e.y + et.h > p.y && e.y + et.h - e.vy <= p.y + 5) {
+                        e.y = p.y - et.h;
+                        e.vy = 0;
+                        e.grounded = true;
+                    }
+                });
+
+                // Check player hitbox vs enemy
+                if (apoc.hitbox) {
+                    const hb = apoc.hitbox;
+                    if (hb.x < e.x + et.w/2 && hb.x + hb.w > e.x - et.w/2 &&
+                        hb.y < e.y + et.h && hb.y + hb.h > e.y) {
+                        e.hp -= hb.dmg;
+                        e.vx = hb.kb;
+                        e.vy = -4;
+                        e.hurtTimer = 15;
+                        e.state = 'hurt';
+                        apoc.worldParticles.push({ x: e.x, y: e.y - 5, text: `-${hb.dmg}`, vx: 0, vy: -2, life: 25, color: '#FFD700', size: 12 });
+                        // Shatter effect
+                        for (let s = 0; s < 4; s++) {
+                            apoc.worldParticles.push({ x: e.x + (Math.random()-0.5)*20, y: e.y + (Math.random()-0.5)*20, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 15, color: et.color, size: 3 });
+                        }
+                        apoc.hitbox = null; // one-hit per swing
+                    }
+                }
+            });
+
+            // Remove dead enemies & drop loot
+            for (let i = apoc.enemiesAlive.length - 1; i >= 0; i--) {
+                const e = apoc.enemiesAlive[i];
+                if (e.hp <= 0) {
+                    const et = APOC_ENEMY_TYPES[e.type];
+                    // Death particles
+                    for (let p = 0; p < 8; p++) {
+                        apoc.worldParticles.push({ x: e.x + (Math.random()-0.5)*30, y: e.y + (Math.random()-0.5)*30, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: et.color, size: 4 });
+                    }
+                    apoc.worldParticles.push({ x: e.x, y: e.y - 20, text: `${et.icon} DEFEATED`, vx: 0, vy: -1, life: 50, color: '#FFD700' });
+                    // Drop loot
+                    if (et.drops) {
+                        et.drops.forEach(d => {
+                            if (Math.random() < d.chance) {
+                                const ct = d.count || 1;
+                                for (let c = 0; c < ct; c++) {
+                                    apoc.worldLoot.push({ t: d.item, x: e.x + (Math.random()-0.5)*40, y: e.y, icon: APOC_LOOT_ICONS[d.item] || '❓', bobTimer: Math.random()*100 });
+                                }
+                            }
+                        });
+                    }
+                    // Track kill
+                    apoc.totalKills++;
+                    apoc.killsByType[e.type] = (apoc.killsByType[e.type] || 0) + 1;
+                    // Update quest objectives
+                    updateApocQuestProgress('kill', e.type);
+                    // Check boss kills
+                    if (et.boss) {
+                        apoc.bossesDefeated.add(e.type);
+                        updateApocQuestProgress('boss', e.type);
+                        if (e.type === 'echo_boss') {
+                            apoc.echoUnlocked = true;
+                            apoc.worldParticles.push({ x: e.x, y: e.y - 40, text: '🤠 ECHO UNLOCKED!', vx: 0, vy: -0.5, life: 120, color: '#FFD700' });
+                        }
+                        if (et.final) {
+                            // GAME COMPLETE
+                            setTimeout(() => handleApocVictory(), 2000);
+                        }
+                    }
+                    apoc.enemiesAlive.splice(i, 1);
+                }
+            }
+
+            // Update projectiles
+            apoc.worldProjectiles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                // Hit player
+                if (p.owner === 'enemy' && apoc.playerInv <= 0) {
+                    if (Math.abs(p.x - apoc.playerX) < 25 && Math.abs(p.y - apoc.playerY) < 30) {
+                        apoc.playerHP -= p.dmg;
+                        apoc.playerInv = 20;
+                        p.life = 0;
+                        apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 10, text: `-${Math.round(p.dmg)}`, vx: 0, vy: -2, life: 25, color: '#f00' });
+                        if (apoc.playerHP <= 0) { apoc.playerHP = 0; handleApocDeath(); }
+                    }
+                }
+            });
+            apoc.worldProjectiles = apoc.worldProjectiles.filter(p => p.life > 0);
+
+            // Update loot (bob animation & pickup)
+            apoc.worldLoot.forEach(l => { l.bobTimer += 0.05; });
+            for (let i = apoc.worldLoot.length - 1; i >= 0; i--) {
+                const l = apoc.worldLoot[i];
+                const dx = Math.abs(l.x - apoc.playerX);
+                const dy = Math.abs(l.y - apoc.playerY);
+                if (dx < 35 && dy < 40) {
+                    pickupApocLoot(l);
+                    apoc.worldLoot.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            apoc.worldParticles.forEach(p => {
+                p.x += (p.vx || 0);
+                p.y += (p.vy || 0);
+                p.life--;
+            });
+            apoc.worldParticles = apoc.worldParticles.filter(p => p.life > 0);
+
+            // NPC interaction check
+            apoc.interactTarget = null;
+            const areaDef = APOC_AREAS[apoc.area];
+            if (areaDef && areaDef.npcs) {
+                areaDef.npcs.forEach(npc => {
+                    const dx = Math.abs(npc.x - apoc.playerX);
+                    const dy = Math.abs(npc.y - apoc.playerY);
+                    if (dx < 60 && dy < 50) {
+                        apoc.interactTarget = npc;
+                    }
+                });
+            }
+            // F key to interact
+            if (keys['f'] && apoc.interactTarget && !apoc.dialogueActive) {
+                interactApocNPC(apoc.interactTarget);
+                keys['f'] = false;
+            }
+
+            // Area transitions
+            if (apoc.playerX >= area.width - 30 && area.exitR !== null && area.exitR !== undefined) {
+                if (apoc.unlockedAreas[area.exitR]) {
+                    apoc.playerX = 80;
+                    loadApocArea(area.exitR);
+                } else {
+                    apoc.playerX = area.width - 35;
+                    apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 30, text: '🔒 AREA LOCKED', vx: 0, vy: -1, life: 40, color: '#f00' });
+                }
+            }
+            if (apoc.playerX <= 30 && area.exitL !== null && area.exitL !== undefined) {
+                const prevArea = APOC_AREAS[area.exitL];
+                apoc.playerX = prevArea.width - 80;
+                loadApocArea(area.exitL);
+            }
+
+            // Camera follow
+            const targetCamX = apoc.playerX - canvas.width / 2;
+            apoc.cameraX += (targetCamX - apoc.cameraX) * 0.1;
+            apoc.cameraX = Math.max(0, Math.min(area.width - canvas.width, apoc.cameraX));
+        }
+
+        // ====== DRAW ======
+        function apocDraw() {
+            const area = APOC_AREAS[apoc.area];
+            if (!area) return;
+            const cam = Math.round(apoc.cameraX);
+
+            ctx.save();
+            // Camera shake
+            if (apoc.shakeCam > 0) {
+                ctx.translate((Math.random()-0.5)*apoc.shakeCam*2, (Math.random()-0.5)*apoc.shakeCam*2);
+            }
+
+            // Sky gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, area.skyColors[0]);
+            skyGrad.addColorStop(1, area.skyColors[1]);
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Parallax background layer (simple)
+            ctx.fillStyle = area.bgColors[0];
+            for (let bx = -cam * 0.3 % 200; bx < canvas.width; bx += 200) {
+                const bh = 30 + Math.sin(bx * 0.01) * 20;
+                ctx.fillRect(bx, area.groundY - bh - 30, 80, bh + 30);
+            }
+            ctx.fillStyle = area.bgColors[1];
+            for (let bx = -cam * 0.5 % 150 + 50; bx < canvas.width; bx += 150) {
+                const bh = 20 + Math.cos(bx * 0.015) * 15;
+                ctx.fillRect(bx, area.groundY - bh - 10, 60, bh + 10);
+            }
+
+            // Decorations
+            if (area.decos) {
+                area.decos.forEach(d => {
+                    const parts = d.split(',');
+                    const dx = parseInt(parts[1]) - cam;
+                    const dy = parseInt(parts[2]);
+                    const sz = parseInt(parts[3]);
+                    if (dx > -100 && dx < canvas.width + 100) {
+                        ctx.font = sz + 'px Arial';
+                        ctx.fillText(parts[0], dx, dy);
+                    }
+                });
+            }
+
+            // Platforms
+            area.platforms.forEach(p => {
+                const px = p.x - cam;
+                if (px + p.w < -50 || px > canvas.width + 50) return;
+                // Ground
+                if (p.y >= area.groundY) {
+                    ctx.fillStyle = '#3a2a1a';
+                    ctx.fillRect(px, p.y, p.w, p.h);
+                    ctx.fillStyle = '#5a4a2a';
+                    ctx.fillRect(px, p.y, p.w, 3);
+                } else {
+                    // Elevated platform
+                    ctx.fillStyle = '#4a3a2a';
+                    ctx.fillRect(px, p.y, p.w, p.h);
+                    ctx.fillStyle = '#6a5a3a';
+                    ctx.fillRect(px, p.y, p.w, 4);
+                    // Shadow
+                    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                    ctx.fillRect(px + 5, p.y + p.h, p.w - 10, 5);
+                }
+            });
+
+            // Loot
+            apoc.worldLoot.forEach(l => {
+                const lx = l.x - cam;
+                if (lx < -50 || lx > canvas.width + 50) return;
+                const bob = Math.sin(l.bobTimer) * 4;
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(l.icon, lx, l.y + bob);
+                // Glow
+                ctx.fillStyle = 'rgba(255,215,0,0.15)';
+                ctx.beginPath();
+                ctx.arc(lx, l.y + bob - 5, 12, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // NPCs
+            if (area.npcs) {
+                area.npcs.forEach(npc => {
+                    const nx = npc.x - cam;
+                    if (nx < -50 || nx > canvas.width + 50) return;
+                    // NPC body
+                    ctx.font = '32px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(npc.icon, nx, npc.y);
+                    // Name
+                    ctx.font = "10px 'Press Start 2P', monospace";
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillText(npc.name, nx, npc.y - 30);
+                    // Quest indicator
+                    const hasQuest = npc.quests && npc.quests.some(qid => {
+                        if (apoc.completedQuests.has(qid)) return false;
+                        if (apoc.activeQuests.includes(qid)) {
+                            const q = APOC_QUESTS.find(x => x.id === qid);
+                            return q && q.objectives.every(o => o.have >= o.need);
+                        }
+                        const q = APOC_QUESTS.find(x => x.id === qid);
+                        if (!q) return false;
+                        if (q.prereqs && !q.prereqs.every(p => apoc.completedQuests.has(p))) return false;
+                        return true;
+                    });
+                    if (hasQuest) {
+                        ctx.font = '18px Arial';
+                        ctx.fillStyle = '#FFD700';
+                        const isReturn = npc.quests.some(qid => {
+                            if (!apoc.activeQuests.includes(qid)) return false;
+                            const q = APOC_QUESTS.find(x => x.id === qid);
+                            return q && q.objectives.every(o => o.have >= o.need);
+                        });
+                        ctx.fillText(isReturn ? '❗' : '❓', nx, npc.y - 42);
+                    }
+                    // Interact prompt
+                    if (apoc.interactTarget && apoc.interactTarget.id === npc.id) {
+                        ctx.font = "10px 'Press Start 2P', monospace";
+                        ctx.fillStyle = '#FFD700';
+                        ctx.globalAlpha = 0.5 + Math.sin(apoc.timer * 0.1) * 0.5;
+                        ctx.fillText('[F] TALK', nx, npc.y + 20);
+                        ctx.globalAlpha = 1;
+                    }
+                });
+            }
+
+            // Enemies
+            apoc.enemiesAlive.forEach(e => {
+                const et = APOC_ENEMY_TYPES[e.type];
+                if (!et) return;
+                const ex = e.x - cam;
+                if (ex < -100 || ex > canvas.width + 100) return;
+                // Flash when hurt
+                if (e.hurtTimer > 0 && e.hurtTimer % 4 < 2) return;
+                // Body
+                ctx.font = (et.w) + 'px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(et.icon, ex, e.y + et.h);
+                // HP bar
+                if (e.hp < e.maxHp) {
+                    const barW = et.w + 10;
+                    const barH = 4;
+                    const barX = ex - barW/2;
+                    const barY = e.y - 8;
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(barX, barY, barW, barH);
+                    ctx.fillStyle = e.hp > e.maxHp * 0.3 ? '#0f0' : '#f00';
+                    ctx.fillRect(barX, barY, barW * (e.hp / e.maxHp), barH);
+                    // Boss name
+                    if (et.boss) {
+                        ctx.font = "8px 'Press Start 2P', monospace";
+                        ctx.fillStyle = '#f00';
+                        ctx.fillText(et.name, ex, barY - 4);
+                    }
+                }
+            });
+
+            // Player
+            const px = Math.round(apoc.playerX - cam);
+            const py = Math.round(apoc.playerY);
+            // Invincibility flash
+            if (apoc.playerInv > 0 && apoc.playerInv % 4 < 2) {
+                // skip draw (flash)
+            } else {
+                ctx.save();
+                ctx.translate(px, py);
+                if (!apoc.playerDir) ctx.scale(-1, 1);
+                // Simple player sprite (colored rect + face)
+                ctx.fillStyle = '#C4A55A'; // skin
+                ctx.fillRect(-12, -40, 24, 40);
+                ctx.fillStyle = '#8B6914'; // hat
+                ctx.fillRect(-14, -48, 28, 10);
+                ctx.fillStyle = '#553311'; // coat
+                ctx.fillRect(-15, -20, 30, 25);
+                ctx.fillStyle = '#FF2200'; // scarf
+                ctx.fillRect(-8, -25, 16, 6);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(2, -38, 4, 4);
+                ctx.fillRect(-6, -38, 4, 4);
+                // Attack slash
+                if (apoc.playerAttacking) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.fillRect(20, -30, 35, 5);
+                    ctx.fillRect(25, -20, 30, 4);
+                    ctx.fillRect(20, -10, 35, 5);
+                }
+                ctx.restore();
+            }
+
+            // Projectiles
+            apoc.worldProjectiles.forEach(p => {
+                const ppx = p.x - cam;
+                if (ppx < -50 || ppx > canvas.width + 50) return;
+                ctx.fillStyle = p.owner === 'enemy' ? '#ff0044' : '#FFD700';
+                ctx.beginPath();
+                ctx.arc(ppx, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Player hitbox (debug visualization - subtle)
+            if (apoc.hitbox) {
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillRect(apoc.hitbox.x - cam, apoc.hitbox.y, apoc.hitbox.w, apoc.hitbox.h);
+            }
+
+            // World particles
+            ctx.textAlign = 'center';
+            apoc.worldParticles.forEach(p => {
+                if (p.text) {
+                    ctx.font = (p.size || 12) + "px 'Press Start 2P', monospace";
+                    ctx.fillStyle = p.color || '#fff';
+                    ctx.globalAlpha = Math.min(1, p.life / 15);
+                    ctx.fillText(p.text, p.x - cam, p.y);
+                    ctx.globalAlpha = 1;
+                } else {
+                    ctx.fillStyle = p.color || '#fff';
+                    ctx.globalAlpha = Math.min(1, p.life / 10);
+                    ctx.beginPath();
+                    ctx.arc(p.x - cam, p.y, p.size || 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            });
+
+            // Dialogue box
+            if (apoc.dialogueActive) {
+                const dlgEl = document.getElementById('apoc-dialogue');
+                dlgEl.classList.remove('hidden');
+                document.getElementById('apoc-dlg-name').innerText = apoc.dialogueSpeaker;
+                document.getElementById('apoc-dlg-text').innerText = apoc.dialogueLines[apoc.dialogueIdx] || '';
+            } else {
+                document.getElementById('apoc-dialogue').classList.add('hidden');
+            }
+
+            ctx.restore();
+
+            // HUD overlay (drawn without camera transform)
+            drawApocHUD();
+
+            // Area name display (first 3 seconds)
+            if (apoc.timer < 180) {
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.globalAlpha = Math.min(1, (180 - apoc.timer) / 60);
+                ctx.font = "24px 'Press Start 2P', monospace";
+                ctx.fillStyle = '#ff6600';
+                ctx.fillText(area.name, canvas.width/2, canvas.height/2 - 20);
+                ctx.font = "12px 'Press Start 2P', monospace";
+                ctx.fillStyle = '#ff9944';
+                ctx.fillText(area.subtitle, canvas.width/2, canvas.height/2 + 10);
+                ctx.restore();
+            }
+
+            // Minimap
+            drawApocMinimap(area, cam);
+        }
+
+        // ====== HUD ======
+        function drawApocHUD() {
+            // Update HTML HUD elements
+            const hpFill = document.getElementById('apoc-hp-fill');
+            const hpText = document.getElementById('apoc-hp-text');
+            const coinsHud = document.getElementById('apoc-coins-hud');
+            const invHud = document.getElementById('apoc-inventory');
+            if (hpFill) hpFill.style.width = (apoc.playerHP / apoc.playerMaxHP * 100) + '%';
+            if (hpText) hpText.innerText = Math.round(apoc.playerHP) + '/' + apoc.playerMaxHP;
+            if (coinsHud) coinsHud.innerText = '🪙 ' + apoc.coins;
+            if (invHud) invHud.innerHTML = `<span class="apoc-inv-item">🩹 ${apoc.medkits}</span><span class="apoc-inv-item">🔫 ${apoc.ammo}</span><span class="apoc-inv-item">⚙️ ${apoc.scrap}</span>`;
+
+            // Quest tracker
+            const tracker = document.getElementById('apoc-quest-tracker');
+            if (tracker && apoc.activeQuests.length > 0) {
+                const q = APOC_QUESTS.find(x => x.id === apoc.activeQuests[0]);
+                if (q) {
+                    tracker.style.display = 'block';
+                    tracker.innerHTML = `<div class="apoc-quest-title">${q.type === 'main' ? '★ ' : ''}${q.title}</div>` +
+                        q.objectives.map(o => `<div class="apoc-quest-obj">${o.desc}: ${o.have}/${o.need} ${o.have >= o.need ? '✅' : ''}</div>`).join('');
+                } else {
+                    tracker.style.display = 'none';
+                }
+            } else if (tracker) {
+                tracker.style.display = 'none';
+            }
+        }
+
+        // ====== MINIMAP ======
+        function drawApocMinimap(area, cam) {
+            const mmW = 150, mmH = 30;
+            const mmX = canvas.width - mmW - 10, mmY = canvas.height - mmH - 10;
+            const scale = mmW / area.width;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
+            ctx.strokeStyle = '#555';
+            ctx.strokeRect(mmX - 2, mmY - 2, mmW + 4, mmH + 4);
+
+            // Platforms
+            ctx.fillStyle = '#444';
+            area.platforms.forEach(p => {
+                ctx.fillRect(mmX + p.x * scale, mmY + (p.y / canvas.height) * mmH, Math.max(1, p.w * scale), 2);
+            });
+
+            // Enemies (red dots)
+            ctx.fillStyle = '#f00';
+            apoc.enemiesAlive.forEach(e => {
+                ctx.fillRect(mmX + e.x * scale - 1, mmY + mmH * 0.6, 2, 2);
+            });
+
+            // NPCs (yellow dots)
+            ctx.fillStyle = '#FFD700';
+            if (area.npcs) {
+                area.npcs.forEach(npc => {
+                    ctx.fillRect(mmX + npc.x * scale - 1, mmY + mmH * 0.5, 3, 3);
+                });
+            }
+
+            // Player (green dot)
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(mmX + apoc.playerX * scale - 2, mmY + mmH * 0.5, 4, 4);
+
+            // Viewport indicator
+            ctx.strokeStyle = '#0f0';
+            ctx.globalAlpha = 0.4;
+            ctx.strokeRect(mmX + cam * scale, mmY, canvas.width * scale, mmH);
+            ctx.globalAlpha = 1;
+
+            ctx.restore();
+        }
+
+        // ====== LOOT PICKUP ======
+        function pickupApocLoot(loot) {
+            const icons = { coin: '🪙', scrap: '⚙️', medkit: '🩹', ammo: '🔫', cyberware: '💿' };
+            switch (loot.t) {
+                case 'coin': apoc.coins += 10; break;
+                case 'scrap': apoc.scrap++; break;
+                case 'medkit': apoc.medkits++; break;
+                case 'ammo': apoc.ammo += 6; break;
+                case 'cyberware': apoc.inventory.push('Cyberware Shard'); break;
+                default:
+                    // Quest item
+                    apoc.questItems[loot.t] = (apoc.questItems[loot.t] || 0) + 1;
+                    updateApocQuestProgress('collect', loot.t);
+                    break;
+            }
+            if (['coin','scrap','medkit','ammo','cyberware'].includes(loot.t)) {
+                updateApocQuestProgress('collect', loot.t);
+            }
+            apoc.worldParticles.push({ x: loot.x, y: loot.y - 15, text: `+${loot.icon}`, vx: 0, vy: -1.5, life: 30, color: '#FFD700' });
+        }
+
+        // ====== QUEST SYSTEM ======
+        function updateApocQuestProgress(type, target) {
+            apoc.activeQuests.forEach(qid => {
+                const q = APOC_QUESTS.find(x => x.id === qid);
+                if (!q) return;
+                q.objectives.forEach(obj => {
+                    if (obj.type === type && obj.target === target && obj.have < obj.need) {
+                        obj.have++;
+                        if (obj.have >= obj.need) {
+                            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 50, text: `✅ ${obj.desc}`, vx: 0, vy: -0.5, life: 60, color: '#0f0' });
+                        }
+                    }
+                });
+                // Check if all objectives complete
+                if (q.objectives.every(o => o.have >= o.need)) {
+                    apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 70, text: `📋 Return to ${q.giver.replace('_',' ')}`, vx: 0, vy: -0.3, life: 80, color: '#FFD700' });
+                }
+            });
+        }
+
+        function completeApocQuest(qid) {
+            const q = APOC_QUESTS.find(x => x.id === qid);
+            if (!q) return;
+            apoc.completedQuests.add(qid);
+            apoc.activeQuests = apoc.activeQuests.filter(x => x !== qid);
+            // Apply rewards
+            if (q.rewards) {
+                if (q.rewards.coins) apoc.coins += q.rewards.coins;
+                if (q.rewards.scrap) apoc.scrap += q.rewards.scrap;
+                if (q.rewards.items) {
+                    q.rewards.items.forEach(item => {
+                        if (item === 'medkit') apoc.medkits++;
+                        else if (item === 'ammo') apoc.ammo += 6;
+                        else if (item === 'cyberware') apoc.inventory.push(q.rewards.rewardName || 'Cyberware');
+                    });
+                }
+                if (q.rewards.special === 'echo_join') {
+                    apoc.echoJoined = true;
+                    apoc.echoUnlocked = true;
+                }
+                if (q.rewards.special === 'unlock_area_2') { apoc.unlockedAreas[2] = true; apoc.unlockedAreas[3] = true; }
+                if (q.rewards.special === 'unlock_area_4') apoc.unlockedAreas[4] = true;
+            }
+            // Unlock next quests
+            if (q.unlocks) {
+                // Just mark them as available (they'll be offered by NPCs)
+            }
+            // Show reward popup
+            showApocReward(q);
+        }
+
+        function showApocReward(quest) {
+            const popup = document.createElement('div');
+            popup.className = 'apoc-reward-popup';
+            popup.innerHTML = `<div class="apoc-reward-title">QUEST COMPLETE!</div>
+                <div style="color:#ff6600;margin-bottom:10px">${quest.title}</div>
+                ${quest.rewards.coins ? `<div class="apoc-reward-item">🪙 ${quest.rewards.coins} Coins</div>` : ''}
+                ${quest.rewards.scrap ? `<div class="apoc-reward-item">⚙️ ${quest.rewards.scrap} Scrap</div>` : ''}
+                ${quest.rewards.rewardName ? `<div class="apoc-reward-item">💿 ${quest.rewards.rewardName}</div>` : ''}
+                ${quest.rewards.special === 'echo_join' ? '<div class="apoc-reward-item" style="color:#FFD700">🤠 ECHO JOINED YOUR TEAM!</div>' : ''}
+                ${quest.rewards.special === 'apocalypse_complete' ? '<div class="apoc-reward-item" style="color:#FFD700;font-size:1.3em">🏆 APOCALYPSE COMPLETE!</div>' : ''}
+                <button class="menu-btn" style="margin-top:15px" onclick="this.parentElement.remove()">CONTINUE</button>`;
+            document.body.appendChild(popup);
+        }
+
+        // ====== NPC INTERACTION ======
+        function interactApocNPC(npc) {
+            // Check if NPC has a quest to turn in
+            const turnInQuest = npc.quests ? npc.quests.find(qid => {
+                if (!apoc.activeQuests.includes(qid)) return false;
+                const q = APOC_QUESTS.find(x => x.id === qid);
+                return q && q.objectives.every(o => o.have >= o.need);
+            }) : null;
+
+            if (turnInQuest) {
+                const q = APOC_QUESTS.find(x => x.id === turnInQuest);
+                showApocDialogue(npc.name, q.dlgEnd, () => {
+                    completeApocQuest(turnInQuest);
+                });
+                return;
+            }
+
+            // Check if NPC has a new quest to offer
+            const newQuest = npc.quests ? npc.quests.find(qid => {
+                if (apoc.completedQuests.has(qid)) return false;
+                if (apoc.activeQuests.includes(qid)) return false;
+                const q = APOC_QUESTS.find(x => x.id === qid);
+                if (!q) return false;
+                if (q.prereqs && !q.prereqs.every(p => apoc.completedQuests.has(p))) return false;
+                return true;
+            }) : null;
+
+            if (newQuest) {
+                const q = APOC_QUESTS.find(x => x.id === newQuest);
+                showApocDialogue(npc.name, q.dlgStart, () => {
+                    apoc.activeQuests.push(newQuest);
+                    apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 50, text: `📋 NEW QUEST: ${q.title}`, vx: 0, vy: -0.5, life: 80, color: '#ff6600' });
+                    // Spawn boss for echo fight
+                    if (newQuest === 'mq2') {
+                        const area = APOC_AREAS[apoc.area];
+                        apoc.enemiesAlive.push({
+                            type: 'echo_boss', x: npc.x + 100, y: area.groundY - 50,
+                            hp: 300, maxHp: 300, vx: 0, vy: 0, dir: false,
+                            state: 'chase', timer: 0, atkCd: 0, grounded: true, hurtTimer: 0
+                        });
+                        apoc.echoFightActive = true;
+                    }
+                    // Re-load area to spawn quest items
+                    const areaIdx = apoc.area;
+                    const q2 = APOC_QUESTS.find(x => x.id === newQuest);
+                    if (q2 && (q2.spawnItem || q2.spawnItems) && !apoc.questItemSpawned[newQuest]) {
+                        if (q2.spawnItem && q2.area === areaIdx) {
+                            apoc.worldLoot.push({ t: q2.spawnItem.t, x: q2.spawnItem.x, y: q2.spawnItem.y, icon: q2.spawnItem.icon, questItem: true, bobTimer: 0 });
+                        }
+                        if (q2.spawnItems && q2.area === areaIdx) {
+                            q2.spawnItems.forEach(si => {
+                                apoc.worldLoot.push({ t: si.t, x: si.x, y: si.y, icon: si.icon, questItem: true, bobTimer: Math.random()*100 });
+                            });
+                        }
+                        apoc.questItemSpawned[newQuest] = true;
+                    }
+                });
+                return;
+            }
+
+            // Default dialogue
+            const defaultLines = {
+                'survivor_doge': ['The wasteland is harsh... but we survive.', 'Stay safe out there.'],
+                'old_pepe': ['*ribbit* Things were better before the apocalypse...', 'Feels bad man.'],
+                'echo_npc': [apoc.echoJoined ? 'Ready when you are, partner.' : 'You look like you could use a gun.', 'The deeper you go, the worse it gets.'],
+                'hermit': ['The void stares back...', 'Beware the shadows.'],
+                'data_doge': ['The data never lies.', 'Trust the network.'],
+                'wasteland_trader': ['Got wares if you\'ve got coin.', 'The wasteland provides... sometimes.'],
+                'courier_cat': ['Meow. Deliveries are my life.', 'Always keep moving.'],
+                'program_npc': ['SYSTEM::IDLE - No tasks available.', 'Awaiting input...'],
+                'hacker_frog': ['*ribbit* The data flows like water.', 'Information is power.'],
+                'last_survivor': ['We\'re the last ones. Make it count.', 'The Meme God awaits at the end.']
+            };
+            const lines = defaultLines[npc.id] || ['...'];
+            showApocDialogue(npc.name, lines, null);
+        }
+
+        // ====== DIALOGUE SYSTEM ======
+        function showApocDialogue(speaker, lines, callback) {
+            apoc.dialogueActive = true;
+            apoc.dialogueSpeaker = speaker;
+            apoc.dialogueLines = lines;
+            apoc.dialogueIdx = 0;
+            apoc.dialogueCallback = callback;
+        }
+
+        function advanceApocDialogue() {
+            if (!apoc.dialogueActive) return;
+            apoc.dialogueIdx++;
+            if (apoc.dialogueIdx >= apoc.dialogueLines.length) {
+                apoc.dialogueActive = false;
+                document.getElementById('apoc-dialogue').classList.add('hidden');
+                if (apoc.dialogueCallback) apoc.dialogueCallback();
+            }
+        }
+
+        // ====== DEATH & VICTORY ======
+        function handleApocDeath() {
+            apoc.worldParticles.push({ x: apoc.playerX, y: apoc.playerY - 40, text: '💀 YOU DIED', vx: 0, vy: -0.5, life: 120, color: '#ff0000' });
+            setTimeout(() => {
+                // Respawn at area start with HP penalty
+                apoc.playerHP = Math.round(apoc.playerMaxHP * 0.5);
+                apoc.playerX = 100;
+                apoc.playerY = APOC_AREAS[apoc.area].groundY - 50;
+                apoc.playerVX = 0;
+                apoc.playerVY = 0;
+                apoc.playerInv = 60;
+                apoc.coins = Math.max(0, apoc.coins - 20);
+                loadApocArea(apoc.area); // reload enemies
+            }, 2000);
+        }
+
+        function handleApocVictory() {
+            gameState = 'TITLE';
+            isMemeApocalypse = false;
+            document.getElementById('apoc-hud').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            // Grand victory popup
+            const popup = document.createElement('div');
+            popup.className = 'apoc-reward-popup';
+            popup.innerHTML = `<div class="apoc-reward-title" style="font-size:2em">🏆 MEME APOCALYPSE COMPLETE 🏆</div>
+                <div style="color:#ff6600;margin:15px 0;font-size:1.2em">You defeated the Meme God and saved the meme world!</div>
+                <div class="apoc-reward-item">Total Kills: ${apoc.totalKills}</div>
+                <div class="apoc-reward-item">Quests Completed: ${apoc.completedQuests.size}/20</div>
+                <div class="apoc-reward-item">Coins Earned: ${apoc.coins}</div>
+                ${apoc.echoUnlocked ? '<div class="apoc-reward-item" style="color:#FFD700">🤠 Echo is now playable in VS mode!</div>' : ''}
+                <button class="menu-btn" style="margin-top:20px" onclick="this.parentElement.remove()">LEGENDARY</button>`;
+            document.body.appendChild(popup);
+        }
+
+        // ====== EXIT APOCALYPSE ======
+        function exitApocWorld() {
+            gameState = 'APOCALYPSE';
+            isMemeApocalypse = false;
+            document.getElementById('apoc-hud').classList.add('hidden');
+            document.getElementById('apocalypse-screen').classList.remove('hidden');
+            renderApocHub();
+        }
+
+        // ====== INPUT HANDLING FOR APOCALYPSE ======
+        window._apocKeys = {};
+        document.addEventListener('keydown', e => {
+            const key = e.key.toLowerCase();
+            window._apocKeys[key] = true;
+            // Dialogue advance
+            if (apoc && apoc.dialogueActive && (key === ' ' || key === 'enter' || key === 'f')) {
+                advanceApocDialogue();
+                e.preventDefault();
+            }
+            // Escape to exit world
+            if (isMemeApocalypse && gameState === 'GAME' && key === 'escape' && !apoc.dialogueActive) {
+                exitApocWorld();
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('keyup', e => {
+            window._apocKeys[e.key.toLowerCase()] = false;
+        });
+        // Click to advance dialogue
+        document.getElementById('apoc-dialogue').addEventListener('click', () => {
+            if (apoc && apoc.dialogueActive) advanceApocDialogue();
+        });
+
+        // ======================================================================
+        // END MEME APOCALYPSE MODE
+        // ======================================================================
 
         loadGame();
         initBossEventOnLoad();
