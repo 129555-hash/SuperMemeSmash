@@ -150,6 +150,248 @@
             color: white;
         }
 
+        /* ========== BOSS EVENT STYLES ========== */
+        .menu-btn.event-btn {
+            border-color: #ff4500;
+            color: #ff4500;
+            position: relative;
+            overflow: hidden;
+            animation: eventPulse 2s infinite;
+        }
+        .menu-btn.event-btn:hover {
+            background: #ff4500;
+            color: white;
+        }
+        .menu-btn.event-btn::after {
+            content: 'LIMITED';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff0000;
+            color: white;
+            font-size: 6px;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        @keyframes eventPulse {
+            0%, 100% { box-shadow: 0 0 5px #ff4500; }
+            50% { box-shadow: 0 0 20px #ff4500, 0 0 40px #ff450066; }
+        }
+        #boss-event-screen {
+            background: radial-gradient(ellipse at center, #1a0000 0%, #000 70%);
+        }
+        .boss-event-title {
+            font-family: 'Black Ops One';
+            font-size: 36px;
+            color: #ff4500;
+            text-shadow: 0 0 20px #ff4500, 0 0 40px #ff000066;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .boss-event-subtitle {
+            font-family: 'Press Start 2P';
+            font-size: 10px;
+            color: #ff8c00;
+            margin-bottom: 15px;
+        }
+        .boss-event-timer {
+            font-family: 'Press Start 2P';
+            font-size: 9px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        .boss-card {
+            background: linear-gradient(135deg, #1a0a00, #2a1500);
+            border: 2px solid #ff4500;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 8px;
+            width: 220px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .boss-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #ff450088;
+            border-color: #ffd700;
+        }
+        .boss-card.defeated {
+            border-color: #2ecc71;
+            opacity: 0.7;
+        }
+        .boss-card.defeated::after {
+            content: '✓ DEFEATED';
+            display: block;
+            color: #2ecc71;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            margin-top: 8px;
+        }
+        .boss-card.locked-boss {
+            border-color: #333;
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .boss-card canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 96px;
+            height: 96px;
+        }
+        .boss-card .boss-name {
+            font-family: 'Press Start 2P';
+            font-size: 11px;
+            color: #ff4500;
+            margin: 8px 0 4px;
+        }
+        .boss-card .boss-desc {
+            font-family: 'Press Start 2P';
+            font-size: 7px;
+            color: #aaa;
+        }
+        .boss-hp-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .boss-hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff4500);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .boss-token-display {
+            font-family: 'Press Start 2P';
+            font-size: 10px;
+            color: #ffd700;
+            margin: 10px 0;
+        }
+        .drop-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .drop-item {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 12px 24px;
+            margin: 6px;
+            font-family: 'Press Start 2P';
+            font-size: 10px;
+            color: #fff;
+            animation: dropIn 0.5s ease-out;
+        }
+        .drop-item.legendary {
+            border-color: #ff4500;
+            box-shadow: 0 0 30px #ff450066;
+            animation: dropIn 0.5s ease-out, eventPulse 1.5s infinite;
+        }
+        @keyframes dropIn {
+            from { transform: translateY(-50px) scale(0.5); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        /* Never The Same Builder */
+        .nts-builder {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+        }
+        .nts-slot {
+            background: #1a1a2e;
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 10px;
+            width: 130px;
+            text-align: center;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .nts-slot:hover {
+            border-color: #ff4500;
+            color: #fff;
+        }
+        .nts-slot.selected {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        .nts-slot .slot-label {
+            color: #888;
+            font-size: 7px;
+            margin-bottom: 5px;
+        }
+        .nts-move-picker {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #111;
+            border: 2px solid #ff4500;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 10002;
+            max-height: 70vh;
+            overflow-y: auto;
+            min-width: 300px;
+        }
+        .nts-move-option {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border: 1px solid #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            color: #fff;
+            transition: 0.2s;
+        }
+        .nts-move-option:hover {
+            background: #ff4500;
+            border-color: #ff4500;
+        }
+        /* Boss Event Shop */
+        .event-shop-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: 700px;
+        }
+        .event-shop-item {
+            background: linear-gradient(135deg, #0a0a1a, #1a0a00);
+            border: 2px solid #ff4500;
+            border-radius: 8px;
+            padding: 12px;
+            width: 160px;
+            text-align: center;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .event-shop-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #ff450066;
+        }
+        .event-shop-item .token-cost {
+            color: #ffd700;
+            margin-top: 6px;
+        }
+
         #shop-screen {
             flex-direction: row !important;
             justify-content: center;
@@ -1279,6 +1521,7 @@
         <h1>SUPER<br>MEME BROS<br>ULTIMATE</h1>
         <button class="menu-btn pulse" onclick="startLocal()">FIGHT (VS)</button>
         <button class="menu-btn boss-btn" onclick="startSurvival()">SURVIVAL</button>
+        <button class="menu-btn event-btn" onclick="openBossEvent()">BOSS EVENT 🔥</button>
         <button class="menu-btn" onclick="startMemeBall()">MEME BALL</button>
         <button class="menu-btn dojo-btn" onclick="startTraining()">TRAINING</button>
         <button class="menu-btn" onclick="startSpectator()">SPECTATOR</button>
@@ -1307,6 +1550,44 @@
                 oninput="sfx.setVol(this.value)"></div>
         <button class="menu-btn" onclick="togglePause()">RESUME</button>
         <button class="menu-btn danger-btn" onclick="location.reload()">QUIT</button>
+    </div>
+    <!-- ========== BOSS EVENT SCREEN ========== -->
+    <div id="boss-event-screen" class="screen hidden">
+        <div class="boss-event-title">⚔️ BOSS EVENT ⚔️</div>
+        <div class="boss-event-subtitle">DEFEAT THE BOSSES. CLAIM THE LOOT.</div>
+        <div class="boss-event-timer" id="boss-event-timer">EVENT ACTIVE — MONTHLY ROTATION</div>
+        <div class="boss-token-display">🪙 BOSS TOKENS: <span id="boss-token-count">0</span></div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:10px 0" id="boss-card-container"></div>
+        <div style="margin:15px 0;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <button class="menu-btn" style="border-color:#ffd700;color:#ffd700" onclick="openEventShop()">EVENT SHOP 🪙</button>
+            <button class="menu-btn" style="border-color:#ff4500;color:#ff4500" onclick="openNTSBuilder()">NEVER THE SAME 🎭</button>
+            <button class="menu-btn" onclick="closeBossEvent()">BACK</button>
+        </div>
+        <div style="font-family:'Press Start 2P';font-size:7px;color:#666;margin-top:10px;text-align:center;max-width:500px">
+            DEFEAT BOSSES FOR 1-3 DROPS: MONEY, CYBERWARE, CHARACTERS, OR THE ULTRA-RARE "NEVER THE SAME" MIX-AND-MATCH CHARACTER
+        </div>
+    </div>
+    <!-- ========== EVENT SHOP SCREEN ========== -->
+    <div id="event-shop-screen" class="screen hidden">
+        <div class="boss-event-title">🪙 EVENT SHOP</div>
+        <div class="boss-token-display">🪙 BOSS TOKENS: <span id="event-shop-tokens">0</span></div>
+        <div class="event-shop-grid" id="event-shop-grid"></div>
+        <button class="menu-btn" style="margin-top:20px" onclick="closeEventShop()">BACK</button>
+    </div>
+    <!-- ========== NEVER THE SAME BUILDER SCREEN ========== -->
+    <div id="nts-builder-screen" class="screen hidden">
+        <div class="boss-event-title">🎭 NEVER THE SAME</div>
+        <div class="boss-event-subtitle" id="nts-status">BUILD YOUR CUSTOM FIGHTER</div>
+        <div class="nts-builder" id="nts-builder"></div>
+        <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <button class="menu-btn" style="border-color:#2ecc71;color:#2ecc71" onclick="saveNTSBuild()">SAVE BUILD</button>
+            <button class="menu-btn" style="border-color:#ff4500;color:#ff4500" onclick="clearNTSBuild()">CLEAR</button>
+            <button class="menu-btn" onclick="closeNTSBuilder()">BACK</button>
+        </div>
+        <div style="font-family:'Press Start 2P';font-size:7px;color:#666;margin-top:15px;text-align:center;max-width:500px">
+            CHOOSE SIDE, UP, DOWN & ULT MOVES FROM ANY UNLOCKED CHARACTER. SAVE UP TO 3 BUILDS.
+        </div>
+        <div id="nts-saved-builds" style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center"></div>
     </div>
     <div id="shop-screen" class="screen hidden">
         <div style="position:absolute;top:20px;left:30px;font-size:24px;font-family:'Black Ops One';color:var(--gold)">
@@ -1945,6 +2226,9 @@
         function showAnnounce(text, color) { announceText = text; announceTimer = 120; announceColor = color || '#fff'; }
         // Weather system
         let weatherType = 'none', weatherTimer = 0, weatherParticles = [];
+        // Boss Event system
+        let isBossEvent = false, currentBossIndex = 0, bossRunDefeated = [], bossRunDrops = [];
+        let bossHPMax = 0, bossHP = 0;
         const keys = {};
         const touchInput = {
             left: !1,
@@ -5214,6 +5498,11 @@
                 ctx.save();
                 ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
                 if (this.isBoss) ctx.scale(2.5, 2.5);
+                // Boss aura effect
+                if (isBossEvent && this.cpu && this.stocks > 0) {
+                    ctx.shadowColor = '#ff4500';
+                    ctx.shadowBlur = 30 + Math.sin(Date.now() / 200) * 15;
+                }
                 // Base sprites face right; flip when facing left
                 if (!this.dir) ctx.scale(-1, 1);
                 if (this.confused > 0) {
@@ -6310,6 +6599,13 @@
             if (!saveData.endingTracker) saveData.endingTracker = { usedSandy: false, ending: null };
             // Init loadout presets
             if (!saveData.loadoutPresets) saveData.loadoutPresets = {};
+            // Init boss event data
+            if (!saveData.bossTokens) saveData.bossTokens = 0;
+            if (!saveData.bossDefeated) saveData.bossDefeated = {};
+            if (!saveData.ntsBuilds) saveData.ntsBuilds = [null, null, null];
+            if (!saveData.ntsSlots) saveData.ntsSlots = 1;
+            if (!saveData.eventItems) saveData.eventItems = {};
+            if (saveData.ntsUnlocked === undefined) saveData.ntsUnlocked = false;
             updateCoinDisplay();
             updateMobileControlsSetting();
             if (saveData.unlocks.includes('yellowdude')) {
@@ -10315,6 +10611,13 @@
         }
         function selectCharacter(c) {
             sfx.play('coin');
+            if (isBossEvent) {
+                p1Char = c;
+                try { initMastery(p1Char.id); useMasteryP1 = isCharMastered(p1Char.id); } catch (e) { }
+                document.getElementById('char-select').classList.add('hidden');
+                launchBossBattle(currentBossIndex);
+                return;
+            }
             if (isSurvival) {
                 if (!p1Char) {
                     p1Char = c;
@@ -10925,6 +11228,31 @@
             gameState = 'GAMEOVER';
             document.getElementById('game-over').classList.remove('hidden');
 
+            // Boss event: player lost to boss
+            if (isBossEvent) {
+                if (w === 2) {
+                    // Boss won
+                    const boss = BOSS_DATA[currentBossIndex];
+                    document.getElementById('winner-display').innerText = boss.icon + ' ' + boss.name + ' WINS!\nYOU WERE DEFEATED';
+                    document.getElementById('winner-display').style.color = "#ff4500";
+                    document.getElementById('rematch-btn').innerText = "RETRY BOSS";
+                    document.getElementById('rematch-btn').onclick = () => {
+                        document.getElementById('game-over').classList.add('hidden');
+                        launchBossBattle(currentBossIndex);
+                    };
+                    const exitBtn = document.getElementById('exit-btn');
+                    exitBtn.onclick = () => {
+                        document.getElementById('game-over').classList.add('hidden');
+                        document.getElementById('hud').classList.add('hidden');
+                        document.getElementById('game-mode-hud').style.display = 'none';
+                        isBossEvent = false;
+                        openBossEvent();
+                    };
+                }
+                document.getElementById('mastery-progress').innerHTML = '';
+                return;
+            }
+
             // Track mastery for both players
             let masteryMsg = '';
             if (!isSurvival && !isMemeBall && players.length >= 2) {
@@ -11170,6 +11498,13 @@
                             serveCharge = 0;
                         }
                     }
+                }
+            }
+
+            // Boss event HP check
+            if (isBossEvent && typeof checkBossDeath === 'function') {
+                if (checkBossDeath()) {
+                    return; // Boss defeated, stop loop
                 }
             }
 
@@ -12125,6 +12460,40 @@
                 ctx.fillText(`Best: ${comboBestThisGame}x`, canvas.width - 20, 100);
                 ctx.restore();
             }
+            // ====== BOSS HP BAR HUD (screen space) ======
+            if (isBossEvent && bossHPMax > 0) {
+                ctx.save();
+                const barW = canvas.width * 0.6;
+                const barH = 18;
+                const barX = (canvas.width - barW) / 2;
+                const barY = 20;
+                const hpPct = Math.max(0, bossHP / bossHPMax);
+                // Background
+                ctx.fillStyle = '#1a0000';
+                ctx.fillRect(barX - 2, barY - 2, barW + 4, barH + 4);
+                ctx.fillStyle = '#333';
+                ctx.fillRect(barX, barY, barW, barH);
+                // HP fill — gradient from red to orange
+                const hpGrad = ctx.createLinearGradient(barX, 0, barX + barW * hpPct, 0);
+                hpGrad.addColorStop(0, '#ff0000');
+                hpGrad.addColorStop(1, hpPct > 0.5 ? '#ff4500' : '#ff0000');
+                ctx.fillStyle = hpGrad;
+                ctx.fillRect(barX, barY, barW * hpPct, barH);
+                // Border
+                ctx.strokeStyle = '#ff4500';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(barX - 2, barY - 2, barW + 4, barH + 4);
+                // Text
+                ctx.font = "bold 10px 'Press Start 2P', monospace";
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fff';
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 4;
+                const boss = BOSS_DATA[currentBossIndex];
+                ctx.fillText(boss.icon + ' ' + boss.name + '  ' + Math.floor(hpPct * 100) + '%', canvas.width / 2, barY + 13);
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
             // ====== ANNOUNCER HUD (screen space) ======
             if (announceTimer > 0) {
                 ctx.save();
@@ -12393,7 +12762,839 @@
             });
         }
 
+        // ================================================================
+        // ==================== BOSS EVENT SYSTEM =======================
+        // ================================================================
+
+        const BOSS_DATA = [
+            {
+                id: 'memelord',
+                name: 'MEME LORD',
+                desc: 'Ruler of all memes. Unpredictable attacks.',
+                hp: 300,
+                power: 1.4,
+                speed: 1.2,
+                weight: 1.8,
+                jump: 1.0,
+                icon: '👹',
+                colors: {
+                    '0': null, '1': '#000000', '2': '#8B0000', '3': '#FF0000',
+                    '4': '#FF4500', '5': '#FFD700', '6': '#FFFFFF',
+                    '7': '#4B0082', '8': '#FF00FF', '9': '#333333'
+                },
+                spriteData: [
+                    "0000055555000000",
+                    "0005533333550000",
+                    "0053322222335000",
+                    "0532222222223500",
+                    "5322268862222350",
+                    "5322286682222350",
+                    "5322222222222350",
+                    "5322234443222350",
+                    "5322233332222350",
+                    "0532222222223500",
+                    "0053399993350000",
+                    "0005399993500000",
+                    "0000944449000000",
+                    "0000944449000000",
+                    "0000911119000000",
+                    "0000910019000000"
+                ],
+                moves: {
+                    side: "Meme Beam",
+                    up: "Viral Launch",
+                    down: "Cringe Crush",
+                    ult: "INFINITE SCROLL"
+                }
+            },
+            {
+                id: 'gigachad',
+                name: 'GIGACHAD PRIME',
+                desc: 'Ultimate life form. Pure power.',
+                hp: 500,
+                power: 2.0,
+                speed: 0.8,
+                weight: 3.0,
+                jump: 0.6,
+                icon: '💪',
+                colors: {
+                    '0': null, '1': '#1a1a1a', '2': '#2d2d2d', '3': '#FFD39B',
+                    '4': '#D2691E', '5': '#4169E1', '6': '#FFFFFF',
+                    '7': '#000000', '8': '#8B4513', '9': '#C0C0C0',
+                    'A': '#FF0000'
+                },
+                spriteData: [
+                    "0000011111100000",
+                    "0001144444110000",
+                    "0014433333441000",
+                    "0143336633341000",
+                    "0143363363341000",
+                    "0143333333341000",
+                    "0014333A33410000",
+                    "0001433334100000",
+                    "0012555555210000",
+                    "0125555555521000",
+                    "1255595595552100",
+                    "1255555555552100",
+                    "0125555555521000",
+                    "0001222222100000",
+                    "0001270072100000",
+                    "0001170071100000"
+                ],
+                moves: {
+                    side: "Sigma Strike",
+                    up: "Alpha Launch",
+                    down: "Based Slam",
+                    ult: "GIGACHAD SUPREMACY"
+                }
+            },
+            {
+                id: 'finalexe',
+                name: 'FINAL.EXE',
+                desc: 'A corrupted glitch entity. The final test.',
+                hp: 800,
+                power: 1.8,
+                speed: 1.5,
+                weight: 2.5,
+                jump: 1.3,
+                icon: '💀',
+                colors: {
+                    '0': null, '1': '#000000', '2': '#1a001a', '3': '#330033',
+                    '4': '#FF00FF', '5': '#00FF00', '6': '#FF0000',
+                    '7': '#FFFFFF', '8': '#0000FF', '9': '#FFFF00',
+                    'A': '#00FFFF'
+                },
+                spriteData: [
+                    "0000111111000000",
+                    "0001423241000000",
+                    "0014232324100000",
+                    "0142356532410000",
+                    "1423565653241000",
+                    "1423A777A3241000",
+                    "1423777773241000",
+                    "1423756573241000",
+                    "1423777773241000",
+                    "0142355532410000",
+                    "0014233324100000",
+                    "0001423241000000",
+                    "0000189810000000",
+                    "0000918190000000",
+                    "0000189810000000",
+                    "0000010010000000"
+                ],
+                moves: {
+                    side: "Corruption Beam",
+                    up: "Glitch Warp",
+                    down: "System Crash",
+                    ult: "BLUE SCREEN OF DEATH"
+                }
+            }
+        ];
+
+        // Event Shop Items (bought with Boss Tokens)
+        const EVENT_SHOP_ITEMS = [
+            { id: 'reroll_drop', name: 'DROP REROLL', desc: 'Reroll your last boss drop', cost: 3, type: 'consumable', icon: '🔄' },
+            { id: 'extra_roll', name: 'BONUS ROLL', desc: 'Get +1 extra drop on next boss', cost: 5, type: 'consumable', icon: '🎲' },
+            { id: 'boss_power', name: 'BOSS BUSTER', desc: '+30% damage vs bosses for 1 fight', cost: 4, type: 'consumable', icon: '⚔️' },
+            { id: 'token_magnet', name: 'TOKEN MAGNET', desc: 'Double tokens from next boss', cost: 6, type: 'consumable', icon: '🧲' },
+            { id: 'nts_slot_2', name: 'NTS SLOT 2', desc: 'Unlock 2nd Never The Same save slot', cost: 15, type: 'permanent', icon: '🎭' },
+            { id: 'nts_slot_3', name: 'NTS SLOT 3', desc: 'Unlock 3rd Never The Same save slot', cost: 25, type: 'permanent', icon: '🎭' },
+            { id: 'boss_crown', name: 'BOSS CROWN', desc: 'Cosmetic: Crown of the Boss Slayer', cost: 20, type: 'cosmetic', icon: '👑' },
+            { id: 'inferno_aura', name: 'INFERNO AURA', desc: 'Cosmetic: Burning aura effect', cost: 30, type: 'cosmetic', icon: '🔥' }
+        ];
+
+        // ===== Boss Event UI Functions =====
+        function openBossEvent() {
+            music.init(); sfx.init();
+            if (!saveData.bossTokens) saveData.bossTokens = 0;
+            if (!saveData.bossDefeated) saveData.bossDefeated = {};
+            if (!saveData.ntsBuilds) saveData.ntsBuilds = [null, null, null];
+            if (!saveData.ntsUnlocked) saveData.ntsUnlocked = false;
+            if (!saveData.ntsSlots) saveData.ntsSlots = 1;
+            if (!saveData.eventItems) saveData.eventItems = {};
+            isBossEvent = false;
+            bossRunDefeated = [];
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('boss-event-screen').classList.remove('hidden');
+            document.getElementById('boss-token-count').innerText = saveData.bossTokens;
+            renderBossCards();
+            gameState = 'BOSS_EVENT';
+        }
+
+        function closeBossEvent() {
+            document.getElementById('boss-event-screen').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            gameState = 'TITLE';
+        }
+
+        function renderBossCards() {
+            const container = document.getElementById('boss-card-container');
+            container.innerHTML = '';
+            BOSS_DATA.forEach((boss, idx) => {
+                const card = document.createElement('div');
+                card.className = 'boss-card';
+                const defeated = saveData.bossDefeated[boss.id];
+                const locked = idx > 0 && !saveData.bossDefeated[BOSS_DATA[idx - 1].id];
+                if (defeated) card.classList.add('defeated');
+                if (locked) card.classList.add('locked-boss');
+
+                // Create sprite canvas
+                const cvs = document.createElement('canvas');
+                cvs.width = 16; cvs.height = 16;
+                cvs.style.cssText = 'image-rendering:pixelated;width:96px;height:96px';
+                const cx = cvs.getContext('2d');
+                drawBossSprite(cx, boss);
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'boss-name';
+                nameDiv.textContent = boss.icon + ' ' + boss.name;
+
+                const descDiv = document.createElement('div');
+                descDiv.className = 'boss-desc';
+                descDiv.textContent = boss.desc;
+
+                const hpBar = document.createElement('div');
+                hpBar.className = 'boss-hp-bar';
+                hpBar.innerHTML = `<div class="boss-hp-fill" style="width:100%"></div>`;
+
+                const hpLabel = document.createElement('div');
+                hpLabel.className = 'boss-desc';
+                hpLabel.style.marginTop = '4px';
+                hpLabel.textContent = `HP: ${boss.hp} | PWR: ${boss.power}x | SPD: ${boss.speed}x`;
+
+                card.appendChild(cvs);
+                card.appendChild(nameDiv);
+                card.appendChild(descDiv);
+                card.appendChild(hpBar);
+                card.appendChild(hpLabel);
+
+                if (!locked) {
+                    card.onclick = () => startBossFight(idx);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        function drawBossSprite(cx, boss) {
+            for (let y = 0; y < boss.spriteData.length; y++) {
+                for (let x = 0; x < boss.spriteData[y].length; x++) {
+                    const ch = boss.spriteData[y][x];
+                    if (boss.colors[ch] && ch !== '0') {
+                        cx.fillStyle = boss.colors[ch];
+                        cx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+        }
+
+        // ===== Boss Fight Mode =====
+        function startBossFight(bossIdx) {
+            if (!p1Char) {
+                // Need to pick a character first
+                showNotification('⚠️ SELECT FIGHTER', 'Choose your character first!');
+                isBossEvent = true;
+                currentBossIndex = bossIdx;
+                document.getElementById('boss-event-screen').classList.add('hidden');
+                document.getElementById('char-select').classList.remove('hidden');
+                document.getElementById('cpu-controls').classList.add('hidden');
+                document.getElementById('select-instruction').innerText = "CHOOSE YOUR BOSS FIGHTER";
+                isSurvival = false; isTraining = false; isMemeBall = false;
+                renderCharGrid();
+                return;
+            }
+            launchBossBattle(bossIdx);
+        }
+
+        function launchBossBattle(bossIdx) {
+            const boss = BOSS_DATA[bossIdx];
+            currentBossIndex = bossIdx;
+            isBossEvent = true;
+            isSurvival = false;
+            isTraining = false;
+            isMemeBall = false;
+
+            // Create boss as a character-like object
+            const bossChar = {
+                id: 'boss_' + boss.id,
+                name: boss.name,
+                icon: boss.icon,
+                speed: boss.speed,
+                weight: boss.weight,
+                power: boss.power,
+                jump: boss.jump,
+                desc: boss.desc,
+                moves: boss.moves,
+                colors: boss.colors,
+                spriteData: boss.spriteData
+            };
+
+            p2Char = bossChar;
+            p2IsCpu = true;
+
+            // Select arena map
+            selectedMap = MAPS.find(m => m.id === 'flat') || MAPS[0];
+
+            // Setup game
+            document.getElementById('boss-event-screen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('game-mode-hud').style.display = 'block';
+            document.getElementById('game-mode-title').innerText = "⚔️ BOSS FIGHT ⚔️";
+            document.getElementById('game-score-val').innerText = boss.name;
+
+            bossHPMax = boss.hp;
+            bossHP = boss.hp;
+
+            initGame();
+
+            // Buff the boss
+            if (players.length >= 2) {
+                players[1].stocks = 99;
+                players[1].w *= 1.5;
+                players[1].h *= 1.5;
+
+                // Apply Boss Buster consumable
+                if (saveData.eventItems && saveData.eventItems.boss_power > 0) {
+                    players[0].bossDmgBoost = 1.3;
+                    saveData.eventItems.boss_power--;
+                    saveGame();
+                    showNotification('⚔️ BOSS BUSTER', '+30% Damage Active!');
+                }
+            }
+
+            saveMatchSettings();
+            gameState = 'GAME';
+            music.play('BOSS');
+            loop();
+        }
+
+        // Override boss death handling — hook into the game loop
+        function checkBossDeath() {
+            if (!isBossEvent || players.length < 2) return false;
+            const bossPlayer = players[1];
+            if (!bossPlayer) return false;
+
+            // Boss HP system: track cumulative damage
+            const dmgDealt = bossPlayer.pct;
+            bossHP = Math.max(0, bossHPMax - dmgDealt);
+
+            // Update HUD to show boss HP
+            const scoreEl = document.getElementById('game-score-val');
+            if (scoreEl) {
+                const pct = Math.floor((bossHP / bossHPMax) * 100);
+                const boss = BOSS_DATA[currentBossIndex];
+                scoreEl.innerText = `${boss.name}: ${pct}% HP`;
+            }
+
+            if (bossHP <= 0) {
+                // Boss defeated!
+                const boss = BOSS_DATA[currentBossIndex];
+                saveData.bossDefeated[boss.id] = true;
+
+                // Award tokens
+                let tokenReward = [3, 5, 10][currentBossIndex] || 3;
+                if (saveData.eventItems && saveData.eventItems.token_magnet > 0) {
+                    tokenReward *= 2;
+                    saveData.eventItems.token_magnet--;
+                }
+                saveData.bossTokens = (saveData.bossTokens || 0) + tokenReward;
+
+                saveGame();
+                gameState = 'GAMEOVER';
+
+                // Trigger drop rolls
+                setTimeout(() => {
+                    showBossDrops(boss, tokenReward);
+                }, 500);
+                return true;
+            }
+            return false;
+        }
+
+        // ===== Drop System =====
+        function showBossDrops(boss, tokenReward) {
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('game-mode-hud').style.display = 'none';
+            const overlay = document.createElement('div');
+            overlay.className = 'drop-overlay';
+            overlay.id = 'drop-overlay';
+
+            const title = document.createElement('div');
+            title.style.cssText = "font-family:'Black Ops One';font-size:28px;color:#ff4500;text-shadow:0 0 20px #ff4500;margin-bottom:5px";
+            title.textContent = '⚔️ ' + boss.name + ' DEFEATED!';
+            overlay.appendChild(title);
+
+            const tokenDiv = document.createElement('div');
+            tokenDiv.style.cssText = "font-family:'Press Start 2P';font-size:10px;color:#ffd700;margin-bottom:15px";
+            tokenDiv.textContent = '🪙 +' + tokenReward + ' BOSS TOKENS';
+            overlay.appendChild(tokenDiv);
+
+            // Roll 1-3 drops
+            let rollCount = 1 + Math.floor(Math.random() * 3); // 1-3
+            if (saveData.eventItems && saveData.eventItems.extra_roll > 0) {
+                rollCount++;
+                saveData.eventItems.extra_roll--;
+            }
+
+            const drops = [];
+            for (let i = 0; i < rollCount; i++) {
+                const drop = rollBossDrop(i, currentBossIndex);
+                drops.push(drop);
+            }
+
+            const dropsTitle = document.createElement('div');
+            dropsTitle.style.cssText = "font-family:'Press Start 2P';font-size:10px;color:#fff;margin:10px 0";
+            dropsTitle.textContent = `🎁 ${rollCount} DROP${rollCount > 1 ? 'S' : ''}:`;
+            overlay.appendChild(dropsTitle);
+
+            drops.forEach((drop, i) => {
+                const item = document.createElement('div');
+                item.className = 'drop-item' + (drop.rarity === 'LEGENDARY' ? ' legendary' : '');
+                item.style.animationDelay = (i * 0.3) + 's';
+                item.innerHTML = `${drop.icon} <span style="color:${drop.color}">${drop.rarity}</span> — ${drop.name}`;
+                overlay.appendChild(item);
+
+                // Apply the drop
+                applyDrop(drop);
+            });
+
+            bossRunDrops = drops;
+            saveGame();
+
+            const btnRow = document.createElement('div');
+            btnRow.style.cssText = 'margin-top:20px;display:flex;gap:10px';
+
+            // Reroll button
+            if (saveData.eventItems && saveData.eventItems.reroll_drop > 0) {
+                const rerollBtn = document.createElement('button');
+                rerollBtn.className = 'menu-btn';
+                rerollBtn.style.cssText = 'border-color:#ffd700;color:#ffd700;font-size:10px';
+                rerollBtn.textContent = '🔄 REROLL (' + saveData.eventItems.reroll_drop + ')';
+                rerollBtn.onclick = () => {
+                    saveData.eventItems.reroll_drop--;
+                    document.body.removeChild(overlay);
+                    // Undo last drops
+                    bossRunDrops.forEach(d => undoDrop(d));
+                    showBossDrops(boss, 0); // re-show with new rolls, no extra tokens
+                };
+                btnRow.appendChild(rerollBtn);
+            }
+
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'menu-btn';
+            continueBtn.style.cssText = 'border-color:#2ecc71;color:#2ecc71;font-size:12px';
+            continueBtn.textContent = 'COLLECT & CONTINUE';
+            continueBtn.onclick = () => {
+                document.body.removeChild(overlay);
+                isBossEvent = false;
+                openBossEvent();
+            };
+            btnRow.appendChild(continueBtn);
+            overlay.appendChild(btnRow);
+
+            document.body.appendChild(overlay);
+        }
+
+        function rollBossDrop(rollIdx, bossIdx) {
+            const roll = Math.random() * 100;
+            const tier = bossIdx; // 0, 1, 2 — higher = better loot
+
+            // Roll 1: 70/20/9/1 | Roll 2: 75/20/4.5/0.5 | Roll 3+: 85/13.5/1.4/0.1
+            let moneyThresh, cyberThresh, charThresh;
+            if (rollIdx === 0) { moneyThresh = 70; cyberThresh = 90; charThresh = 99; }
+            else if (rollIdx === 1) { moneyThresh = 75; cyberThresh = 95; charThresh = 99.5; }
+            else { moneyThresh = 85; cyberThresh = 98.5; charThresh = 99.9; }
+
+            // Better bosses shift thresholds slightly
+            moneyThresh -= tier * 5;
+            cyberThresh -= tier * 3;
+
+            if (roll < moneyThresh) {
+                // Money drop
+                const amounts = [50, 100, 150, 200, 300, 500];
+                const amt = amounts[Math.floor(Math.random() * amounts.length)] + (tier * 100);
+                return { type: 'money', amount: amt, name: amt + ' COINS', icon: '💰', rarity: 'COMMON', color: '#aaa' };
+            } else if (roll < cyberThresh) {
+                // Cyberware drop
+                const cyberDrops = [
+                    { id: 'sandevistan_zeta', name: 'ZETATECH SANDY' },
+                    { id: 'sandevistan_dynlar', name: 'DYNAR SANDY' },
+                    { id: 'gorilla_arm', name: 'GORILLA ARM' },
+                    { id: 'mantis_blades', name: 'MANTIS BLADES' }
+                ];
+                const cyber = cyberDrops[Math.floor(Math.random() * cyberDrops.length)];
+                return { type: 'cyberware', id: cyber.id, name: cyber.name, icon: '🦾', rarity: 'RARE', color: '#00bfff' };
+            } else if (roll < charThresh) {
+                // Character drop
+                const allChars = CHARACTERS.filter(c => !saveData.unlocks.includes(c.id));
+                if (allChars.length > 0) {
+                    const char = allChars[Math.floor(Math.random() * allChars.length)];
+                    return { type: 'character', id: char.id, name: char.name.toUpperCase(), icon: '⭐', rarity: 'EPIC', color: '#ff4500' };
+                } else {
+                    return { type: 'money', amount: 500, name: '500 COINS (ALL CHARS OWNED)', icon: '💰', rarity: 'COMMON', color: '#aaa' };
+                }
+            } else {
+                // NEVER THE SAME — ultra rare!
+                return { type: 'nts', name: 'NEVER THE SAME', icon: '🎭', rarity: 'LEGENDARY', color: '#ffd700' };
+            }
+        }
+
+        function applyDrop(drop) {
+            switch (drop.type) {
+                case 'money':
+                    saveData.coins = (saveData.coins || 0) + drop.amount;
+                    break;
+                case 'cyberware':
+                    if (!saveData.ownedCyber) saveData.ownedCyber = [];
+                    if (!saveData.ownedCyber.includes(drop.id)) saveData.ownedCyber.push(drop.id);
+                    break;
+                case 'character':
+                    if (!saveData.unlocks.includes(drop.id)) {
+                        saveData.unlocks.push(drop.id);
+                        showNotification('⭐ CHARACTER UNLOCKED!', drop.name);
+                    }
+                    break;
+                case 'nts':
+                    saveData.ntsUnlocked = true;
+                    showNotification('🎭 LEGENDARY DROP!', 'NEVER THE SAME UNLOCKED!');
+                    break;
+            }
+        }
+
+        function undoDrop(drop) {
+            switch (drop.type) {
+                case 'money':
+                    saveData.coins = Math.max(0, (saveData.coins || 0) - drop.amount);
+                    break;
+                case 'character':
+                    const idx = saveData.unlocks.indexOf(drop.id);
+                    if (idx >= 0) saveData.unlocks.splice(idx, 1);
+                    break;
+                case 'nts':
+                    // Don't undo NTS, too rare
+                    break;
+            }
+        }
+
+        // ===== Never The Same Builder =====
+        let ntsCurrentBuild = { side: null, up: null, down: null, ult: null };
+        let ntsPickerSlot = null;
+
+        function openNTSBuilder() {
+            if (!saveData.ntsUnlocked) {
+                showNotification('🔒 LOCKED', 'Defeat bosses to obtain Never The Same!');
+                return;
+            }
+            document.getElementById('boss-event-screen').classList.add('hidden');
+            document.getElementById('nts-builder-screen').classList.remove('hidden');
+            ntsCurrentBuild = { side: null, up: null, down: null, ult: null };
+            renderNTSBuilder();
+            renderNTSSavedBuilds();
+        }
+
+        function closeNTSBuilder() {
+            document.getElementById('nts-builder-screen').classList.add('hidden');
+            document.getElementById('boss-event-screen').classList.remove('hidden');
+        }
+
+        function renderNTSBuilder() {
+            const builder = document.getElementById('nts-builder');
+            builder.innerHTML = '';
+            const slots = ['side', 'up', 'down', 'ult'];
+            const labels = ['SIDE ATTACK', 'UP ATTACK', 'DOWN ATTACK', 'ULTIMATE'];
+            const icons = ['➡️', '⬆️', '⬇️', '💥'];
+
+            slots.forEach((slot, i) => {
+                const div = document.createElement('div');
+                div.className = 'nts-slot' + (ntsCurrentBuild[slot] ? ' selected' : '');
+                const current = ntsCurrentBuild[slot];
+                div.innerHTML = `
+                    <div class="slot-label">${labels[i]}</div>
+                    <div style="font-size:20px;margin:5px 0">${icons[i]}</div>
+                    <div>${current ? current.charName + ': ' + current.moveName : 'TAP TO PICK'}</div>
+                `;
+                div.onclick = () => openMovePicker(slot);
+                builder.appendChild(div);
+            });
+        }
+
+        function openMovePicker(slot) {
+            ntsPickerSlot = slot;
+            // Remove old picker
+            const old = document.getElementById('nts-move-picker');
+            if (old) old.remove();
+
+            const picker = document.createElement('div');
+            picker.className = 'nts-move-picker';
+            picker.id = 'nts-move-picker';
+
+            const title = document.createElement('div');
+            title.style.cssText = "font-family:'Press Start 2P';font-size:10px;color:#ff4500;margin-bottom:10px";
+            title.textContent = 'PICK ' + slot.toUpperCase() + ' MOVE';
+            picker.appendChild(title);
+
+            // Show all unlocked characters' moves for this slot
+            const unlockedChars = CHARACTERS.filter(c => saveData.unlocks.includes(c.id));
+            unlockedChars.forEach(c => {
+                if (c.moves && c.moves[slot]) {
+                    const opt = document.createElement('div');
+                    opt.className = 'nts-move-option';
+                    opt.textContent = c.name + ' — ' + c.moves[slot];
+                    opt.onclick = () => {
+                        ntsCurrentBuild[slot] = { charId: c.id, charName: c.name, moveName: c.moves[slot] };
+                        picker.remove();
+                        renderNTSBuilder();
+                    };
+                    picker.appendChild(opt);
+                }
+            });
+
+            // Also add boss moves if boss was defeated
+            BOSS_DATA.forEach(b => {
+                if (saveData.bossDefeated[b.id] && b.moves[slot]) {
+                    const opt = document.createElement('div');
+                    opt.className = 'nts-move-option';
+                    opt.style.borderColor = '#ff4500';
+                    opt.textContent = '🔥 ' + b.name + ' — ' + b.moves[slot];
+                    opt.onclick = () => {
+                        ntsCurrentBuild[slot] = { charId: 'boss_' + b.id, charName: b.name, moveName: b.moves[slot] };
+                        picker.remove();
+                        renderNTSBuilder();
+                    };
+                    picker.appendChild(opt);
+                }
+            });
+
+            const cancelBtn = document.createElement('div');
+            cancelBtn.className = 'nts-move-option';
+            cancelBtn.style.cssText = 'text-align:center;color:#e74c3c;border-color:#e74c3c';
+            cancelBtn.textContent = 'CANCEL';
+            cancelBtn.onclick = () => picker.remove();
+            picker.appendChild(cancelBtn);
+
+            document.body.appendChild(picker);
+        }
+
+        function saveNTSBuild() {
+            if (!ntsCurrentBuild.side || !ntsCurrentBuild.up || !ntsCurrentBuild.down || !ntsCurrentBuild.ult) {
+                showNotification('⚠️ INCOMPLETE', 'Fill all 4 move slots!');
+                return;
+            }
+            if (!saveData.ntsBuilds) saveData.ntsBuilds = [null, null, null];
+            const maxSlots = saveData.ntsSlots || 1;
+
+            // Find first open slot
+            let saved = false;
+            for (let i = 0; i < maxSlots; i++) {
+                if (!saveData.ntsBuilds[i]) {
+                    saveData.ntsBuilds[i] = { ...ntsCurrentBuild };
+                    saved = true;
+                    showNotification('✅ BUILD SAVED', 'Slot ' + (i + 1));
+                    break;
+                }
+            }
+            if (!saved) {
+                // Overwrite slot 1
+                saveData.ntsBuilds[0] = { ...ntsCurrentBuild };
+                showNotification('✅ BUILD SAVED', 'Slot 1 (overwritten)');
+            }
+
+            // Register NTS as a playable character if not already
+            registerNTSCharacter();
+            saveGame();
+            renderNTSSavedBuilds();
+        }
+
+        function clearNTSBuild() {
+            ntsCurrentBuild = { side: null, up: null, down: null, ult: null };
+            renderNTSBuilder();
+        }
+
+        function renderNTSSavedBuilds() {
+            const container = document.getElementById('nts-saved-builds');
+            container.innerHTML = '';
+            if (!saveData.ntsBuilds) return;
+
+            const maxSlots = saveData.ntsSlots || 1;
+            for (let i = 0; i < maxSlots; i++) {
+                const build = saveData.ntsBuilds[i];
+                const div = document.createElement('div');
+                div.style.cssText = 'background:#111;border:2px solid #ff4500;border-radius:8px;padding:10px;width:200px;text-align:center';
+                if (build) {
+                    div.innerHTML = `
+                        <div style="font-family:'Press Start 2P';font-size:9px;color:#ffd700;margin-bottom:5px">SLOT ${i + 1}</div>
+                        <div style="font-family:'Press Start 2P';font-size:7px;color:#aaa">
+                            ➡️ ${build.side.moveName}<br>
+                            ⬆️ ${build.up.moveName}<br>
+                            ⬇️ ${build.down.moveName}<br>
+                            💥 ${build.ult.moveName}
+                        </div>
+                        <div style="margin-top:8px">
+                            <button class="menu-btn" style="font-size:7px;padding:4px 8px;border-color:#e74c3c;color:#e74c3c" onclick="deleteNTSBuild(${i})">DELETE</button>
+                            <button class="menu-btn" style="font-size:7px;padding:4px 8px;border-color:#2ecc71;color:#2ecc71" onclick="loadNTSBuild(${i})">LOAD</button>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div style="font-family:'Press Start 2P';font-size:9px;color:#555">SLOT ${i + 1}</div>
+                        <div style="font-family:'Press Start 2P';font-size:7px;color:#333;margin-top:5px">EMPTY</div>
+                    `;
+                }
+                container.appendChild(div);
+            }
+        }
+
+        function deleteNTSBuild(idx) {
+            saveData.ntsBuilds[idx] = null;
+            saveGame();
+            renderNTSSavedBuilds();
+            showNotification('🗑️ DELETED', 'Slot ' + (idx + 1) + ' cleared');
+        }
+
+        function loadNTSBuild(idx) {
+            if (saveData.ntsBuilds[idx]) {
+                ntsCurrentBuild = { ...saveData.ntsBuilds[idx] };
+                renderNTSBuilder();
+                showNotification('📋 LOADED', 'Slot ' + (idx + 1));
+            }
+        }
+
+        function registerNTSCharacter() {
+            // Add "Never The Same" to CHARACTERS if not there
+            if (!CHARACTERS.find(c => c.id === 'nts')) {
+                CHARACTERS.push({
+                    id: 'nts',
+                    name: 'Never The Same',
+                    icon: '🎭',
+                    speed: 1.1,
+                    weight: 1.0,
+                    power: 1.2,
+                    jump: 1.1,
+                    desc: "Mix & Match",
+                    moves: {
+                        side: "Custom",
+                        up: "Custom",
+                        down: "Custom",
+                        ult: "CUSTOM ULT"
+                    },
+                    colors: {
+                        '0': null, '1': '#ff4500', '2': '#ffd700', '3': '#ff00ff',
+                        '4': '#00ffff', '5': '#ffffff', '6': '#000000',
+                        '7': '#ff0000', '8': '#00ff00', '9': '#4169E1'
+                    },
+                    spriteData: [
+                        "0000066666000000",
+                        "0006611111660000",
+                        "0061155555116000",
+                        "0615544445516000",
+                        "6155425524551600",
+                        "6155445544551600",
+                        "6155555555551600",
+                        "6155534435551600",
+                        "0615555555516000",
+                        "0061133331160000",
+                        "0006122221600000",
+                        "0000622226000000",
+                        "0000063360000000",
+                        "0000063360000000",
+                        "0000069960000000",
+                        "0000060060000000"
+                    ]
+                });
+
+                // Add to unlocks
+                if (!saveData.unlocks.includes('nts')) {
+                    saveData.unlocks.push('nts');
+                }
+            }
+        }
+
+        // ===== Event Shop =====
+        function openEventShop() {
+            document.getElementById('boss-event-screen').classList.add('hidden');
+            document.getElementById('event-shop-screen').classList.remove('hidden');
+            document.getElementById('event-shop-tokens').innerText = saveData.bossTokens || 0;
+            renderEventShop();
+        }
+
+        function closeEventShop() {
+            document.getElementById('event-shop-screen').classList.add('hidden');
+            document.getElementById('boss-event-screen').classList.remove('hidden');
+            document.getElementById('boss-token-count').innerText = saveData.bossTokens || 0;
+        }
+
+        function renderEventShop() {
+            const grid = document.getElementById('event-shop-grid');
+            grid.innerHTML = '';
+            EVENT_SHOP_ITEMS.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'event-shop-item';
+
+                // Check if permanent item already owned
+                let owned = false;
+                if (item.type === 'permanent') {
+                    if (item.id === 'nts_slot_2' && (saveData.ntsSlots || 1) >= 2) owned = true;
+                    if (item.id === 'nts_slot_3' && (saveData.ntsSlots || 1) >= 3) owned = true;
+                }
+                if (item.type === 'cosmetic' && saveData.cosmetics && saveData.cosmetics.includes(item.id)) owned = true;
+
+                const count = (saveData.eventItems && saveData.eventItems[item.id]) || 0;
+                let countText = item.type === 'consumable' ? ` (owned: ${count})` : '';
+                if (owned) countText = ' ✅ OWNED';
+
+                div.innerHTML = `
+                    <div style="font-size:24px;margin-bottom:5px">${item.icon}</div>
+                    <div style="color:#ff4500;margin-bottom:3px">${item.name}</div>
+                    <div style="color:#888;font-size:7px;margin-bottom:5px">${item.desc}${countText}</div>
+                    <div class="token-cost">🪙 ${item.cost} TOKENS</div>
+                `;
+
+                if (!owned) {
+                    div.onclick = () => buyEventItem(item);
+                } else {
+                    div.style.opacity = '0.5';
+                    div.style.cursor = 'default';
+                }
+                grid.appendChild(div);
+            });
+        }
+
+        function buyEventItem(item) {
+            if ((saveData.bossTokens || 0) < item.cost) {
+                showNotification('❌ NOT ENOUGH', 'Need ' + item.cost + ' Boss Tokens');
+                return;
+            }
+            saveData.bossTokens -= item.cost;
+
+            if (item.type === 'consumable') {
+                if (!saveData.eventItems) saveData.eventItems = {};
+                saveData.eventItems[item.id] = (saveData.eventItems[item.id] || 0) + 1;
+            } else if (item.type === 'permanent') {
+                if (item.id === 'nts_slot_2') saveData.ntsSlots = Math.max(saveData.ntsSlots || 1, 2);
+                if (item.id === 'nts_slot_3') saveData.ntsSlots = Math.max(saveData.ntsSlots || 1, 3);
+            } else if (item.type === 'cosmetic') {
+                if (!saveData.cosmetics) saveData.cosmetics = [];
+                if (!saveData.cosmetics.includes(item.id)) saveData.cosmetics.push(item.id);
+            }
+
+            saveGame();
+            document.getElementById('event-shop-tokens').innerText = saveData.bossTokens;
+            renderEventShop();
+            showNotification('✅ PURCHASED', item.name);
+        }
+
+        // ===== Hook into the selectCharacter for boss events =====
+        const _origSelectChar = typeof selectCharacter === 'function' ? selectCharacter : null;
+
+        // Register NTS character on load if previously unlocked
+        function initBossEventOnLoad() {
+            if (saveData.ntsUnlocked) {
+                registerNTSCharacter();
+            }
+        }
+
         loadGame();
+        initBossEventOnLoad();
         resize();
     </script>
 </body>
