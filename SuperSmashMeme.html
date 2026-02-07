@@ -9288,9 +9288,14 @@
             isSurvival = !1;
             isTraining = !1;
             isMemeBall = !1;
+            isBossEvent = false;
+            p1Char = null;
+            p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('char-select').classList.remove('hidden');
             document.getElementById('cpu-controls').classList.remove('hidden');
+            document.getElementById('select-instruction').innerText = 'P1 CHOOSE';
+            document.getElementById('select-instruction').style.color = 'var(--p1)';
             renderCharGrid();
             music.play('MENU');
         }
@@ -9733,6 +9738,9 @@
             isSurvival = !0;
             isTraining = !1;
             isMemeBall = !1;
+            isBossEvent = false;
+            p1Char = null;
+            p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('char-select').classList.remove('hidden');
             document.getElementById('cpu-controls').classList.remove('hidden');
@@ -9746,6 +9754,9 @@
             isTraining = !0;
             isSurvival = !1;
             isMemeBall = !1;
+            isBossEvent = false;
+            p1Char = null;
+            p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('char-select').classList.remove('hidden');
             document.getElementById('cpu-controls').classList.add('hidden');
@@ -9798,6 +9809,9 @@
             isMemeBall = !0;
             isSurvival = !1;
             isTraining = !1;
+            isBossEvent = false;
+            p1Char = null;
+            p2Char = null;
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('char-select').classList.remove('hidden');
             document.getElementById('cpu-controls').classList.add('hidden');
@@ -11275,11 +11289,17 @@
             gameState = 'GAMEOVER';
             document.getElementById('game-over').classList.remove('hidden');
 
-            // Boss event: player lost to boss
+            // Reset game-over buttons to defaults before any mode customizes them
+            document.getElementById('rematch-btn').innerText = 'REMATCH';
+            document.getElementById('rematch-btn').onclick = rematch;
+            document.getElementById('exit-btn').innerText = 'MAIN MENU';
+            document.getElementById('exit-btn').onclick = exitToMenu;
+
+            // Boss event handling
             if (isBossEvent) {
+                const boss = BOSS_DATA[currentBossIndex];
                 if (w === 2) {
                     // Boss won
-                    const boss = BOSS_DATA[currentBossIndex];
                     document.getElementById('winner-display').innerText = boss.icon + ' ' + boss.name + ' WINS!\nYOU WERE DEFEATED';
                     document.getElementById('winner-display').style.color = "#ff4500";
                     document.getElementById('rematch-btn').innerText = "RETRY BOSS";
@@ -11287,15 +11307,25 @@
                         document.getElementById('game-over').classList.add('hidden');
                         launchBossBattle(currentBossIndex);
                     };
-                    const exitBtn = document.getElementById('exit-btn');
-                    exitBtn.onclick = () => {
+                } else {
+                    // Player won (edge case — boss lost all stocks before HP hit 0)
+                    document.getElementById('winner-display').innerText = '⚔️ ' + boss.name + ' DEFEATED!';
+                    document.getElementById('winner-display').style.color = "#ffd700";
+                    document.getElementById('rematch-btn').innerText = "FIGHT AGAIN";
+                    document.getElementById('rematch-btn').onclick = () => {
                         document.getElementById('game-over').classList.add('hidden');
-                        document.getElementById('hud').classList.add('hidden');
-                        document.getElementById('game-mode-hud').style.display = 'none';
-                        isBossEvent = false;
-                        openBossEvent();
+                        launchBossBattle(currentBossIndex);
                     };
                 }
+                const exitBtn = document.getElementById('exit-btn');
+                exitBtn.innerText = 'BACK TO EVENT';
+                exitBtn.onclick = () => {
+                    document.getElementById('game-over').classList.add('hidden');
+                    document.getElementById('hud').classList.add('hidden');
+                    document.getElementById('game-mode-hud').style.display = 'none';
+                    isBossEvent = false;
+                    openBossEvent();
+                };
                 document.getElementById('mastery-progress').innerHTML = '';
                 return;
             }
@@ -12971,6 +13001,9 @@
         function closeBossEvent() {
             document.getElementById('boss-event-screen').classList.add('hidden');
             document.getElementById('title-screen').classList.remove('hidden');
+            isBossEvent = false;
+            p1Char = null;
+            p2Char = null;
             gameState = 'TITLE';
         }
 
