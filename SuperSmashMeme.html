@@ -1026,6 +1026,58 @@
             margin-bottom: 20px;
             opacity: 0.8;
         }
+        #story-screen.rift-mode {
+            background: linear-gradient(135deg, #060018 0%, #0b0030 50%, #04001a 100%);
+        }
+        #story-screen.rift-mode h2 {
+            color: #00eaff;
+            text-shadow: 0 0 18px #00eaff, 0 0 36px #00aaff;
+        }
+        #story-screen.rift-mode .story-subtitle {
+            color: #ff6bd6;
+        }
+        .story-campaign-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .story-campaign-btn {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid #333;
+            color: #bbb;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+        .story-campaign-btn.active {
+            border-color: #00eaff;
+            color: #00eaff;
+            box-shadow: 0 0 10px rgba(0,234,255,0.4);
+        }
+        .story-hero-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .story-hero-label {
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            color: #aaa;
+        }
+        .story-hero-select {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #333;
+            color: #fff;
+            font-family: 'Press Start 2P';
+            font-size: 8px;
+            padding: 4px 6px;
+        }
         .quest-card {
             background: rgba(20, 0, 40, 0.9);
             border: 2px solid #333;
@@ -1579,7 +1631,6 @@
             onclick="openCyberware()">CYBERWARE</button>
         <button id="story-btn" class="menu-btn" style="border-color:#ff003c;color:#ff003c;display:none"
             onclick="openStory()">STORY MODE</button>
-        <button id="apocalypse-btn" class="menu-btn apoc-btn" onclick="openApocalypseHub()">MEME APOCALYPSE 🔥</button>
         <button class="menu-btn" style="border-color: #ff00ff; color: #ff00ff;" onclick="openGacha()"
             onmouseover="this.style.background='#ff00ff';this.style.color='white';"
             onmouseout="this.style.background='transparent';this.style.color='#ff00ff';">GACHA 🎰</button>
@@ -1730,8 +1781,16 @@
     </div>
     <!-- Edgerunner Story Mode -->
     <div id="story-screen" class="screen hidden">
-        <h2>EDGERUNNERS</h2>
-        <div class="story-subtitle">NIGHT CITY STORYLINE</div>
+        <h2 id="story-title">EDGERUNNERS</h2>
+        <div class="story-subtitle" id="story-subtitle">NIGHT CITY STORYLINE</div>
+        <div class="story-campaign-bar">
+            <button id="campaign-edgerunner" class="story-campaign-btn active" onclick="setStoryMode('edgerunner')">EDGERUNNERS</button>
+            <button id="campaign-rift" class="story-campaign-btn" onclick="setStoryMode('rift')">RIFT ARC</button>
+        </div>
+        <div class="story-hero-row" id="story-hero-row" style="display:none">
+            <div class="story-hero-label">CAMPAIGN HERO</div>
+            <select id="story-hero-select" class="story-hero-select" onchange="setStoryHero(this.value)"></select>
+        </div>
         <div id="street-cred-display" style="font-family:'Press Start 2P';font-size:9px;color:#ff003c;margin-bottom:10px"></div>
         <div id="quest-list" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;align-items:center;width:100%"></div>
         <div style="margin-top:15px;display:flex;gap:15px">
@@ -6825,6 +6884,177 @@
                 }
             }
         }, {
+            id: 'vex',
+            name: 'Vex',
+            icon: '⚡',
+            speed: 1.4,
+            weight: 0.8,
+            power: 1.1,
+            jump: 1.3,
+            desc: 'Rift Duelist',
+            moves: {
+                side: 'Rift Slash',
+                up: 'Sky Step',
+                down: 'Blink Strike',
+                ult: 'Monarch Break'
+            },
+            colors: {
+                '0': null,
+                '1': '#000000',
+                '2': '#2aa7ff',
+                '3': '#7dd9ff',
+                '4': '#176090',
+                '5': '#ffffff',
+                '6': '#ff2f9c'
+            },
+            spriteData: [
+                "0000000000000000",
+                "0000001111000000",
+                "0000112222110000",
+                "0001242523410000",
+                "0001232223410000",
+                "0000122222100000",
+                "0000011111000000",
+                "0000011111000000",
+                "0000122222100000",
+                "0000122622100000",
+                "0001242223410000",
+                "0000120002100000",
+                "0000110001100000",
+                "0000100000100000",
+                "0000100000100000",
+                "0000000000000000"
+            ]
+        }, {
+            id: 'riftling',
+            name: 'Riftling',
+            icon: '👾',
+            speed: 1.1,
+            weight: 0.7,
+            power: 0.8,
+            jump: 1.1,
+            desc: 'Minor Rift Spawn',
+            hidden: true,
+            moves: {
+                side: 'Rift Swipe',
+                up: 'Warp Hop',
+                down: 'Void Dip',
+                ult: 'Rift Burst'
+            },
+            colors: {
+                '0': null,
+                '1': '#000000',
+                '2': '#7b3cff',
+                '3': '#b07bff',
+                '4': '#3b1a77',
+                '5': '#ffffff',
+                '6': '#00eaff'
+            },
+            spriteData: [
+                "0000000000000000",
+                "0000001111000000",
+                "0000112222110000",
+                "0001242523410000",
+                "0000122222100000",
+                "0000011111000000",
+                "0000122222100000",
+                "0000122222100000",
+                "0000120002100000",
+                "0000110001100000",
+                "0000100000100000",
+                "0000100000100000",
+                "0000000000000000",
+                "0000000000000000",
+                "0000000000000000",
+                "0000000000000000"
+            ]
+        }, {
+            id: 'shardwarden',
+            name: 'Shard Warden',
+            icon: '🧿',
+            speed: 0.9,
+            weight: 1.4,
+            power: 1.3,
+            jump: 0.9,
+            desc: 'Rift Anchor',
+            hidden: true,
+            moves: {
+                side: 'Shard Slam',
+                up: 'Crystal Rise',
+                down: 'Anchor Pulse',
+                ult: 'Obelisk Crash'
+            },
+            colors: {
+                '0': null,
+                '1': '#000000',
+                '2': '#6ad6ff',
+                '3': '#b8f1ff',
+                '4': '#2b6f9a',
+                '5': '#ffffff',
+                '6': '#00ffcc'
+            },
+            spriteData: [
+                "0000011111100000",
+                "0000122222210000",
+                "0001242522410000",
+                "0001242223410000",
+                "0000122222210000",
+                "0000011111100000",
+                "0000011111100000",
+                "0000122222210000",
+                "0001242222410000",
+                "0001242223410000",
+                "0000120000210000",
+                "0000110000110000",
+                "0000100000100000",
+                "0000100000100000",
+                "0000000000000000",
+                "0000000000000000"
+            ]
+        }, {
+            id: 'riftmonarch',
+            name: 'Rift Monarch',
+            icon: '👑',
+            speed: 1.0,
+            weight: 1.6,
+            power: 1.6,
+            jump: 1.0,
+            desc: 'Rift Sovereign',
+            hidden: true,
+            moves: {
+                side: 'Royal Cleave',
+                up: 'Void Ascend',
+                down: 'Monarch Pulse',
+                ult: 'Crownfall'
+            },
+            colors: {
+                '0': null,
+                '1': '#000000',
+                '2': '#ff5a8c',
+                '3': '#ff9bb9',
+                '4': '#8a2a4b',
+                '5': '#ffffff',
+                '6': '#ffd700'
+            },
+            spriteData: [
+                "0000016061000000",
+                "0000011111100000",
+                "0000122222210000",
+                "0001242523410000",
+                "0001232223410000",
+                "0000122222210000",
+                "0000011111100000",
+                "0000011111100000",
+                "0000122222210000",
+                "0000122622210000",
+                "0001242223410000",
+                "0000120000210000",
+                "0000110000110000",
+                "0000100000100000",
+                "0000100000100000",
+                "0000000000000000"
+            ]
+        }, {
             id: 'nyancat',
             name: 'Nyan Cat',
             icon: '🌈',
@@ -7106,6 +7336,8 @@
             if (saveData.cyberSlots && !saveData.cyberSlots.hasOwnProperty('legs')) saveData.cyberSlots.legs = null;
             // Init quest progress
             if (!saveData.questProgress) saveData.questProgress = {};
+            if (!saveData.storyMode) saveData.storyMode = 'edgerunner';
+            if (!saveData.storyHeroId) saveData.storyHeroId = 'yellowdude';
             // Init street cred
             if (!saveData.streetCred) saveData.streetCred = { xp: 0, level: 1 };
             // Init ending tracker
@@ -7140,6 +7372,10 @@
         function earnCoins(amount) {
             saveData.coins += amount;
             saveGame();
+
+            if (quest.id && quest.id.startsWith('rift_')) {
+                riftStory = null;
+            }
             const pop = document.createElement('div');
             pop.className = 'coin-pop';
             pop.innerText = `+${amount} 💰`;
@@ -8249,24 +8485,106 @@
             }
         ];
 
+        // ===== RIFT ARC CAMPAIGN (VERTICAL SLICE) =====
+        const RIFT_ARC_QUESTS = [
+            {
+                id: 'rift_ep1_gate',
+                num: 'R1',
+                title: 'GATEFALL',
+                subtitle: 'EPISODE 1',
+                desc: 'A rift tears open above the plaza. Push back the first wave and stabilize the gate.',
+                enemy: 'riftling',
+                enemyName: 'RIFTLING',
+                map: 'nightcity',
+                stocks: 2,
+                rewardType: 'coins',
+                rewardName: 'RIFT SHARDS',
+                coins: 200,
+                dialogue_pre: [
+                    { speaker: 'SYSTEM', portrait: '', text: 'RIFT ARC INITIATED. Reality integrity dropping.' },
+                    { speaker: 'VEX', portrait: '', text: 'So it begins. Stay sharp — the gate is bleeding.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'Objective: repel the riftlings and stabilize the breach.' }
+                ],
+                dialogue_post: [
+                    { speaker: 'VEX', portrait: '', text: 'First wave down. The gate is still unstable.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'RIFT PRESSURE RISING. A heavy signature approaches.' }
+                ]
+            },
+            {
+                id: 'rift_ep2_warden',
+                num: 'R2',
+                title: 'SHARD WARDEN',
+                subtitle: 'EPISODE 1.5',
+                desc: 'A crystalline sentinel anchors the rift. Break it before it seals the portal forever.',
+                enemy: 'shardwarden',
+                enemyName: 'SHARD WARDEN',
+                map: 'backrooms',
+                stocks: 2,
+                rewardType: 'coins',
+                rewardName: 'RIFT SHARDS',
+                coins: 300,
+                dialogue_pre: [
+                    { speaker: 'VEX', portrait: '', text: 'That thing is the anchor. Crack it and the gate buckles.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'Warning: shardwarden armor is reinforced.' }
+                ],
+                dialogue_post: [
+                    { speaker: 'VEX', portrait: '', text: 'Anchor shattered. The core signature just spiked.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'RIFT MONARCH DETECTED. Brace for phase shift.' }
+                ]
+            },
+            {
+                id: 'rift_ep3_monarch',
+                num: 'R3',
+                title: 'RIFT MONARCH',
+                subtitle: 'EPISODE 1 - FINALE',
+                desc: 'The ruler of the breach descends. Survive its burst and end the arc.',
+                enemy: 'riftmonarch',
+                enemyName: 'RIFT MONARCH',
+                map: 'space',
+                stocks: 3,
+                rewardType: 'char',
+                reward: 'vex',
+                rewardName: 'VEX',
+                coins: 500,
+                dialogue_pre: [
+                    { speaker: 'RIFT MONARCH', portrait: '', text: 'MORTAL. YOU STAND AT THE EDGE OF ERASURE.' },
+                    { speaker: 'VEX', portrait: '', text: 'Then I push back. Let us finish this.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'Objective: defeat the Rift Monarch.' }
+                ],
+                dialogue_post: [
+                    { speaker: 'VEX', portrait: '', text: 'The gate is sealed... for now.' },
+                    { speaker: 'SYSTEM', portrait: '', text: 'RIFT ARC COMPLETE. NEW HERO UNLOCKED.' }
+                ]
+            }
+        ];
+
         let activeQuest = null;
         let activeSideQuest = null;
         let questDialogueQueue = [];
         let questDialogueCallback = null;
         let isQuestBattle = false;
         let isSideQuestBattle = false;
+        let storyMode = 'edgerunner';
+        let riftStory = null;
 
-        function getQuestStatus(questId) {
+        function getActiveQuestList() {
+            return storyMode === 'rift' ? RIFT_ARC_QUESTS : EDGERUNNER_QUESTS;
+        }
+
+        function getQuestStatusFor(questId, questList) {
             if (!saveData.questProgress) saveData.questProgress = {};
             if (saveData.questProgress[questId] === 'completed') return 'completed';
-            // Check if previous quest is done
-            const idx = EDGERUNNER_QUESTS.findIndex(q => q.id === questId);
+            const idx = questList.findIndex(q => q.id === questId);
             if (idx === 0) return saveData.questProgress[questId] || 'available';
-            const prevQuest = EDGERUNNER_QUESTS[idx - 1];
-            if (saveData.questProgress[prevQuest.id] === 'completed') {
+            const prevQuest = questList[idx - 1];
+            if (prevQuest && saveData.questProgress[prevQuest.id] === 'completed') {
                 return saveData.questProgress[questId] || 'available';
             }
             return 'locked';
+        }
+
+        function getQuestStatus(questId) {
+            return getQuestStatusFor(questId, EDGERUNNER_QUESTS);
         }
 
         function getSideQuestStatus(sideQuestId) {
@@ -8281,12 +8599,253 @@
             return 'locked';
         }
 
+        function getQuestRewardText(q) {
+            if (q.rewardType === 'char') return `REWARD: ${q.rewardName}`;
+            if (q.rewardType === 'coins') return `REWARD: ${q.coins} COINS`;
+            return `REWARD: ${q.rewardName} + ${q.coins} COINS`;
+        }
+
+        function setStoryMode(mode) {
+            storyMode = mode;
+            if (!saveData) return;
+            saveData.storyMode = mode;
+            saveGame();
+            updateStoryHeader();
+            updateStoryHeroSelect();
+            renderQuestList();
+        }
+
+        function setStoryHero(id) {
+            if (!saveData) return;
+            saveData.storyHeroId = id;
+            saveGame();
+        }
+
+        function updateStoryHeader() {
+            const screen = document.getElementById('story-screen');
+            const title = document.getElementById('story-title');
+            const subtitle = document.getElementById('story-subtitle');
+            const edgBtn = document.getElementById('campaign-edgerunner');
+            const riftBtn = document.getElementById('campaign-rift');
+            const heroRow = document.getElementById('story-hero-row');
+            const credEl = document.getElementById('street-cred-display');
+            if (!screen || !title || !subtitle) return;
+            if (storyMode === 'rift') {
+                screen.classList.add('rift-mode');
+                title.innerText = 'RIFT ARC';
+                subtitle.innerText = 'GATEFALL CAMPAIGN';
+                if (heroRow) heroRow.style.display = 'flex';
+                if (credEl) credEl.style.display = 'none';
+            } else {
+                screen.classList.remove('rift-mode');
+                title.innerText = 'EDGERUNNERS';
+                subtitle.innerText = 'NIGHT CITY STORYLINE';
+                if (heroRow) heroRow.style.display = 'none';
+                if (credEl) credEl.style.display = 'block';
+            }
+            if (edgBtn) edgBtn.classList.toggle('active', storyMode === 'edgerunner');
+            if (riftBtn) riftBtn.classList.toggle('active', storyMode === 'rift');
+        }
+
+        function updateStoryHeroSelect() {
+            const select = document.getElementById('story-hero-select');
+            if (!select) return;
+            select.innerHTML = '';
+            const unlocked = CHARACTERS.filter(c => saveData.unlocks.includes(c.id) && !c.hidden);
+            const fallback = unlocked.length ? unlocked[0].id : 'yellowdude';
+            const current = saveData.storyHeroId || fallback;
+            unlocked.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name.toUpperCase();
+                if (c.id === current) opt.selected = true;
+                select.appendChild(opt);
+            });
+            if (!saveData.storyHeroId) {
+                saveData.storyHeroId = current;
+                saveGame();
+            }
+        }
+
+        function initRiftStory(quest) {
+            riftStory = {
+                active: true,
+                questId: quest.id,
+                phase: 0,
+                objectiveText: '',
+                objectiveProgressText: '',
+                objectiveType: '',
+                objectiveTimer: 0,
+                objectiveTarget: 0,
+                overlayText: '',
+                overlaySub: '',
+                overlayTimer: 0,
+                freezeTimer: 0,
+                mapSequence: [],
+                mapIndex: 0,
+                phaseTriggered: false,
+                enemyBuffed: false
+            };
+
+            if (quest.id === 'rift_ep1_gate') {
+                riftStory.mapSequence = [
+                    { id: 'nightcity', label: 'GATE PLAZA', subtitle: 'RIFT ARC: OPENING' },
+                    { id: 'backrooms', label: 'INNER HALL', subtitle: 'GATE BREACH' }
+                ];
+                setRiftMapIndex(0);
+                queueRiftCinematic('GATE PLAZA', 'RIFT ARC: OPENING', 120, 60);
+                riftStory.objectiveType = 'survive';
+                riftStory.objectiveTimer = 1200;
+                riftStory.objectiveText = 'HOLD THE LINE';
+            } else if (quest.id === 'rift_ep2_warden') {
+                riftStory.mapSequence = [
+                    { id: 'backrooms', label: 'INNER HALL', subtitle: 'ANCHOR CHAMBER' }
+                ];
+                setRiftMapIndex(0);
+                queueRiftCinematic('INNER HALL', 'ANCHOR CHAMBER', 120, 60);
+                riftStory.objectiveType = 'damage';
+                riftStory.objectiveTarget = 60;
+                riftStory.objectiveText = 'CRACK THE ANCHOR';
+            } else if (quest.id === 'rift_ep3_monarch') {
+                riftStory.mapSequence = [
+                    { id: 'backrooms', label: 'INNER HALL', subtitle: 'THRESHOLD' },
+                    { id: 'space', label: 'THRONE RIFT', subtitle: 'MONARCH DESCENDS' }
+                ];
+                setRiftMapIndex(0);
+                queueRiftCinematic('INNER HALL', 'THRESHOLD', 120, 60);
+                riftStory.objectiveType = 'damage';
+                riftStory.objectiveTarget = 60;
+                riftStory.objectiveText = 'PUSH TO 60%';
+            }
+        }
+
+        function setRiftMapIndex(idx) {
+            if (!riftStory || !riftStory.mapSequence[idx]) return;
+            riftStory.mapIndex = idx;
+            const mapId = riftStory.mapSequence[idx].id;
+            const map = MAPS.find(m => m.id === mapId);
+            if (map) selectedMap = map;
+        }
+
+        function queueRiftCinematic(text, sub, duration, freeze) {
+            if (!riftStory) return;
+            riftStory.overlayText = text || '';
+            riftStory.overlaySub = sub || '';
+            riftStory.overlayTimer = duration || 90;
+            riftStory.freezeTimer = freeze || 30;
+        }
+
+        function applyRiftPhaseBuff(p2, powerMul, speedMul) {
+            if (!p2 || riftStory.enemyBuffed) return;
+            p2.stats = { ...p2.stats };
+            p2.stats.power *= powerMul;
+            p2.stats.speed *= speedMul;
+            riftStory.enemyBuffed = true;
+        }
+
+        function updateRiftStory() {
+            if (!riftStory || !riftStory.active || !isQuestBattle || storyMode !== 'rift') return;
+            const p2 = players.find(p => p.id === 2);
+            if (!p2) return;
+
+            if (riftStory.overlayTimer > 0) riftStory.overlayTimer--;
+
+            if (riftStory.objectiveType === 'survive') {
+                if (riftStory.objectiveTimer > 0) {
+                    riftStory.objectiveTimer--;
+                    const secs = Math.ceil(riftStory.objectiveTimer / 60);
+                    riftStory.objectiveProgressText = 'SURVIVE ' + secs + 's';
+                } else if (!riftStory.phaseTriggered) {
+                    riftStory.phaseTriggered = true;
+                    riftStory.objectiveType = 'defeat';
+                    riftStory.objectiveText = 'DEFEAT THE RIFTLING';
+                    riftStory.objectiveProgressText = '';
+                    setRiftMapIndex(1);
+                    queueRiftCinematic('INNER HALL', 'ANCHOR EXPOSED', 110, 50);
+                    showAnnounce('ANCHOR EXPOSED', '#00eaff');
+                    applyRiftPhaseBuff(p2, 1.1, 1.05);
+                }
+            } else if (riftStory.objectiveType === 'damage') {
+                const pct = Math.min(999, Math.floor(p2.pct || 0));
+                const tgt = riftStory.objectiveTarget || 60;
+                riftStory.objectiveProgressText = 'DMG ' + Math.min(pct, tgt) + '/' + tgt + '%';
+                if (pct >= tgt && !riftStory.phaseTriggered) {
+                    riftStory.phaseTriggered = true;
+                    if (riftStory.questId === 'rift_ep2_warden') {
+                        queueRiftCinematic('ANCHOR SHATTERED', 'PHASE SHIFT', 110, 50);
+                        showAnnounce('ANCHOR SHATTERED!', '#ff6bd6');
+                        applyRiftPhaseBuff(p2, 1.15, 1.1);
+                        riftStory.objectiveType = 'defeat';
+                        riftStory.objectiveText = 'DEFEAT THE WARDEN';
+                        riftStory.objectiveProgressText = '';
+                    } else if (riftStory.questId === 'rift_ep3_monarch') {
+                        setRiftMapIndex(1);
+                        queueRiftCinematic('THRONE RIFT', 'PHASE SHIFT', 130, 60);
+                        showAnnounce('PHASE SHIFT!', '#ff6bd6');
+                        applyRiftPhaseBuff(p2, 1.2, 1.12);
+                        riftStory.objectiveType = 'defeat';
+                        riftStory.objectiveText = 'DEFEAT THE MONARCH';
+                        riftStory.objectiveProgressText = '';
+                    }
+                }
+            }
+        }
+
+        function drawRiftStoryHUD() {
+            if (!riftStory || !riftStory.active || !isQuestBattle || storyMode !== 'rift') return;
+
+            // Objective panel
+            ctx.save();
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(12, 12, 260, 46);
+            ctx.strokeStyle = '#00eaff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(12, 12, 260, 46);
+            ctx.font = "bold 10px 'Press Start 2P', monospace";
+            ctx.fillStyle = '#00eaff';
+            ctx.fillText('OBJECTIVE', 22, 28);
+            ctx.font = "8px 'Press Start 2P', monospace";
+            ctx.fillStyle = '#fff';
+            ctx.fillText(riftStory.objectiveText || '', 22, 42);
+            if (riftStory.objectiveProgressText) {
+                ctx.fillStyle = '#ff6bd6';
+                ctx.fillText(riftStory.objectiveProgressText, 22, 54);
+            }
+            ctx.restore();
+
+            // Cinematic overlay
+            if (riftStory.overlayTimer > 0) {
+                const alpha = Math.min(0.85, riftStory.overlayTimer / 60);
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = Math.min(1, alpha + 0.2);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = "bold 28px 'Press Start 2P', monospace";
+                ctx.fillStyle = '#00eaff';
+                ctx.shadowColor = '#00eaff';
+                ctx.shadowBlur = 18;
+                ctx.fillText(riftStory.overlayText || '', canvas.width / 2, canvas.height / 2 - 12);
+                ctx.shadowBlur = 0;
+                ctx.font = "10px 'Press Start 2P', monospace";
+                ctx.fillStyle = '#ff6bd6';
+                ctx.fillText(riftStory.overlaySub || '', canvas.width / 2, canvas.height / 2 + 18);
+                ctx.restore();
+            }
+        }
+
         function openStory() {
             sfx.init();
             music.init();
             document.getElementById('title-screen').classList.add('hidden');
             document.getElementById('story-screen').classList.remove('hidden');
             gameState = 'STORY';
+            if (saveData && saveData.storyMode) storyMode = saveData.storyMode;
+            updateStoryHeader();
+            updateStoryHeroSelect();
             // Update street cred display
             const cred = getStreetCredLevel();
             const credEl = document.getElementById('street-cred-display');
@@ -8307,26 +8866,31 @@
             const list = document.getElementById('quest-list');
             list.innerHTML = '';
 
-            // El Dorado progress tracker
-            const totalSide = SIDE_QUESTS.length;
-            const doneSide = SIDE_QUESTS.filter(sq => saveData.questProgress && saveData.questProgress[sq.id] === 'completed').length;
-            const hasElDorado = saveData.cyberware && saveData.cyberware.includes('el_dorado');
+            const questList = getActiveQuestList();
+            const isRift = storyMode === 'rift';
 
-            if (totalSide > 0) {
-                const tracker = document.createElement('div');
-                tracker.style.cssText = 'width:90%;max-width:700px;margin-bottom:10px;padding:8px 15px;background:rgba(0,255,136,0.05);border:1px solid #00ff88;font-family:Press Start 2P;font-size:8px;color:#00ff88;text-align:center;';
-                if (hasElDorado) {
-                    tracker.innerHTML = 'EL DORADO UNLOCKED - ICONIC SOFTWARE';
-                    tracker.style.borderColor = '#ffd700';
-                    tracker.style.color = '#ffd700';
-                } else {
-                    tracker.innerHTML = `SIDE GIGS: ${doneSide}/${totalSide} ${doneSide >= totalSide ? '- EL DORADO READY!' : ''}`;
+            // El Dorado progress tracker
+            if (!isRift) {
+                const totalSide = SIDE_QUESTS.length;
+                const doneSide = SIDE_QUESTS.filter(sq => saveData.questProgress && saveData.questProgress[sq.id] === 'completed').length;
+                const hasElDorado = saveData.cyberware && saveData.cyberware.includes('el_dorado');
+
+                if (totalSide > 0) {
+                    const tracker = document.createElement('div');
+                    tracker.style.cssText = 'width:90%;max-width:700px;margin-bottom:10px;padding:8px 15px;background:rgba(0,255,136,0.05);border:1px solid #00ff88;font-family:Press Start 2P;font-size:8px;color:#00ff88;text-align:center;';
+                    if (hasElDorado) {
+                        tracker.innerHTML = 'EL DORADO UNLOCKED - ICONIC SOFTWARE';
+                        tracker.style.borderColor = '#ffd700';
+                        tracker.style.color = '#ffd700';
+                    } else {
+                        tracker.innerHTML = `SIDE GIGS: ${doneSide}/${totalSide} ${doneSide >= totalSide ? '- EL DORADO READY!' : ''}`;
+                    }
+                    list.appendChild(tracker);
                 }
-                list.appendChild(tracker);
             }
 
-            EDGERUNNER_QUESTS.forEach(q => {
-                const status = getQuestStatus(q.id);
+            questList.forEach(q => {
+                const status = getQuestStatusFor(q.id, questList);
                 const card = document.createElement('div');
                 card.className = 'quest-card ' + status;
                 let statusText = '';
@@ -8340,7 +8904,7 @@
                     <div class="quest-info">
                         <div class="quest-title">${q.title}</div>
                         <div class="quest-desc">${q.subtitle} — ${q.desc.substring(0, 80)}${q.desc.length > 80 ? '...' : ''}</div>
-                        <div class="quest-reward">REWARD: ${q.rewardName} + ${q.coins} COINS</div>
+                        <div class="quest-reward">${getQuestRewardText(q)}</div>
                     </div>
                     <div class="quest-status" style="color:${statusColor}">${statusText}</div>
                 `;
@@ -8353,44 +8917,45 @@
 
                 list.appendChild(card);
 
-                // Insert side quests after their parent main quest
-                const relatedSides = SIDE_QUESTS.filter(sq => sq.afterQuest === q.id);
-                relatedSides.forEach(sq => {
-                    const sStatus = getSideQuestStatus(sq.id);
-                    const sCard = document.createElement('div');
-                    sCard.className = 'quest-card ' + sStatus;
-                    sCard.style.marginLeft = '30px';
-                    sCard.style.borderLeftWidth = '4px';
-                    sCard.style.borderLeftColor = sStatus === 'completed' ? '#00ff88' : sStatus === 'available' ? '#00ff88' : '#333';
-                    sCard.style.opacity = sStatus === 'locked' ? '0.3' : sStatus === 'completed' ? '0.7' : '1';
-                    let sStatusText = '';
-                    let sStatusColor = '#666';
-                    if (sStatus === 'completed') { sStatusText = '✅ DONE'; sStatusColor = '#00ff88'; }
-                    else if (sStatus === 'available') { sStatusText = '▶ START'; sStatusColor = '#00ff88'; }
-                    else { sStatusText = '🔒 LOCKED'; sStatusColor = '#555'; }
+                if (!isRift) {
+                    const relatedSides = SIDE_QUESTS.filter(sq => sq.afterQuest === q.id);
+                    relatedSides.forEach(sq => {
+                        const sStatus = getSideQuestStatus(sq.id);
+                        const sCard = document.createElement('div');
+                        sCard.className = 'quest-card ' + sStatus;
+                        sCard.style.marginLeft = '30px';
+                        sCard.style.borderLeftWidth = '4px';
+                        sCard.style.borderLeftColor = sStatus === 'completed' ? '#00ff88' : sStatus === 'available' ? '#00ff88' : '#333';
+                        sCard.style.opacity = sStatus === 'locked' ? '0.3' : sStatus === 'completed' ? '0.7' : '1';
+                        let sStatusText = '';
+                        let sStatusColor = '#666';
+                        if (sStatus === 'completed') { sStatusText = '✅ DONE'; sStatusColor = '#00ff88'; }
+                        else if (sStatus === 'available') { sStatusText = '▶ START'; sStatusColor = '#00ff88'; }
+                        else { sStatusText = '🔒 LOCKED'; sStatusColor = '#555'; }
 
-                    sCard.innerHTML = `
-                        <div class="quest-num" style="background:#00331a;color:#00ff88;font-size:10px">${sq.num}</div>
-                        <div class="quest-info">
-                            <div class="quest-title" style="color:#00ff88;font-size:10px">${sq.title}</div>
-                            <div class="quest-desc">${sq.subtitle} — ${sq.desc.substring(0, 70)}${sq.desc.length > 70 ? '...' : ''}</div>
-                            <div class="quest-reward" style="color:#00bb66">REWARD: ${sq.coins} COINS</div>
-                        </div>
-                        <div class="quest-status" style="color:${sStatusColor}">${sStatusText}</div>
-                    `;
+                        sCard.innerHTML = `
+                            <div class="quest-num" style="background:#00331a;color:#00ff88;font-size:10px">${sq.num}</div>
+                            <div class="quest-info">
+                                <div class="quest-title" style="color:#00ff88;font-size:10px">${sq.title}</div>
+                                <div class="quest-desc">${sq.subtitle} — ${sq.desc.substring(0, 70)}${sq.desc.length > 70 ? '...' : ''}</div>
+                                <div class="quest-reward" style="color:#00bb66">REWARD: ${sq.coins} COINS</div>
+                            </div>
+                            <div class="quest-status" style="color:${sStatusColor}">${sStatusText}</div>
+                        `;
 
-                    if (sStatus === 'available') {
-                        sCard.onclick = () => startSideQuest(sq);
-                    } else if (sStatus === 'completed') {
-                        sCard.onclick = () => startSideQuest(sq);
-                    }
+                        if (sStatus === 'available') {
+                            sCard.onclick = () => startSideQuest(sq);
+                        } else if (sStatus === 'completed') {
+                            sCard.onclick = () => startSideQuest(sq);
+                        }
 
-                    list.appendChild(sCard);
-                });
+                        list.appendChild(sCard);
+                    });
+                }
             });
 
             // Show ending card if story is complete
-            if (saveData.endingTracker && saveData.endingTracker.ending) {
+            if (!isRift && saveData.endingTracker && saveData.endingTracker.ending) {
                 const ending = saveData.endingTracker.ending;
                 const endingCard = document.createElement('div');
                 endingCard.style.cssText = 'width:90%;max-width:700px;margin-top:15px;padding:20px;text-align:center;font-family:Press Start 2P;border:2px solid;';
@@ -8412,7 +8977,7 @@
 
             // Show ending hints if story is almost done
             const allMainDone = EDGERUNNER_QUESTS.every(q => saveData.questProgress && saveData.questProgress[q.id] === 'completed');
-            if (allMainDone && !saveData.endingTracker?.ending) {
+            if (!isRift && allMainDone && !saveData.endingTracker?.ending) {
                 const hint = document.createElement('div');
                 hint.style.cssText = 'width:90%;max-width:700px;margin-top:8px;padding:10px;text-align:center;font-family:Press Start 2P;font-size:7px;color:#666;border:1px dashed #333;';
                 hint.innerHTML = 'COMPLETE ALL SIDE GIGS FOR THE TRUE ENDING...';
@@ -8546,26 +9111,37 @@
             // Hide story screen
             document.getElementById('story-screen').classList.add('hidden');
 
-            // Track Sandy usage for The Natural ending
-            if (!saveData.endingTracker) saveData.endingTracker = { usedSandy: false, ending: null };
-            const coreSlot = saveData.cyberSlots ? saveData.cyberSlots.core : null;
-            if (coreSlot && (coreSlot.includes('sandevistan') || coreSlot === 'david_sandevistan' || coreSlot === 'sandevistan_apogee')) {
-                saveData.endingTracker.usedSandy = true;
-                saveGame();
+            // Track Sandy usage for The Natural ending (Edgerunner only)
+            if (storyMode !== 'rift') {
+                if (!saveData.endingTracker) saveData.endingTracker = { usedSandy: false, ending: null };
+                const coreSlot = saveData.cyberSlots ? saveData.cyberSlots.core : null;
+                if (coreSlot && (coreSlot.includes('sandevistan') || coreSlot === 'david_sandevistan' || coreSlot === 'sandevistan_apogee')) {
+                    saveData.endingTracker.usedSandy = true;
+                    saveGame();
+                }
             }
 
             isQuestBattle = true;
             isSurvival = false;
             isMemeBall = false;
 
-            // Set player as Yellow Dude
-            p1Char = CHARACTERS.find(c => c.id === 'yellowdude');
+            // Set player character based on campaign
+            if (storyMode === 'rift') {
+                const heroId = (saveData && saveData.storyHeroId) ? saveData.storyHeroId : 'yellowdude';
+                p1Char = CHARACTERS.find(c => c.id === heroId) || CHARACTERS.find(c => c.id === 'yellowdude') || CHARACTERS[0];
+            } else {
+                p1Char = CHARACTERS.find(c => c.id === 'yellowdude');
+            }
             p2Char = CHARACTERS.find(c => c.id === quest.enemy) || CHARACTERS[0];
             p2IsCpu = true;
             stocks = quest.stocks;
             selectedMap = MAPS.find(m => m.id === quest.map) || MAPS[4]; // Night City
 
             initGame();
+
+            if (storyMode === 'rift' && quest.id && quest.id.startsWith('rift_')) {
+                initRiftStory(quest);
+            }
 
             // Boss buff: give CPU more power for quest difficulty
             const cpuPlayer = players.find(p => p.cpu);
@@ -8576,7 +9152,7 @@
             // Show quest HUD
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('game-mode-hud').style.display = 'block';
-            document.getElementById('game-mode-title').innerText = quest.subtitle.toUpperCase();
+            document.getElementById('game-mode-title').innerText = storyMode === 'rift' ? 'RIFT ARC' : quest.subtitle.toUpperCase();
             document.getElementById('game-score-val').innerText = quest.title.toUpperCase();
 
             gameState = 'GAME';
@@ -8589,22 +9165,32 @@
             const wasAlreadyDone = saveData.questProgress[quest.id] === 'completed';
             saveData.questProgress[quest.id] = 'completed';
 
-            // Award reward (cyberware)
-            if (!saveData.cyberware) saveData.cyberware = [];
-            if (!saveData.cyberware.includes(quest.reward)) {
-                saveData.cyberware.push(quest.reward);
+            // Award reward
+            if (quest.rewardType === 'char') {
+                if (!saveData.unlocks.includes(quest.reward)) {
+                    saveData.unlocks.push(quest.reward);
+                }
+            } else if (quest.rewardType === 'coins') {
+                // Coins handled below
+            } else {
+                if (!saveData.cyberware) saveData.cyberware = [];
+                if (!saveData.cyberware.includes(quest.reward)) {
+                    saveData.cyberware.push(quest.reward);
+                }
             }
 
             // Award coins (only first completion)
             if (!wasAlreadyDone) {
                 saveData.coins += quest.coins;
-                // Award street cred for quest completion
-                addStreetCred(quest.coins >= 1000 ? 50 : 30);
+                // Award street cred for Edgerunner quests
+                if (quest.id && quest.id.startsWith('ep')) {
+                    addStreetCred(quest.coins >= 1000 ? 50 : 30);
+                }
             }
 
             saveGame();
 
-            // Check if all quests complete
+            // Check if all Edgerunner quests complete
             const allDone = EDGERUNNER_QUESTS.every(q => saveData.questProgress[q.id] === 'completed');
             if (allDone && !saveData.trophies.includes('edgerunner_complete')) {
                 unlockTrophy('edgerunner_complete');
@@ -10967,6 +11553,7 @@
                 isSideQuestBattle = false;
                 activeSideQuest = null;
             }
+            riftStory = null;
             location.reload();
         }
         function saveMatchSettings() {
@@ -11009,6 +11596,7 @@
             const g = document.getElementById('char-grid');
             g.innerHTML = '';
             CHARACTERS.forEach(c => {
+                if (c.hidden) return;
                 const d = document.createElement('div');
                 d.className = 'char-card';
                 d.id = `card-${c.id}`;
@@ -11891,7 +12479,9 @@
                     setTimeout(() => {
                         showDialogue(quest.dialogue_post, () => {
                             completeQuest(quest);
-                            showNotification("QUEST COMPLETE!", quest.rewardName + " UNLOCKED!");
+                            let rewardMsg = quest.rewardName + " UNLOCKED!";
+                            if (quest.rewardType === 'coins') rewardMsg = quest.coins + " COINS EARNED";
+                            showNotification("QUEST COMPLETE!", rewardMsg);
                             isQuestBattle = false;
                             activeQuest = null;
                             // Return to story screen
@@ -11989,6 +12579,15 @@
                 draw();
                 requestAnimationFrame(loop);
                 return;
+            }
+            if (isQuestBattle && storyMode === 'rift') {
+                updateRiftStory();
+                if (riftStory && riftStory.freezeTimer > 0) {
+                    riftStory.freezeTimer--;
+                    draw();
+                    requestAnimationFrame(loop);
+                    return;
+                }
             }
             mapTimer++;
             // Combo timer decay
@@ -13188,6 +13787,8 @@
                 ctx.shadowBlur = 0;
                 ctx.restore();
             }
+            // ====== RIFT ARC STORY HUD ======
+            drawRiftStoryHUD();
             // ====== WEATHER EFFECTS (screen space) ======
             if (weatherType === 'rain') {
                 ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
